@@ -1,0 +1,276 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Level {
+  LICENCE
+  MASTER
+  ENGINEER
+}
+
+enum InternshipStatus {
+  DECLARED
+  ADMIN_PENDING
+  ADMIN_VALIDATED
+  SUPERVISOR_ASSIGNED
+  SUBJECT_PENDING
+  SUBJECT_VALIDATED
+  IN_PROGRESS
+  REPORT_LATE
+  REPORT_WRITING
+  READY_FOR_DEFENSE
+  DEFENSE_AUTHORIZED
+  DEFENSE_NOT_AUTHORIZED
+  CLOSED
+}
+
+enum AdministrativeStatus {
+  COMPLETE
+  INCOMPLETE
+  PENDING_DOCUMENTS
+  REJECTED
+}
+
+enum MeetingType {
+  PRESENTIAL
+  REMOTE
+}
+
+enum ComplaintStatus {
+  PENDING
+  IN_PROGRESS
+  RESOLVED
+  REJECTED
+}
+
+model Role {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  users User[]
+}
+
+model User {
+  id        Int    @id @default(autoincrement())
+  firstName String
+  lastName  String
+  email     String @unique
+  password  String
+
+  roleId Int
+  role   Role @relation(fields: [roleId], references: [id])
+
+  student           Student?
+  supervisor        Supervisor?
+  internshipManager InternshipManager?
+  departmentHead    DepartmentHead?
+  admin             Admin?
+
+  notifications Notification[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Department {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  students        Student[]
+  supervisors     Supervisor[]
+  departmentHeads DepartmentHead[]
+}
+
+model Student {
+  id          Int    @id @default(autoincrement())
+  studentCode String @unique
+
+  level Level
+
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id])
+
+  departmentId Int
+  department   Department @relation(fields: [departmentId], references: [id])
+
+  internships Internship[]
+}
+
+model Supervisor {
+  id Int @id @default(autoincrement())
+
+  speciality String?
+
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id])
+
+  departmentId Int?
+  department   Department? @relation(fields: [departmentId], references: [id])
+
+  internships Internship[]
+}
+
+model InternshipManager {
+  id Int @id @default(autoincrement())
+
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id])
+}
+
+model DepartmentHead {
+  id Int @id @default(autoincrement())
+
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id])
+
+  departmentId Int
+  department   Department @relation(fields: [departmentId], references: [id])
+}
+
+model Admin {
+  id Int @id @default(autoincrement())
+
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id])
+}
+
+model Company {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  address String?
+  email   String?
+  phone   String?
+
+  internships Internship[]
+}
+
+model Internship {
+  id Int @id @default(autoincrement())
+
+  title       String
+  description String?
+
+  startDate DateTime
+  endDate   DateTime
+
+  professionalSupervisor String?
+
+  status InternshipStatus
+
+  administrativeStatus AdministrativeStatus?
+
+  studentId Int
+  student   Student @relation(fields: [studentId], references: [id])
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  supervisorId Int?
+  supervisor   Supervisor? @relation(fields: [supervisorId], references: [id])
+
+  weeklyReports WeeklyReport[]
+  meetings      Meeting[]
+  documents     Document[]
+  complaints    Complaint[]
+
+  finalDecision FinalDecision?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WeeklyReport {
+  id Int @id @default(autoincrement())
+
+  completedWork String
+  difficulties  String?
+  nextWeekPlan  String?
+
+  progress Int
+
+  submittedAt DateTime @default(now())
+
+  internshipId Int
+  internship   Internship @relation(fields: [internshipId], references: [id])
+}
+
+model Meeting {
+  id Int @id @default(autoincrement())
+
+  date DateTime
+
+  type MeetingType
+
+  summary           String?
+  discussedPoints   String?
+  decisions         String?
+  assignedWork      String?
+  supervisorComment String?
+
+  internshipId Int
+  internship   Internship @relation(fields: [internshipId], references: [id])
+}
+
+model Document {
+  id Int @id @default(autoincrement())
+
+  name String
+  path String
+  type String
+
+  internshipId Int
+  internship   Internship @relation(fields: [internshipId], references: [id])
+
+  uploadedAt DateTime @default(now())
+}
+
+model Complaint {
+  id Int @id @default(autoincrement())
+
+  subject     String
+  description String
+
+  status ComplaintStatus @default(PENDING)
+
+  internshipId Int
+  internship   Internship @relation(fields: [internshipId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model FinalDecision {
+  id Int @id @default(autoincrement())
+
+  decision String
+  comment  String?
+
+  internshipId Int        @unique
+  internship   Internship @relation(fields: [internshipId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id Int @id @default(autoincrement())
+
+  title   String
+  message String
+
+  isRead Boolean @default(false)
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+}
