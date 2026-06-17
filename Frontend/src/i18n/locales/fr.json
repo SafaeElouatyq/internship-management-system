@@ -1,0 +1,15 @@
+{
+  "login": {
+    "title": "Bienvenue",
+    "subtitle": "Connectez-vous pour continuer",
+    "email": "Email",
+    "password": "Mot de passe",
+    "emailPlaceholder": "Entrez votre email",
+    "passwordPlaceholder": "Entrez votre mot de passe",
+    "signIn": "Se connecter"
+  },
+
+  "dashboard": {
+    "title": "Tableau de bord"
+  }
+}
