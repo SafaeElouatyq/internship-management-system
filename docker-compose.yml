@@ -14,5 +14,15 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  backend:
+    build: ./Backend
+    container_name: internship_backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./Backend/.env
+    depends_on:
+      - db
+
 volumes:
   postgres_data:
