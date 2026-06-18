@@ -1,4 +1,4 @@
-import { getAllUsers } from "../services/userService.js";
+import { getAllUsers,createUser } from "../services/userService.js";
 
 export const getUsers = async (req, res) => {
   try {
@@ -12,4 +12,22 @@ export const getUsers = async (req, res) => {
     message: "Error fetching users",
   });
 }
+};
+
+
+export const addUser = async (req, res) => {
+  try {
+    const user = await createUser(req.body);
+
+    res.status(201).json({
+      message: "User created successfully",
+      user,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(400).json({
+      message: error.message,
+    });
+  }
 };
