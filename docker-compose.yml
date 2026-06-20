@@ -17,18 +17,36 @@ services:
   backend:
     build: ./Backend
     container_name: internship_backend
+
     ports:
       - "5000:5000"
+
     env_file:
       - ./Backend/.env
+
     depends_on:
       - db
+
+    volumes:
+      - ./Backend:/app
+      - /app/node_modules
+
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
 
   frontend:
     build: ./Frontend
     container_name: internship_frontend
+
     ports:
       - "5173:5173"
+
+    volumes:
+      - ./Frontend:/app
+      - /app/node_modules
+
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
 
 volumes:
   postgres_data:

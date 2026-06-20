@@ -1,0 +1,119 @@
+import { NavLink } from "react-router-dom";
+import {
+  LayoutDashboard,
+  Users,
+  GraduationCap,
+  BriefcaseBusiness,
+  Building2,
+  Settings,
+  CircleHelp,
+  LogOut,
+} from "lucide-react";
+
+function Sidebar() {
+  const menu = [
+    {
+      title: "Tableau de bord",
+      path: "/dashboard",
+      icon: LayoutDashboard,
+    },
+    {
+      title: "Utilisateurs",
+      path: "/users",
+      icon: Users,
+    },
+    {
+      title: "Étudiants",
+      path: "/students",
+      icon: GraduationCap,
+    },
+    {
+      title: "Stages",
+      path: "/internships",
+      icon: BriefcaseBusiness,
+    },
+    {
+      title: "Entreprises",
+      path: "/companies",
+      icon: Building2,
+    },
+  ];
+
+  const others = [
+    {
+      title: "Paramètres",
+      path: "/settings",
+      icon: Settings,
+    },
+    {
+      title: "Aide",
+      path: "/help",
+      icon: CircleHelp,
+    },
+  ];
+
+  return (
+    <aside className="w-72 bg-white border-r border-slate-200 flex flex-col justify-between">
+      <div className="pt-10">
+        <nav className="px-5 space-y-2">
+          {menu.map((item) => {
+            const Icon = item.icon;
+
+            return (
+              <NavLink
+                key={item.title}
+                to={item.path}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                    isActive
+                      ? "bg-blue-500 text-white shadow-md"
+                      : "text-slate-600 hover:bg-slate-100"
+                  }`
+                }
+              >
+                <Icon size={20} />
+
+                <span className="font-medium">{item.title}</span>
+              </NavLink>
+            );
+          })}
+        </nav>
+
+        <div className="mx-5 my-7 border-t border-slate-200"></div>
+
+        <nav className="px-5 space-y-2">
+          {others.map((item) => {
+            const Icon = item.icon;
+
+            return (
+              <NavLink
+                key={item.title}
+                to={item.path}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                    isActive
+                      ? "bg-blue-500 text-white shadow-md"
+                      : "text-slate-600 hover:bg-slate-100"
+                  }`
+                }
+              >
+                <Icon size={20} />
+
+                <span className="font-medium">{item.title}</span>
+              </NavLink>
+            );
+          })}
+        </nav>
+      </div>
+
+      <div className="p-5">
+        <button className="w-full flex items-center justify-center gap-3 border border-red-200 text-red-500 hover:bg-red-50 py-3 rounded-xl transition font-medium">
+          <LogOut size={18} />
+          Déconnexion
+        </button>
+      </div>
+    </aside>
+  );
+}
+
+export default Sidebar;
