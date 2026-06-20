@@ -3,6 +3,8 @@ import { useEffect } from "react";
 import { X, Eye, EyeOff } from "lucide-react";
 import Alert from "../common/alert.jsx";
 import { createUser, updateUser } from "../../services/userService";
+import { getDepartments } from "../../services/departementService.jsx";
+import { getRoles } from "../../services/roleService.jsx";
 
 function UserForm({ onClose, onSuccess, user }) {
   const [alert, setAlert] = useState(null);
@@ -19,6 +21,8 @@ function UserForm({ onClose, onSuccess, user }) {
     department: "",
     speciality: "",
   });
+  const [departments, setDepartments] = useState([]);
+  const [roles, setRoles] = useState([]);
 
   useEffect(() => {
     if (user) {
@@ -35,6 +39,10 @@ function UserForm({ onClose, onSuccess, user }) {
       });
     }
   }, [user]);
+  useEffect(() => {
+    loadDepartments();
+    loadRoles();
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -85,13 +93,26 @@ function UserForm({ onClose, onSuccess, user }) {
     }
   };
 
- 
+  const loadDepartments = async () => {
+    try {
+      const data = await getDepartments();
+      setDepartments(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const loadRoles = async () => {
+    try {
+      const data = await getRoles();
+      setRoles(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
-  
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
- 
-
       <div className="bg-white rounded-3xl shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-8">
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -195,11 +216,12 @@ function UserForm({ onClose, onSuccess, user }) {
               disabled={user}
             >
               <option value="">Sélectionner un rôle</option>
-              <option value="ADMIN">Administrateur</option>
-              <option value="STUDENT">Étudiant</option>
-              <option value="SUPERVISOR">Encadrant</option>
-              <option value="INTERNSHIP_MANAGER">Responsable des stages</option>
-              <option value="DEPARTMENT_HEAD">Chef de département</option>
+
+              {roles.map((role) => (
+                <option key={role.id} value={role.name}>
+                  {role.name}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -247,14 +269,21 @@ function UserForm({ onClose, onSuccess, user }) {
                 Département
               </label>
 
-              <input
-                type="text"
+              <select
                 name="department"
                 value={formData.department}
                 onChange={handleChange}
                 className="w-full border border-slate-300 rounded-xl px-4 py-3"
                 required
-              />
+              >
+                <option value="">Sélectionner un département</option>
+
+                {departments.map((department) => (
+                  <option key={department.id} value={department.name}>
+                    {department.name}
+                  </option>
+                ))}
+              </select>
             </div>
           )}
 

@@ -6,10 +6,8 @@ export const getDepartments = async (req, res) => {
 
     res.status(200).json(departments);
   } catch (error) {
-    console.error(error);
-
     res.status(500).json({
-      message: "Error fetching departments",
+      message: error.message,
     });
   }
 };

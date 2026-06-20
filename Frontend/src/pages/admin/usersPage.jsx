@@ -2,26 +2,28 @@ import { useEffect, useState } from "react";
 import AdminLayout from "../../components/layout/AdminLayout";
 import UserTable from "../../components/users/UserTable";
 import UserForm from "../../components/users/UserForm";
-import {
-  getUsers,
-  deleteUser,
-} from "../../services/userService";
+import { getUsers, deleteUser } from "../../services/userService";
+import { Search } from "lucide-react";
 
 function UsersPage() {
   const [users, setUsers] = useState([]);
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
   const [openForm, setOpenForm] = useState(false);
-
   const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
-    loadUsers();
-  }, []);
+    const timer = setTimeout(() => {
+      loadUsers(search);
+    }, 300);
 
-  const loadUsers = async () => {
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const loadUsers = async (value = "") => {
     try {
-      const data = await getUsers();
+      const data = await getUsers(value);
       setUsers(data);
     } catch (error) {
       console.log(error);
@@ -37,7 +39,7 @@ function UsersPage() {
 
   const Delete = async (user) => {
     const confirmDelete = window.confirm(
-      `Supprimer ${user.firstName} ${user.lastName} ?`
+      `Supprimer ${user.firstName} ${user.lastName} ?`,
     );
 
     if (!confirmDelete) return;
@@ -47,12 +49,9 @@ function UsersPage() {
 
       alert("Utilisateur supprimé");
 
-      loadUsers();
+      loadUsers(search);
     } catch (error) {
-      alert(
-        error.response?.data?.message ||
-          "Erreur lors de la suppression"
-      );
+      alert(error.response?.data?.message || "Erreur lors de la suppression");
     }
   };
 
@@ -64,9 +63,7 @@ function UsersPage() {
             Gestion des utilisateurs
           </h1>
 
-          <p className="text-slate-500 mt-2">
-            Liste de tous les utilisateurs.
-          </p>
+          <p className="text-slate-500 mt-2">Liste de tous les utilisateurs.</p>
         </div>
 
         <button
@@ -85,11 +82,25 @@ function UsersPage() {
           Chargement...
         </div>
       ) : (
-        <UserTable
-          users={users}
-          onEdit={Edit}
-          onDelete={Delete}
-        />
+        <>
+          <div className="mb-6">
+            <div className="relative w-full md:w-96">
+              <Search
+                size={18}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+              />
+
+              <input
+                type="text"
+                placeholder="Rechercher un utilisateur..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full bg-white border border-slate-200 rounded-2xl pl-12 pr-4 py-3 shadow-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+              />
+            </div>
+          </div>
+          <UserTable users={users} onEdit={Edit} onDelete={Delete} />
+        </>
       )}
 
       {openForm && (
@@ -100,7 +111,7 @@ function UsersPage() {
             setSelectedUser(null);
           }}
           onSuccess={() => {
-            loadUsers();
+            loadUsers(search);
             setOpenForm(false);
             setSelectedUser(null);
           }}
