@@ -1,8 +1,31 @@
 import prisma from "../config/prisma.js";
 import bcrypt from "bcryptjs";
 
-export const getAllUsers = async () => {
+export const getAllUsers = async (search = "") => {
   return await prisma.user.findMany({
+    where: {
+      OR: [
+        {
+          firstName: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+        {
+          lastName: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+        {
+          email: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+      ],
+    },
+
     select: {
       id: true,
       firstName: true,
@@ -14,13 +37,9 @@ export const getAllUsers = async () => {
         },
       },
     },
-  });
-};
 
-export const getUserByEmail = async (email) => {
-  return await prisma.user.findUnique({
-    where: {
-      email,
+    orderBy: {
+      firstName: "asc",
     },
   });
 };
