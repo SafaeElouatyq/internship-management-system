@@ -1,8 +1,11 @@
 import { useState } from "react";
+import { useEffect } from "react";
 import { X, Eye, EyeOff } from "lucide-react";
-import { createUser } from "../../services/userService";
+import Alert from "../common/alert.jsx";
+import { createUser, updateUser } from "../../services/userService";
 
-function UserForm({ onClose, onSuccess }) {
+function UserForm({ onClose, onSuccess, user }) {
+  const [alert, setAlert] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -17,6 +20,22 @@ function UserForm({ onClose, onSuccess }) {
     speciality: "",
   });
 
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        password: "",
+        role: user.role.name,
+        studentCode: "",
+        level: "",
+        department: "",
+        speciality: "",
+      });
+    }
+  }, [user]);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -28,30 +47,62 @@ function UserForm({ onClose, onSuccess }) {
     e.preventDefault();
 
     try {
-      await createUser(formData);
+      if (user) {
+        const data = {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+        };
 
-      alert("Utilisateur créé avec succès");
+        if (formData.password) {
+          data.password = formData.password;
+        }
+
+        await updateUser(user.id, data);
+
+        setAlert({
+          type: "success",
+          message: "Utilisateur modifié avec succès",
+        });
+      } else {
+        await createUser(formData);
+
+        setAlert({
+          type: "success",
+          message: "Utilisateur créé avec succès",
+        });
+      }
 
       onSuccess();
     } catch (error) {
-      alert(
-        error.response?.data?.message ||
-          "Erreur lors de la création de l'utilisateur",
-      );
+      console.log(error);
+
+      console.log(error.response);
+
+      console.log(error.response?.data);
+
+      alert(error.response?.data?.message || error.message);
     }
   };
 
+ 
+
   return (
+  
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+ 
+
       <div className="bg-white rounded-3xl shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-8">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-2xl font-bold text-slate-800">
-              Ajouter un utilisateur
+              {user ? "Modifier un utilisateur" : "Ajouter un utilisateur"}
             </h2>
 
             <p className="text-slate-500 mt-1">
-              Remplissez les informations du nouvel utilisateur.
+              {user
+                ? "Modifiez les informations."
+                : "Remplissez les informations du nouvel utilisateur."}{" "}
             </p>
           </div>
 
@@ -119,7 +170,7 @@ function UserForm({ onClose, onSuccess }) {
                 value={formData.password}
                 onChange={handleChange}
                 className="w-full border border-slate-300 rounded-xl px-4 py-3 pr-12 outline-none focus:ring-2 focus:ring-blue-500"
-                required
+                required={!user}
               />
 
               <button
@@ -141,6 +192,7 @@ function UserForm({ onClose, onSuccess }) {
               onChange={handleChange}
               className="w-full border border-slate-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
               required
+              disabled={user}
             >
               <option value="">Sélectionner un rôle</option>
               <option value="ADMIN">Administrateur</option>
@@ -236,7 +288,7 @@ function UserForm({ onClose, onSuccess }) {
               type="submit"
               className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium"
             >
-              Créer
+              {user ? "Modifier" : "Créer"}
             </button>
           </div>
         </form>
