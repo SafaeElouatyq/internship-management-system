@@ -24,11 +24,11 @@ function UsersPage() {
     }
   };
 
-  const handleEdit = (user) => {
+  const Edit = (user) => {
     console.log(user);
   };
 
-  const handleDelete = (user) => {
+  const Delete = (user) => {
     console.log(user);
   };
 
@@ -60,8 +60,8 @@ function UsersPage() {
       ) : (
         <UserTable
           users={users}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
+          onEdit={Edit}
+          onDelete={Delete}
         />
       )}
 
