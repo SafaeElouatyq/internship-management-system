@@ -26,14 +26,24 @@ export const getAllUsers = async (search = "") => {
       ],
     },
 
-    select: {
-      id: true,
-      firstName: true,
-      lastName: true,
-      email: true,
-      role: {
-        select: {
-          name: true,
+    include: {
+      role: true,
+
+      student: {
+        include: {
+          department: true,
+        },
+      },
+
+      supervisor: {
+        include: {
+          department: true,
+        },
+      },
+
+      departmentHead: {
+        include: {
+          department: true,
         },
       },
     },
@@ -43,7 +53,6 @@ export const getAllUsers = async (search = "") => {
     },
   });
 };
-
 
 
 export const createUser = async (userData) => {
@@ -162,17 +171,64 @@ export const createUser = async (userData) => {
   });
 };
 
+// export const updateUser = async (userId, userData) => {
+//   const {
+//     firstName,
+//     lastName,
+//     email,
+//     password,
+//   } = userData;
+
+//   const user = await prisma.user.findUnique({
+//     where: {
+//       id: Number(userId),
+//     },
+//   });
+
+//   if (!user) {
+//     throw new Error("User not found");
+//   }
+
+//   const data = {};
+
+//   if (firstName !== undefined) data.firstName = firstName;
+//   if (lastName !== undefined) data.lastName = lastName;
+//   if (email !== undefined) data.email = email;
+
+//   if (password) {
+//     data.password = await bcrypt.hash(password, 10);
+//   }
+
+//   return await prisma.user.update({
+//     where: {
+//       id: Number(userId),
+//     },
+//     data,
+//   });
+// };
+
+
 export const updateUser = async (userId, userData) => {
   const {
     firstName,
     lastName,
     email,
     password,
+    studentCode,
+    level,
+    department,
+    speciality,
   } = userData;
 
   const user = await prisma.user.findUnique({
     where: {
       id: Number(userId),
+    },
+    include: {
+      role: true,
+      student: true,
+      supervisor: true,
+      departmentHead: true,
     },
   });
 
@@ -180,21 +236,95 @@ export const updateUser = async (userId, userData) => {
     throw new Error("User not found");
   }
 
-  const data = {};
-
-  if (firstName !== undefined) data.firstName = firstName;
-  if (lastName !== undefined) data.lastName = lastName;
-  if (email !== undefined) data.email = email;
+  const data = {
+    firstName,
+    lastName,
+    email,
+  };
 
   if (password) {
     data.password = await bcrypt.hash(password, 10);
   }
 
-  return await prisma.user.update({
-    where: {
-      id: Number(userId),
-    },
-    data,
+  let departmentData = null;
+
+  if (department) {
+    departmentData = await prisma.department.findUnique({
+      where: {
+        name: department,
+      },
+    });
+  }
+
+  return await prisma.$transaction(async (tx) => {
+    await tx.user.update({
+      where: {
+        id: Number(userId),
+      },
+      data,
+    });
+
+    switch (user.role.name) {
+      case "STUDENT":
+        await tx.student.update({
+          where: {
+            userId: Number(userId),
+          },
+          data: {
+            studentCode,
+            level,
+            departmentId: departmentData?.id,
+          },
+        });
+        break;
+
+      case "SUPERVISOR":
+        await tx.supervisor.update({
+          where: {
+            userId: Number(userId),
+          },
+          data: {
+            speciality,
+            departmentId: departmentData?.id,
+          },
+        });
+        break;
+
+      case "DEPARTMENT_HEAD":
+        await tx.departmentHead.update({
+          where: {
+            userId: Number(userId),
+          },
+          data: {
+            departmentId: departmentData?.id,
+          },
+        });
+        break;
+    }
+
+    return await tx.user.findUnique({
+      where: {
+        id: Number(userId),
+      },
+      include: {
+        role: true,
+        student: {
+          include: {
+            department: true,
+          },
+        },
+        supervisor: {
+          include: {
+            department: true,
+          },
+        },
+        departmentHead: {
+          include: {
+            department: true,
+          },
+        },
+      },
+    });
   });
 };
 

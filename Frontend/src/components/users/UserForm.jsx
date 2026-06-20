@@ -25,19 +25,24 @@ function UserForm({ onClose, onSuccess, user }) {
   const [roles, setRoles] = useState([]);
 
   useEffect(() => {
-    if (user) {
-      setFormData({
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        password: "",
-        role: user.role.name,
-        studentCode: "",
-        level: "",
-        department: "",
-        speciality: "",
-      });
-    }
+    if (!user) return;
+
+    setFormData({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      password: "",
+      role: user.role.name,
+      studentCode: user.student?.studentCode || "",
+      level: user.student?.level || "",
+      department:
+        user.student?.department?.name ||
+        user.supervisor?.department?.name ||
+        user.departmentHead?.department?.name ||
+        "",
+
+      speciality: user.supervisor?.speciality || "",
+    });
   }, [user]);
   useEffect(() => {
     loadDepartments();
@@ -60,6 +65,10 @@ function UserForm({ onClose, onSuccess, user }) {
           firstName: formData.firstName,
           lastName: formData.lastName,
           email: formData.email,
+          studentCode: formData.studentCode,
+          level: formData.level,
+          department: formData.department,
+          speciality: formData.speciality,
         };
 
         if (formData.password) {
@@ -213,7 +222,7 @@ function UserForm({ onClose, onSuccess, user }) {
               onChange={handleChange}
               className="w-full border border-slate-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
               required
-              disabled={user}
+              
             >
               <option value="">Sélectionner un rôle</option>
 
