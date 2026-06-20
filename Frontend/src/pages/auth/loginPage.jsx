@@ -55,16 +55,16 @@ function LoginPage() {
         <div className="w-full max-w-sm bg-white p-8 rounded-3xl shadow-xl">
           <div className="mb-7 text-center">
             <h2 className="text-2xl font-bold text-slate-900">
-              {t("login.title")}
+              Bienvenue
             </h2>
 
-            <p className="mt-2 text-sm text-slate-500">{t("login.subtitle")}</p>
+            <p className="mt-2 text-sm text-slate-500"> Connectez-vous pour continuer</p>
           </div>
 
           <form onSubmit={Submit} className="space-y-5">
             <div>
               <label className="block mb-2 text-sm font-medium text-slate-700">
-                {t("login.email")}
+                Email
               </label>
               <div className="relative">
                 <input
@@ -72,7 +72,7 @@ function LoginPage() {
                   name="email"
                   value={formData.email}
                   onChange={Change}
-                  placeholder={t("login.emailPlaceholder")}
+                  placeholder="Entrez votre email"
                   className="w-full px-4 pr-10 py-2.5 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
 
@@ -85,7 +85,7 @@ function LoginPage() {
 
             <div>
               <label className="block mb-2 text-sm font-medium text-slate-700">
-                {t("login.password")}
+                Mot de passe
               </label>
               <div className="relative">
                 <input
@@ -93,7 +93,7 @@ function LoginPage() {
                   name="password"
                   value={formData.password}
                   onChange={Change}
-                  placeholder={t("login.passwordPlaceholder")}
+                  placeholder="Entrez votre mot de passe"
                   className="w-full px-4 pr-10 py-2.5 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
 
@@ -114,7 +114,7 @@ function LoginPage() {
               disabled={loading}
               className="w-full py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md transition disabled:opacity-50"
             >
-              {loading ? "Connexion..." : t("login.signIn")}
+              {loading ? "Connexion..." : "Se connecter"}
             </button>
           </form>
         </div>

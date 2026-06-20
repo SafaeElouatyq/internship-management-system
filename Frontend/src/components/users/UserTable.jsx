@@ -1,0 +1,55 @@
+import UserRow from "./UserRow";
+
+function UserTable({ users, onEdit, onDelete }) {
+  if (!users.length) {
+    return (
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-12 text-center">
+        <h3 className="text-lg font-semibold text-slate-800">
+          Aucun utilisateur trouvé
+        </h3>
+        <p className="text-slate-500 mt-2">
+          Ajoutez un utilisateur pour commencer la gestion des accès.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <table className="w-full">
+        <thead className="bg-slate-100">
+          <tr>
+            <th className="text-left px-6 py-4">
+              Nom
+            </th>
+
+            <th className="text-left px-6 py-4">
+              Email
+            </th>
+
+            <th className="text-left px-6 py-4">
+              Rôle
+            </th>
+
+            <th className="text-center px-6 py-4">
+              Actions
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {users.map((user) => (
+            <UserRow
+              key={user.id}
+              user={user}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export default UserTable;

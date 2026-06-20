@@ -5,6 +5,21 @@ const prisma = new PrismaClient();
 
 async function main() {
 
+  const departments = [
+"INFORMATIQUE",
+
+];
+
+for (const department of departments) {
+  await prisma.department.upsert({
+    where: { name: department },
+    update: {},
+    create: { name: department },
+  });
+}
+
+console.log(" Departments seeded");
+
   const roles = [
     "ADMIN",
     "STUDENT",
@@ -74,3 +89,4 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+
