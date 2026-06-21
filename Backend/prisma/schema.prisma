@@ -67,6 +67,7 @@ model User {
   lastName  String
   email     String @unique
   password  String
+  mustChangePassword Boolean @default(true)
 
   roleId Int
   role   Role @relation(fields: [roleId], references: [id])

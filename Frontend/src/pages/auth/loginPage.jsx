@@ -1,11 +1,9 @@
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 import { Mail, Eye, EyeOff } from "lucide-react";
 import { login } from "../../services/authService.jsx";
 import { useNavigate } from "react-router-dom";
 
 function LoginPage() {
-  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -32,8 +30,13 @@ function LoginPage() {
       const data = await login(formData);
 
       localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
 
-      navigate("/dashboard");
+      if (data.user.mustChangePassword === true) {
+        navigate("/change-password");
+      } else {
+        navigate("/admin/dashboard");
+      }
     } catch (error) {
       setError(error.response?.data?.message || "Erreur de connexion");
     } finally {

@@ -10,3 +10,19 @@ export const login = async (credentials) => {
 
   return response.data;
 };
+
+export const changePassword = async (passwordData) => {
+  const token = localStorage.getItem("token");
+
+  const response = await axios.patch(
+    `${API_URL}/change-password`,
+    passwordData,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return response.data;
+};

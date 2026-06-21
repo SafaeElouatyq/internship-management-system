@@ -14,12 +14,12 @@ function Sidebar() {
   const menu = [
     {
       title: "Tableau de bord",
-      path: "/dashboard",
+      path: "/admin/dashboard",
       icon: LayoutDashboard,
     },
     {
       title: "Utilisateurs",
-      path: "/users",
+      path: "/admin/users",
       icon: Users,
     },
     {

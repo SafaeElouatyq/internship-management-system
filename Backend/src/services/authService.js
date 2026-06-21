@@ -14,10 +14,7 @@ export const login = async (email, password) => {
     throw new Error("Invalid credentials");
   }
 
-  const isPasswordValid = await bcrypt.compare(
-    password,
-    user.password
-  );
+  const isPasswordValid = await bcrypt.compare(password, user.password);
 
   if (!isPasswordValid) {
     throw new Error("Invalid credentials");
@@ -31,7 +28,7 @@ export const login = async (email, password) => {
     process.env.JWT_SECRET,
     {
       expiresIn: "1d",
-    }
+    },
   );
 
   return {
@@ -42,6 +39,7 @@ export const login = async (email, password) => {
       lastName: user.lastName,
       email: user.email,
       role: user.role.name,
+      mustChangePassword: user.mustChangePassword,
     },
   };
 };

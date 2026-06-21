@@ -1,8 +1,10 @@
-import AdminLayout from "../../components/layout/AdminLayout";
 
 function DashboardPage() {
   return (
-    <AdminLayout>
+    <>
+
+  
+    
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-800">
           Tableau de bord
@@ -54,8 +56,8 @@ function DashboardPage() {
             0
           </p>
         </div>
-      </div>
-    </AdminLayout>
+      </div>  </>
+    
   );
 }
 
