@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Mail, Eye, EyeOff } from "lucide-react";
 import { login } from "../../services/authService.jsx";
 import { useNavigate } from "react-router-dom";
+import { redirectByRole } from "../../utils/redirectByRole";
 
 function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -28,14 +29,13 @@ function LoginPage() {
 
     try {
       const data = await login(formData);
-
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
       if (data.user.mustChangePassword === true) {
         navigate("/change-password");
       } else {
-        navigate("/admin/dashboard");
+        redirectByRole(data.user.role, navigate);
       }
     } catch (error) {
       setError(error.response?.data?.message || "Erreur de connexion");
@@ -57,11 +57,12 @@ function LoginPage() {
       <div className="flex items-center justify-center px-6">
         <div className="w-full max-w-sm bg-white p-8 rounded-3xl shadow-xl">
           <div className="mb-7 text-center">
-            <h2 className="text-2xl font-bold text-slate-900">
-              Bienvenue
-            </h2>
+            <h2 className="text-2xl font-bold text-slate-900">Bienvenue</h2>
 
-            <p className="mt-2 text-sm text-slate-500"> Connectez-vous pour continuer</p>
+            <p className="mt-2 text-sm text-slate-500">
+              {" "}
+              Connectez-vous pour continuer
+            </p>
           </div>
 
           <form onSubmit={Submit} className="space-y-5">

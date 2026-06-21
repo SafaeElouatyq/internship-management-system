@@ -4,7 +4,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon --legacy-watch src/server.js",
+    "dev": "prisma generate && nodemon --legacy-watch src/server.js",
     "start": "node src/server.js",
     "seed": "node prisma/seed.js"
   },
