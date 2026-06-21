@@ -1,4 +1,5 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { logout } from "../../services/authService.jsx";
 import {
   LayoutDashboard,
   Users,
@@ -11,6 +12,13 @@ import {
 } from "lucide-react";
 
 function Sidebar() {
+  const navigate = useNavigate();
+
+  const Logout = () => {
+    logout();
+    navigate("/");
+  };
+
   const menu = [
     {
       title: "Tableau de bord",
@@ -107,7 +115,10 @@ function Sidebar() {
       </div>
 
       <div className="p-5">
-        <button className="w-full flex items-center justify-center gap-3 border border-red-200 text-red-500 hover:bg-red-50 py-3 rounded-xl transition font-medium">
+        <button
+          onClick={Logout}
+          className="w-full flex items-center justify-center gap-3 border border-red-200 text-red-500 hover:bg-red-50 py-3 rounded-xl transition font-medium"
+        >
           <LogOut size={18} />
           Déconnexion
         </button>
