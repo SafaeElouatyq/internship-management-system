@@ -88,6 +88,52 @@ export const getMyInternships = async (userId) => {
   });
 };
 
+export const getAllInternships = async ({ student = "", company = "", status = "" }) => {
+  const where = {};
+
+  if (student) {
+    where.student = {
+      user: {
+        OR: [
+          {
+            firstName: {
+              contains: student,
+              mode: "insensitive",
+            },
+          },
+          {
+            lastName: {
+              contains: student,
+              mode: "insensitive",
+            },
+          },
+        ],
+      },
+    };
+  }
+
+  if (company) {
+    where.company = {
+      name: {
+        contains: company,
+        mode: "insensitive",
+      },
+    };
+  }
+
+  if (status) {
+    where.status = status;
+  }
+
+  return await prisma.internship.findMany({
+    where,
+    include: includeRelations,
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
+
 export const getMyInternshipById = async (internshipId, userId) => {
   const internship = await getStudentInternship(internshipId, userId);
 
@@ -97,6 +143,21 @@ export const getMyInternshipById = async (internshipId, userId) => {
     },
     include: includeRelations,
   });
+};
+
+export const getInternshipById = async (internshipId) => {
+  const internship = await prisma.internship.findUnique({
+    where: {
+      id: Number(internshipId),
+    },
+    include: includeRelations,
+  });
+
+  if (!internship) {
+    throw new Error("Internship not found");
+  }
+
+  return internship;
 };
 
 export const addInternship = async (internshipData, userId) => {
@@ -232,5 +293,72 @@ export const deleteInternship = async (internshipId, userId) => {
     where: {
       id: internship.id,
     },
+  });
+};
+
+export const assignSupervisor = async (internshipId, supervisorId) => {
+  const supervisor = await prisma.supervisor.findUnique({
+    where: {
+      id: Number(supervisorId),
+    },
+  });
+
+  if (!supervisor) {
+    throw new Error("Supervisor not found");
+  }
+
+  return await prisma.internship.update({
+    where: {
+      id: Number(internshipId),
+    },
+    data: {
+      supervisor: {
+        connect: {
+          id: Number(supervisorId),
+        },
+      },
+      status: "SUPERVISOR_ASSIGNED",
+    },
+    include: includeRelations,
+  });
+};
+
+export const updateAdministrativeStatus = async (
+  internshipId,
+  administrativeStatus,
+) => {
+  const allowedStatuses = [
+    "COMPLETE",
+    "INCOMPLETE",
+    "PENDING_DOCUMENTS",
+    "REJECTED",
+  ];
+
+  if (!allowedStatuses.includes(administrativeStatus)) {
+    throw new Error("Invalid administrative status");
+  }
+
+  const internship = await prisma.internship.findUnique({
+    where: {
+      id: Number(internshipId),
+    },
+  });
+
+  if (!internship) {
+    throw new Error("Internship not found");
+  }
+
+  const status =
+    administrativeStatus === "COMPLETE" ? "ADMIN_VALIDATED" : "ADMIN_PENDING";
+
+  return await prisma.internship.update({
+    where: {
+      id: Number(internshipId),
+    },
+    data: {
+      administrativeStatus,
+      status,
+    },
+    include: includeRelations,
   });
 };

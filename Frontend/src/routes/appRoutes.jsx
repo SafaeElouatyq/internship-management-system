@@ -5,8 +5,10 @@ import DashboardPage from "../pages/admin/dashBoard.jsx";
 import UsersPage from "../pages/admin/usersPage.jsx";
 import StudentDashboard from "../pages/student/StudentDashboard.jsx";
 import StudentInternshipPage from "../pages/student/StudentInternshipPage.jsx";
+import InternshipManagementPage from "../pages/internshipManager/InternshipManagementPage.jsx";
 import AdminLayout from "../components/layout/AdminLayout.jsx";
 import StudentLayout from "../components/layout/StudentLayout.jsx";
+import InternshipManagerLayout from "../components/layout/InternshipManagerLayout.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
 
 function AppRoutes() {
@@ -54,6 +56,20 @@ function AppRoutes() {
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<StudentDashboard />} />
         <Route path="internship" element={<StudentInternshipPage />} />
+      </Route>
+
+      <Route
+        path="/manager"
+        element={
+          <ProtectedRoute roles={["INTERNSHIP_MANAGER"]}>
+            <InternshipManagerLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<InternshipManagementPage />} />
+        <Route path="internships" element={<InternshipManagementPage />} />
+        <Route path="assign-supervisors" element={<InternshipManagementPage />} />
       </Route>
     </Routes>
   );
