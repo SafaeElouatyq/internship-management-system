@@ -8,6 +8,8 @@ import {
   deleteInternship,
   assignSupervisor,
   updateAdministrativeStatus,
+  validateInternshipDeclaration,
+  rejectInternshipDeclaration,
 } from "../services/internshipServie.js";
 
 export const getInternships = async (req, res) => {
@@ -132,6 +134,40 @@ export const verifyAdministrativeFile = async (req, res) => {
 
     res.status(200).json({
       message: "Administrative file updated successfully",
+      internship,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(400).json({
+      message: error.message,
+    });
+  }
+};
+
+export const validateInternship = async (req, res) => {
+  try {
+    const internship = await validateInternshipDeclaration(req.params.id);
+
+    res.status(200).json({
+      message: "Stage validé avec succès",
+      internship,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(400).json({
+      message: error.message,
+    });
+  }
+};
+
+export const rejectInternship = async (req, res) => {
+  try {
+    const internship = await rejectInternshipDeclaration(req.params.id);
+
+    res.status(200).json({
+      message: "Stage refusé avec succès",
       internship,
     });
   } catch (error) {

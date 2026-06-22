@@ -5,8 +5,8 @@ import {
   createInternship,
   editInternship,
   removeInternship,
-  assignInternshipSupervisor,
-  verifyAdministrativeFile,
+  validateInternship,
+  rejectInternship,
 } from "../controllers/internshipController.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { roleMiddleware } from "../middlewares/roleMiddleware.js";
@@ -14,17 +14,17 @@ import { roleMiddleware } from "../middlewares/roleMiddleware.js";
 const router = Router();
 
 router.get("/", authMiddleware, roleMiddleware("STUDENT", "INTERNSHIP_MANAGER"), getInternships);
-router.put(
-  "/:id/assign-supervisor",
+router.patch(
+  "/:id/validate",
   authMiddleware,
   roleMiddleware("INTERNSHIP_MANAGER"),
-  assignInternshipSupervisor,
+  validateInternship,
 );
-router.put(
-  "/:id/administrative-status",
+router.patch(
+  "/:id/reject",
   authMiddleware,
   roleMiddleware("INTERNSHIP_MANAGER"),
-  verifyAdministrativeFile,
+  rejectInternship,
 );
 router.get("/:id", authMiddleware, roleMiddleware("STUDENT", "INTERNSHIP_MANAGER"), getInternship);
 router.post("/", authMiddleware, roleMiddleware("STUDENT"), createInternship);

@@ -4,10 +4,16 @@ const includeRelations = {
   student: {
     include: {
       user: true,
+      department: true,
     },
   },
   company: true,
-  supervisor: true,
+  supervisor: {
+    include: {
+      user: true,
+    },
+  },
+  documents: true,
 };
 
 const getStudentByUserId = async (userId) => {
@@ -358,6 +364,70 @@ export const updateAdministrativeStatus = async (
     data: {
       administrativeStatus,
       status,
+    },
+    include: includeRelations,
+  });
+};
+
+export const validateInternshipDeclaration = async (internshipId) => {
+  const internship = await prisma.internship.findUnique({
+    where: {
+      id: Number(internshipId),
+    },
+  });
+
+  if (!internship) {
+    throw new Error("Internship not found");
+  }
+
+  if (internship.administrativeStatus === "REJECTED") {
+    throw new Error("This internship declaration has already been rejected");
+  }
+
+  const pendingStatuses = ["DECLARED", "ADMIN_PENDING"];
+
+  if (!pendingStatuses.includes(internship.status)) {
+    throw new Error("This internship declaration cannot be validated");
+  }
+
+  return await prisma.internship.update({
+    where: {
+      id: Number(internshipId),
+    },
+    data: {
+      status: "ADMIN_VALIDATED",
+    },
+    include: includeRelations,
+  });
+};
+
+export const rejectInternshipDeclaration = async (internshipId) => {
+  const internship = await prisma.internship.findUnique({
+    where: {
+      id: Number(internshipId),
+    },
+  });
+
+  if (!internship) {
+    throw new Error("Internship not found");
+  }
+
+  if (internship.administrativeStatus === "REJECTED") {
+    throw new Error("This internship declaration has already been rejected");
+  }
+
+  const pendingStatuses = ["DECLARED", "ADMIN_PENDING"];
+
+  if (!pendingStatuses.includes(internship.status)) {
+    throw new Error("This internship declaration cannot be rejected");
+  }
+
+  return await prisma.internship.update({
+    where: {
+      id: Number(internshipId),
+    },
+    data: {
+      administrativeStatus: "REJECTED",
     },
     include: includeRelations,
   });

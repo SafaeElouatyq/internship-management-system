@@ -1,23 +1,15 @@
 import { useEffect, useState } from "react";
-import AdministrativeStatusForm from "../../components/internshipManager/AdministrativeStatusForm";
-import AssignSupervisorForm from "../../components/internshipManager/AssignSupervisorForm";
-import InternshipDetailsModal from "../../components/internshipManager/InternshipDetailsModal";
+import { useNavigate } from "react-router-dom";
 import InternshipTable from "../../components/internshipManager/InternshipTable";
 import {
-  assignSupervisor,
   getInternships,
-  getSupervisors,
-  updateAdministrativeStatus,
+  rejectInternship,
+  validateInternship,
 } from "../../services/internshipManagerService.jsx";
 
 function InternshipManagementPage() {
+  const navigate = useNavigate();
   const [internships, setInternships] = useState([]);
-  const [supervisors, setSupervisors] = useState([]);
-  const [selectedInternship, setSelectedInternship] = useState(null);
-  const [detailsInternship, setDetailsInternship] = useState(null);
-  const [administrativeInternship, setAdministrativeInternship] = useState(null);
-  const [supervisorId, setSupervisorId] = useState("");
-  const [administrativeStatus, setAdministrativeStatus] = useState("");
   const [searchStudent, setSearchStudent] = useState("");
   const [searchCompany, setSearchCompany] = useState("");
   const [status, setStatus] = useState("");
@@ -26,12 +18,7 @@ function InternshipManagementPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  useEffect(() => {
-    loadInternships();
-    loadSupervisors();
-  }, []);
-
-  const loadInternships = async () => {
+  async function loadInternships() {
     try {
       const data = await getInternships({
         student: searchStudent,
@@ -45,16 +32,28 @@ function InternshipManagementPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const loadSupervisors = async () => {
-    try {
-      const data = await getSupervisors();
-      setSupervisors(data);
-    } catch (error) {
-      setError(error.response?.data?.message || "Erreur lors du chargement");
-    }
-  };
+  useEffect(() => {
+    let active = true;
+
+    getInternships()
+      .then((data) => {
+        if (active) setInternships(data);
+      })
+      .catch((error) => {
+        if (active) {
+          setError(error.response?.data?.message || "Erreur lors du chargement");
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const Search = (e) => {
     e.preventDefault();
@@ -62,79 +61,48 @@ function InternshipManagementPage() {
     loadInternships();
   };
 
-  const OpenAssign = (internship) => {
-    setSelectedInternship(internship);
-    setSupervisorId(internship.supervisorId || "");
-    setError("");
-    setSuccess("");
-  };
-
-  const CloseAssign = () => {
-    setSelectedInternship(null);
-    setSupervisorId("");
-  };
-
-  const ChangeSupervisor = (e) => {
-    setSupervisorId(e.target.value);
-  };
-
-  const OpenAdministrativeStatus = (internship) => {
-    setAdministrativeInternship(internship);
-    setAdministrativeStatus(internship.administrativeStatus || "");
-    setError("");
-    setSuccess("");
-  };
-
-  const CloseAdministrativeStatus = () => {
-    setAdministrativeInternship(null);
-    setAdministrativeStatus("");
-  };
-
-  const ChangeAdministrativeStatus = (e) => {
-    setAdministrativeStatus(e.target.value);
-  };
-
-  const SubmitAssign = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    setError("");
-    setSuccess("");
-
-    try {
-      await assignSupervisor(selectedInternship.id, supervisorId);
-      setSuccess("Encadrant affecté avec succès");
-      CloseAssign();
-      loadInternships();
-    } catch (error) {
-      setError(error.response?.data?.message || "Erreur lors de l'affectation");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const SubmitAdministrativeStatus = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    setError("");
-    setSuccess("");
-
-    try {
-      await updateAdministrativeStatus(
-        administrativeInternship.id,
-        administrativeStatus,
-      );
-      setSuccess("Dossier administratif mis à jour avec succès");
-      CloseAdministrativeStatus();
-      loadInternships();
-    } catch (error) {
-      setError(error.response?.data?.message || "Erreur lors de la vérification");
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const View = (internship) => {
-    setDetailsInternship(internship);
+    navigate(`/manager/internships/${internship.id}`);
+  };
+
+  const Validate = async (internship) => {
+    const confirmValidate = window.confirm("Valider ce stage ?");
+
+    if (!confirmValidate) return;
+
+    setSaving(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      await validateInternship(internship.id);
+      setSuccess("Stage validé avec succès");
+      loadInternships();
+    } catch (error) {
+      setError(error.response?.data?.message || "Erreur lors de la validation");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const Reject = async (internship) => {
+    const confirmReject = window.confirm("Refuser ce stage ?");
+
+    if (!confirmReject) return;
+
+    setSaving(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      await rejectInternship(internship.id);
+      setSuccess("Stage refusé avec succès");
+      loadInternships();
+    } catch (error) {
+      setError(error.response?.data?.message || "Erreur lors du refus");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -145,7 +113,7 @@ function InternshipManagementPage() {
         </h1>
 
         <p className="text-slate-500 mt-2">
-          Gérez les déclarations et l'affectation des encadrants.
+          Consultez les déclarations et validez ou refusez les stages proposés.
         </p>
       </div>
 
@@ -189,8 +157,8 @@ function InternshipManagementPage() {
           >
             <option value="">Tous les statuts</option>
             <option value="DECLARED">Déclaré</option>
-            <option value="ADMIN_PENDING">En attente admin</option>
-            <option value="ADMIN_VALIDATED">Validé par admin</option>
+            <option value="ADMIN_PENDING">En attente</option>
+            <option value="ADMIN_VALIDATED">Stage validé</option>
             <option value="SUPERVISOR_ASSIGNED">Encadrant affecté</option>
             <option value="SUBJECT_PENDING">Sujet en attente</option>
             <option value="SUBJECT_VALIDATED">Sujet validé</option>
@@ -200,7 +168,8 @@ function InternshipManagementPage() {
 
           <button
             type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-medium"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-medium disabled:opacity-60"
+            disabled={saving}
           >
             Rechercher
           </button>
@@ -215,38 +184,8 @@ function InternshipManagementPage() {
         <InternshipTable
           internships={internships}
           onView={View}
-          onAssign={OpenAssign}
-          onEditStatus={OpenAdministrativeStatus}
-        />
-      )}
-
-      {detailsInternship && (
-        <InternshipDetailsModal
-          internship={detailsInternship}
-          onClose={() => setDetailsInternship(null)}
-        />
-      )}
-
-      {selectedInternship && (
-        <AssignSupervisorForm
-          supervisors={supervisors}
-          supervisorId={supervisorId}
-          onChange={ChangeSupervisor}
-          onSubmit={SubmitAssign}
-          onCancel={CloseAssign}
-          saving={saving}
-          internship={selectedInternship}
-        />
-      )}
-
-      {administrativeInternship && (
-        <AdministrativeStatusForm
-          internship={administrativeInternship}
-          administrativeStatus={administrativeStatus}
-          onChange={ChangeAdministrativeStatus}
-          onSubmit={SubmitAdministrativeStatus}
-          onCancel={CloseAdministrativeStatus}
-          saving={saving}
+          onValidate={Validate}
+          onReject={Reject}
         />
       )}
     </>

@@ -7,8 +7,8 @@ const administrativeStatusLabels = {
 
 const statusLabels = {
   DECLARED: "Déclaré",
-  ADMIN_PENDING: "En attente admin",
-  ADMIN_VALIDATED: "Validé par admin",
+  ADMIN_PENDING: "En attente",
+  ADMIN_VALIDATED: "Stage validé",
   SUPERVISOR_ASSIGNED: "Encadrant affecté",
   SUBJECT_PENDING: "Sujet en attente",
   SUBJECT_VALIDATED: "Sujet validé",

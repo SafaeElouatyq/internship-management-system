@@ -1,7 +1,6 @@
 import axios from "axios";
 
 const INTERNSHIP_URL = "http://localhost:5000/api/internships";
-const SUPERVISOR_URL = "http://localhost:5000/api/supervisors";
 
 const getToken = () => ({
   headers: {
@@ -18,28 +17,29 @@ export const getInternships = async (filters = {}) => {
   return response.data;
 };
 
-export const getSupervisors = async () => {
-  const response = await axios.get(SUPERVISOR_URL, getToken());
-  return response.data;
-};
-
-export const assignSupervisor = async (internshipId, supervisorId) => {
-  const response = await axios.put(
-    `${INTERNSHIP_URL}/${internshipId}/assign-supervisor`,
-    { supervisorId },
+export const getInternship = async (internshipId) => {
+  const response = await axios.get(
+    `${INTERNSHIP_URL}/${internshipId}`,
     getToken(),
   );
 
   return response.data;
 };
 
-export const updateAdministrativeStatus = async (
-  internshipId,
-  administrativeStatus,
-) => {
-  const response = await axios.put(
-    `${INTERNSHIP_URL}/${internshipId}/administrative-status`,
-    { administrativeStatus },
+export const validateInternship = async (internshipId) => {
+  const response = await axios.patch(
+    `${INTERNSHIP_URL}/${internshipId}/validate`,
+    {},
+    getToken(),
+  );
+
+  return response.data;
+};
+
+export const rejectInternship = async (internshipId) => {
+  const response = await axios.patch(
+    `${INTERNSHIP_URL}/${internshipId}/reject`,
+    {},
     getToken(),
   );
 

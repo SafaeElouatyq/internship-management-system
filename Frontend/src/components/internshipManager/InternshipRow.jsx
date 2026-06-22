@@ -1,9 +1,9 @@
-import { Eye, SquarePen, UserPlus } from "lucide-react";
+import { Check, Eye, X } from "lucide-react";
 
 const statusLabels = {
   DECLARED: "Déclaré",
-  ADMIN_PENDING: "En attente admin",
-  ADMIN_VALIDATED: "Validé par admin",
+  ADMIN_PENDING: "En attente",
+  ADMIN_VALIDATED: "Stage validé",
   SUPERVISOR_ASSIGNED: "Encadrant affecté",
   SUBJECT_PENDING: "Sujet en attente",
   SUBJECT_VALIDATED: "Sujet validé",
@@ -16,16 +16,14 @@ const statusLabels = {
   CLOSED: "Clôturé",
 };
 
-const administrativeStatusLabels = {
-  COMPLETE: "Complet",
-  INCOMPLETE: "Incomplet",
-  PENDING_DOCUMENTS: "Documents en attente",
-  REJECTED: "Rejeté",
-};
+const canManageInternship = (internship) =>
+  ["DECLARED", "ADMIN_PENDING"].includes(internship.status) &&
+  internship.administrativeStatus !== "REJECTED";
 
-function InternshipRow({ internship, onView, onAssign, onEditStatus }) {
+function InternshipRow({ internship, onView, onValidate, onReject }) {
   const student = internship.student?.user;
-  const supervisor = internship.supervisor?.user;
+  const documentCount = internship.documents?.length || 0;
+  const canManage = canManageInternship(internship);
 
   return (
     <tr className="border-t border-slate-200 hover:bg-slate-50">
@@ -62,14 +60,8 @@ function InternshipRow({ internship, onView, onAssign, onEditStatus }) {
 
       <td className="px-4 py-4">
         <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
-          {administrativeStatusLabels[internship.administrativeStatus] ||
-            internship.administrativeStatus ||
-            "-"}
+          {documentCount} document{documentCount > 1 ? "s" : ""}
         </span>
-      </td>
-
-      <td className="px-4 py-4 text-slate-600">
-        {supervisor ? `${supervisor.firstName} ${supervisor.lastName}` : "-"}
       </td>
 
       <td className="px-2 py-4">
@@ -78,33 +70,33 @@ function InternshipRow({ internship, onView, onAssign, onEditStatus }) {
             type="button"
             onClick={() => onView(internship)}
             className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-800 transition"
-            title="Voir détails"
-            aria-label="Voir détails"
+            title="Voir dossier"
+            aria-label="Voir dossier"
           >
             <Eye size={18} />
           </button>
 
-          {/*<button
+          <button
             type="button"
-            onClick={() => onAssign(internship)}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-blue-600 hover:bg-blue-50 hover:text-blue-700 transition"
-            title="Affecter un encadrant"
-            aria-label="Affecter un encadrant"
+            onClick={() => onValidate(internship)}
+            disabled={!canManage}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-green-600 hover:bg-green-50 hover:text-green-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
+            title="Valider le stage"
+            aria-label="Valider le stage"
           >
-            <UserPlus size={18} />
-          </button>*/}
+            <Check size={18} />
+          </button>
 
-          {onEditStatus && (
-            <button
-              type="button"
-              onClick={() => onEditStatus(internship)}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-amber-600 hover:bg-amber-50 hover:text-amber-700 transition"
-              title="Modifier statut"
-              aria-label="Modifier statut"
-            >
-              <SquarePen size={18} />
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => onReject(internship)}
+            disabled={!canManage}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-red-600 hover:bg-red-50 hover:text-red-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
+            title="Refuser le stage"
+            aria-label="Refuser le stage"
+          >
+            <X size={18} />
+          </button>
         </div>
       </td>
     </tr>

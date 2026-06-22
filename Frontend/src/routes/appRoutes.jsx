@@ -5,10 +5,14 @@ import DashboardPage from "../pages/admin/dashBoard.jsx";
 import UsersPage from "../pages/admin/usersPage.jsx";
 import StudentDashboard from "../pages/student/StudentDashboard.jsx";
 import StudentInternshipPage from "../pages/student/StudentInternshipPage.jsx";
+import InternshipManagerDashboard from "../pages/internshipManager/InternshipManagerDashboard.jsx";
 import InternshipManagementPage from "../pages/internshipManager/InternshipManagementPage.jsx";
+import InternshipDetailPage from "../pages/internshipManager/InternshipDetailPage.jsx";
+import DepartmentHeadPage from "../pages/departmentHead/DepartmentHeadPage.jsx";
 import AdminLayout from "../components/layout/AdminLayout.jsx";
 import StudentLayout from "../components/layout/StudentLayout.jsx";
 import InternshipManagerLayout from "../components/layout/InternshipManagerLayout.jsx";
+import DepartmentHeadLayout from "../components/layout/DepartmentHeadLayout.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
 
 function AppRoutes() {
@@ -67,9 +71,22 @@ function AppRoutes() {
         }
       >
         <Route index element={<Navigate to="dashboard" replace />} />
-        <Route path="dashboard" element={<InternshipManagementPage />} />
+        <Route path="dashboard" element={<InternshipManagerDashboard />} />
         <Route path="internships" element={<InternshipManagementPage />} />
-        <Route path="assign-supervisors" element={<InternshipManagementPage />} />
+        <Route path="internships/:id" element={<InternshipDetailPage />} />
+      </Route>
+
+      <Route
+        path="/head"
+        element={
+          <ProtectedRoute roles={["DEPARTMENT_HEAD"]}>
+            <DepartmentHeadLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<DepartmentHeadPage />} />
+        <Route path="assign-supervisors" element={<DepartmentHeadPage />} />
       </Route>
     </Routes>
   );
