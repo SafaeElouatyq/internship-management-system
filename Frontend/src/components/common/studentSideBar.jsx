@@ -22,11 +22,11 @@ function StudentSideBar() {
   };
 
   const menu = [
-  {
-    title: "Tableau de bord",
-    path: "/student/dashboard",
-    icon: LayoutDashboard,
-  },
+  // {
+  //   title: "Tableau de bord",
+  //   path: "/student/dashboard",
+  //   icon: LayoutDashboard,
+  // },
   {
     title: "Mon Stage",
     path: "/student/internship",
