@@ -21,6 +21,7 @@ import DepartmentHeadInternshipsPage from "../pages/departmentHead/DepartmentHea
 import DepartmentHeadSupervisorsPage from "../pages/departmentHead/DepartmentHeadSupervisorsPage.jsx";
 import DepartmentHeadNotificationsPage from "../pages/departmentHead/DepartmentHeadNotificationsPage.jsx";
 import DepartmentHeadSettingsPage from "../pages/departmentHead/DepartmentHeadSettingsPage.jsx";
+import DepartmentHeadFinalDecisionsPage from "../pages/departmentHead/DepartmentHeadFinalDecisionsPage.jsx";
 import AdminLayout from "../components/layout/AdminLayout.jsx";
 import StudentLayout from "../components/layout/StudentLayout.jsx";
 import InternshipManagerLayout from "../components/layout/InternshipManagerLayout.jsx";
@@ -120,6 +121,7 @@ function AppRoutes() {
         <Route path="dashboard" element={<DepartmentHeadDashboard />} />
         <Route path="internships" element={<DepartmentHeadInternshipsPage />} />
         <Route path="supervisors" element={<DepartmentHeadSupervisorsPage />} />
+        <Route path="final-decisions" element={<DepartmentHeadFinalDecisionsPage />} />
         <Route path="notifications" element={<DepartmentHeadNotificationsPage />} />
         <Route path="settings" element={<DepartmentHeadSettingsPage />} />
       </Route>

@@ -3,21 +3,27 @@ import {
   getInternships,
   getSupervisors,
 } from "../../services/departmentHeadService.jsx";
+import { getFinalDecisions } from "../../services/finalDecisionService.jsx";
 
 function DepartmentHeadDashboard() {
   const [internships, setInternships] = useState([]);
   const [supervisors, setSupervisors] = useState([]);
+  const [stats, setStats] = useState({
+    authorizedCount: 0,
+    refusedCount: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     let active = true;
 
-    Promise.all([getInternships(), getSupervisors()])
-      .then(([internshipsData, supervisorsData]) => {
+    Promise.all([getInternships(), getSupervisors(), getFinalDecisions()])
+      .then(([internshipsData, supervisorsData, decisionsData]) => {
         if (active) {
           setInternships(internshipsData);
           setSupervisors(supervisorsData);
+          setStats(decisionsData.stats);
         }
       })
       .catch((error) => {
@@ -61,6 +67,14 @@ function DepartmentHeadDashboard() {
       title: "Affectations en attente",
       value: affectationsEnAttente,
     },
+    {
+      title: "Soutenances autorisées",
+      value: stats.authorizedCount,
+    },
+    {
+      title: "Soutenances refusées",
+      value: stats.refusedCount,
+    },
   ];
 
   return (
@@ -71,7 +85,7 @@ function DepartmentHeadDashboard() {
         </h1>
 
         <p className="text-slate-500 mt-2">
-          Suivez les stages validés et les affectations d'encadrants académiques.
+          Suivez les stages validés, les affectations et les décisions de soutenance.
         </p>
       </div>
 
@@ -86,7 +100,7 @@ function DepartmentHeadDashboard() {
           Chargement...
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {cards.map((card) => (
             <div
               key={card.title}

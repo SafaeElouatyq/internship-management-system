@@ -7,6 +7,7 @@ import {
   Bell,
   Settings,
   LogOut,
+  Gavel,
 } from "lucide-react";
 
 function DepartmentHeadSideBar() {
@@ -32,6 +33,11 @@ function DepartmentHeadSideBar() {
       title: "Encadrants",
       path: "/department-head/supervisors",
       icon: Users,
+    },
+    {
+      title: "Décisions finales",
+      path: "/department-head/final-decisions",
+      icon: Gavel,
     },
     {
       title: "Notifications",
