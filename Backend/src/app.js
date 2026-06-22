@@ -6,6 +6,7 @@ import roleRoutes from "./routes/roleRoutes.js";
 import internshipRoutes from "./routes/internshipRoutes.js";
 import supervisorRoutes from "./routes/supervisorRoutes.js";
 import departmentHeadRoutes from "./routes/departmentHeadRoutes.js";
+import reportRoutes from "./routes/reportRoutes.js";
 import cors from "cors";
 
 
@@ -21,6 +22,7 @@ app.use("/api/roles", roleRoutes);
 app.use("/api/internships", internshipRoutes);
 app.use("/api/supervisors", supervisorRoutes);
 app.use("/api/department-head", departmentHeadRoutes);
+app.use("/api/reports", reportRoutes);
 
 
 

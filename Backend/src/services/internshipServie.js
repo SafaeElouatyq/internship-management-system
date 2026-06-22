@@ -24,7 +24,7 @@ const getStudentByUserId = async (userId) => {
   });
 
   if (!student) {
-    throw new Error("Student profile not found");
+    throw new Error("Profil étudiant introuvable");
   }
 
   return student;
@@ -37,7 +37,7 @@ const getOrCreateCompany = async ({
   companyPhone,
 }) => {
   if (!companyName) {
-    throw new Error("Company name is required");
+    throw new Error("Le nom de l'entreprise est obligatoire");
   }
 
   let company = await prisma.company.findFirst({
@@ -74,7 +74,7 @@ const getStudentInternship = async (internshipId, userId) => {
   });
 
   if (!internship) {
-    throw new Error("Internship not found");
+    throw new Error("Déclaration de stage introuvable");
   }
 
   return internship;
@@ -160,7 +160,7 @@ export const getInternshipById = async (internshipId) => {
   });
 
   if (!internship) {
-    throw new Error("Internship not found");
+    throw new Error("Déclaration de stage introuvable");
   }
 
   return internship;
@@ -181,11 +181,11 @@ export const addInternship = async (internshipData, userId) => {
   } = internshipData;
 
   if (!title || !startDate || !endDate) {
-    throw new Error("Title, start date and end date are required");
+    throw new Error("Le sujet, la date de début et la date de fin sont obligatoires");
   }
 
   if (new Date(startDate) > new Date(endDate)) {
-    throw new Error("End date must be after start date");
+    throw new Error("La date de fin doit être postérieure à la date de début");
   }
 
   const student = await getStudentByUserId(userId);
@@ -257,7 +257,7 @@ export const updateInternship = async (internshipId, internshipData, userId) => 
     (endDate || internship.endDate) &&
     new Date(startDate || internship.startDate) > new Date(endDate || internship.endDate)
   ) {
-    throw new Error("End date must be after start date");
+    throw new Error("La date de fin doit être postérieure à la date de début");
   }
 
   if (companyName) {
@@ -310,7 +310,7 @@ export const assignSupervisor = async (internshipId, supervisorId) => {
   });
 
   if (!supervisor) {
-    throw new Error("Supervisor not found");
+    throw new Error("Encadrant introuvable");
   }
 
   return await prisma.internship.update({
@@ -341,7 +341,7 @@ export const updateAdministrativeStatus = async (
   ];
 
   if (!allowedStatuses.includes(administrativeStatus)) {
-    throw new Error("Invalid administrative status");
+    throw new Error("Statut administratif invalide");
   }
 
   const internship = await prisma.internship.findUnique({
@@ -351,7 +351,7 @@ export const updateAdministrativeStatus = async (
   });
 
   if (!internship) {
-    throw new Error("Internship not found");
+    throw new Error("Déclaration de stage introuvable");
   }
 
   const status =
@@ -377,17 +377,17 @@ export const validateInternshipDeclaration = async (internshipId) => {
   });
 
   if (!internship) {
-    throw new Error("Internship not found");
+    throw new Error("Déclaration de stage introuvable");
   }
 
   if (internship.administrativeStatus === "REJECTED") {
-    throw new Error("This internship declaration has already been rejected");
+    throw new Error("Cette déclaration a déjà été refusée");
   }
 
   const pendingStatuses = ["DECLARED", "ADMIN_PENDING"];
 
   if (!pendingStatuses.includes(internship.status)) {
-    throw new Error("This internship declaration cannot be validated");
+    throw new Error("Cette déclaration ne peut pas être validée");
   }
 
   return await prisma.internship.update({
@@ -409,17 +409,17 @@ export const rejectInternshipDeclaration = async (internshipId) => {
   });
 
   if (!internship) {
-    throw new Error("Internship not found");
+    throw new Error("Déclaration de stage introuvable");
   }
 
   if (internship.administrativeStatus === "REJECTED") {
-    throw new Error("This internship declaration has already been rejected");
+    throw new Error("Cette déclaration a déjà été refusée");
   }
 
   const pendingStatuses = ["DECLARED", "ADMIN_PENDING"];
 
   if (!pendingStatuses.includes(internship.status)) {
-    throw new Error("This internship declaration cannot be rejected");
+    throw new Error("Cette déclaration ne peut pas être refusée");
   }
 
   return await prisma.internship.update({

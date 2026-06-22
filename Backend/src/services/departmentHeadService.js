@@ -69,15 +69,17 @@ export const assignAcademicSupervisor = async (internshipId, supervisorId) => {
   });
 
   if (!internship) {
-    throw new Error("Internship not found");
+    throw new Error("Déclaration de stage introuvable");
   }
 
   if (internship.status !== "ADMIN_VALIDATED") {
-    throw new Error("Internship declaration is not validated yet");
+    throw new Error(
+      "Cette déclaration n'est pas encore validée par le gestionnaire de stage",
+    );
   }
 
   if (internship.administrativeStatus === "REJECTED") {
-    throw new Error("Internship declaration has been rejected");
+    throw new Error("Cette déclaration de stage a été refusée");
   }
 
   const supervisor = await prisma.supervisor.findUnique({
@@ -87,7 +89,7 @@ export const assignAcademicSupervisor = async (internshipId, supervisorId) => {
   });
 
   if (!supervisor) {
-    throw new Error("Supervisor not found");
+    throw new Error("Encadrant introuvable");
   }
 
   return await prisma.internship.update({

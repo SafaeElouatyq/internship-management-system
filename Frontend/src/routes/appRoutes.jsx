@@ -5,6 +5,10 @@ import DashboardPage from "../pages/admin/dashBoard.jsx";
 import UsersPage from "../pages/admin/usersPage.jsx";
 import StudentDashboard from "../pages/student/StudentDashboard.jsx";
 import StudentInternshipPage from "../pages/student/StudentInternshipPage.jsx";
+import StudentReportsPage from "../pages/student/StudentReportsPage.jsx";
+import SupervisorDashboard from "../pages/supervisor/SupervisorDashboard.jsx";
+import SupervisorReportsPage from "../pages/supervisor/SupervisorReportsPage.jsx";
+import SupervisorSettingsPage from "../pages/supervisor/SupervisorSettingsPage.jsx";
 import InternshipManagerDashboard from "../pages/internshipManager/InternshipManagerDashboard.jsx";
 import InternshipManagementPage from "../pages/internshipManager/InternshipManagementPage.jsx";
 import InternshipDetailPage from "../pages/internshipManager/InternshipDetailPage.jsx";
@@ -17,6 +21,7 @@ import AdminLayout from "../components/layout/AdminLayout.jsx";
 import StudentLayout from "../components/layout/StudentLayout.jsx";
 import InternshipManagerLayout from "../components/layout/InternshipManagerLayout.jsx";
 import DepartmentHeadLayout from "../components/layout/DepartmentHeadLayout.jsx";
+import SupervisorLayout from "../components/layout/SupervisorLayout.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
 
 function AppRoutes() {
@@ -64,6 +69,21 @@ function AppRoutes() {
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<StudentDashboard />} />
         <Route path="internship" element={<StudentInternshipPage />} />
+        <Route path="reports" element={<StudentReportsPage />} />
+      </Route>
+
+      <Route
+        path="/supervisor"
+        element={
+          <ProtectedRoute roles={["SUPERVISOR"]}>
+            <SupervisorLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<SupervisorDashboard />} />
+        <Route path="reports" element={<SupervisorReportsPage />} />
+        <Route path="settings" element={<SupervisorSettingsPage />} />
       </Route>
 
       <Route

@@ -73,7 +73,7 @@ export const createUser = async (userData) => {
   });
 
   if (existingUser) {
-    throw new Error("Email already exists");
+    throw new Error("Cet email est déjà utilisé");
   }
 
   const roleData = await prisma.role.findUnique({
@@ -83,7 +83,7 @@ export const createUser = async (userData) => {
   });
 
   if (!roleData) {
-    throw new Error("Invalid role");
+    throw new Error("Rôle invalide");
   }
 
   let departmentData = null;
@@ -96,7 +96,7 @@ export const createUser = async (userData) => {
     });
 
     if (!departmentData) {
-      throw new Error("Department not found");
+      throw new Error("Département introuvable");
     }
   }
 
@@ -164,7 +164,7 @@ export const createUser = async (userData) => {
         break;
 
       default:
-        throw new Error("Invalid role");
+        throw new Error("Rôle invalide");
     }
 
     return user;
@@ -186,7 +186,7 @@ export const createUser = async (userData) => {
 //   });
 
 //   if (!user) {
-//     throw new Error("User not found");
+//     throw new Error("Utilisateur introuvable");
 //   }
 
 //   const data = {};
@@ -233,7 +233,7 @@ export const updateUser = async (userId, userData) => {
   });
 
   if (!user) {
-    throw new Error("User not found");
+    throw new Error("Utilisateur introuvable");
   }
 
   const data = {
@@ -339,7 +339,7 @@ export const deleteUser = async (userId) => {
   });
 
   if (!user) {
-    throw new Error("User not found");
+    throw new Error("Utilisateur introuvable");
   }
 
   await prisma.$transaction(async (tx) => {

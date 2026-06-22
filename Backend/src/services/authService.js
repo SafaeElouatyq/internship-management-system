@@ -11,13 +11,13 @@ export const login = async (email, password) => {
   });
 
   if (!user) {
-    throw new Error("Invalid credentials");
+    throw new Error("Identifiants incorrects");
   }
 
   const isPasswordValid = await bcrypt.compare(password, user.password);
 
   if (!isPasswordValid) {
-    throw new Error("Invalid credentials");
+    throw new Error("Identifiants incorrects");
   }
 
   const token = jwt.sign(

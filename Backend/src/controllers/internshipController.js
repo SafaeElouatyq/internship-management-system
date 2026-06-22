@@ -55,7 +55,7 @@ export const createInternship = async (req, res) => {
     const internship = await addInternship(req.body, req.user.id);
 
     res.status(201).json({
-      message: "Internship created successfully",
+      message: "Déclaration créée avec succès",
       internship,
     });
   } catch (error) {
@@ -76,7 +76,7 @@ export const editInternship = async (req, res) => {
     );
 
     res.status(200).json({
-      message: "Internship updated successfully",
+      message: "Déclaration modifiée avec succès",
       internship,
     });
   } catch (error) {
@@ -93,7 +93,7 @@ export const removeInternship = async (req, res) => {
     await deleteInternship(req.params.id, req.user.id);
 
     res.status(200).json({
-      message: "Internship deleted successfully",
+      message: "Déclaration supprimée avec succès",
     });
   } catch (error) {
     console.error(error);
@@ -136,7 +136,7 @@ export const verifyAdministrativeFile = async (req, res) => {
     );
 
     res.status(200).json({
-      message: "Administrative file updated successfully",
+      message: "Dossier administratif mis à jour avec succès",
       internship,
     });
   } catch (error) {

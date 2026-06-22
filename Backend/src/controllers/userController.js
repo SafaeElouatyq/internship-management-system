@@ -16,7 +16,7 @@ export const getUsers = async (req, res) => {
     console.error(error);
 
     res.status(500).json({
-      message: "Error fetching users",
+      message: "Erreur lors du chargement des utilisateurs",
     });
   }
 };
@@ -26,7 +26,7 @@ export const addUser = async (req, res) => {
     const user = await createUser(req.body);
 
     res.status(201).json({
-      message: "User created successfully",
+      message: "Utilisateur créé avec succès",
       user,
     });
   } catch (error) {
@@ -43,7 +43,7 @@ export const editUser = async (req, res) => {
     const user = await updateUser(req.params.id, req.body);
 
     res.status(200).json({
-      message: "User updated successfully",
+      message: "Utilisateur modifié avec succès",
       user,
     });
   } catch (error) {
@@ -60,7 +60,7 @@ export const removeUser = async (req, res) => {
     await deleteUser(req.params.id);
 
     res.status(200).json({
-      message: "User deleted successfully",
+      message: "Utilisateur supprimé avec succès",
     });
   } catch (error) {
     console.error(error);
