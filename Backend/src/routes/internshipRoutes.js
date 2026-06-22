@@ -7,6 +7,7 @@ import {
   removeInternship,
   validateInternship,
   rejectInternship,
+  assignInternshipSupervisor,
 } from "../controllers/internshipController.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { roleMiddleware } from "../middlewares/roleMiddleware.js";
@@ -25,6 +26,12 @@ router.patch(
   authMiddleware,
   roleMiddleware("INTERNSHIP_MANAGER"),
   rejectInternship,
+);
+router.patch(
+  "/:id/assign-supervisor",
+  authMiddleware,
+  roleMiddleware("DEPARTMENT_HEAD"),
+  assignInternshipSupervisor,
 );
 router.get("/:id", authMiddleware, roleMiddleware("STUDENT", "INTERNSHIP_MANAGER"), getInternship);
 router.post("/", authMiddleware, roleMiddleware("STUDENT"), createInternship);

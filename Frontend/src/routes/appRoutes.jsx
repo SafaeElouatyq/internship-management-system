@@ -8,7 +8,11 @@ import StudentInternshipPage from "../pages/student/StudentInternshipPage.jsx";
 import InternshipManagerDashboard from "../pages/internshipManager/InternshipManagerDashboard.jsx";
 import InternshipManagementPage from "../pages/internshipManager/InternshipManagementPage.jsx";
 import InternshipDetailPage from "../pages/internshipManager/InternshipDetailPage.jsx";
-import DepartmentHeadPage from "../pages/departmentHead/DepartmentHeadPage.jsx";
+import DepartmentHeadDashboard from "../pages/departmentHead/DepartmentHeadDashboard.jsx";
+import DepartmentHeadInternshipsPage from "../pages/departmentHead/DepartmentHeadInternshipsPage.jsx";
+import DepartmentHeadSupervisorsPage from "../pages/departmentHead/DepartmentHeadSupervisorsPage.jsx";
+import DepartmentHeadNotificationsPage from "../pages/departmentHead/DepartmentHeadNotificationsPage.jsx";
+import DepartmentHeadSettingsPage from "../pages/departmentHead/DepartmentHeadSettingsPage.jsx";
 import AdminLayout from "../components/layout/AdminLayout.jsx";
 import StudentLayout from "../components/layout/StudentLayout.jsx";
 import InternshipManagerLayout from "../components/layout/InternshipManagerLayout.jsx";
@@ -77,7 +81,7 @@ function AppRoutes() {
       </Route>
 
       <Route
-        path="/head"
+        path="/department-head"
         element={
           <ProtectedRoute roles={["DEPARTMENT_HEAD"]}>
             <DepartmentHeadLayout />
@@ -85,8 +89,11 @@ function AppRoutes() {
         }
       >
         <Route index element={<Navigate to="dashboard" replace />} />
-        <Route path="dashboard" element={<DepartmentHeadPage />} />
-        <Route path="assign-supervisors" element={<DepartmentHeadPage />} />
+        <Route path="dashboard" element={<DepartmentHeadDashboard />} />
+        <Route path="internships" element={<DepartmentHeadInternshipsPage />} />
+        <Route path="supervisors" element={<DepartmentHeadSupervisorsPage />} />
+        <Route path="notifications" element={<DepartmentHeadNotificationsPage />} />
+        <Route path="settings" element={<DepartmentHeadSettingsPage />} />
       </Route>
     </Routes>
   );

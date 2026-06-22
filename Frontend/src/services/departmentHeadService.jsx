@@ -1,5 +1,6 @@
 import axios from "axios";
 
+const INTERNSHIP_URL = "http://localhost:5000/api/internships";
 const API_URL = "http://localhost:5000/api/department-head";
 
 const getToken = () => ({
@@ -19,8 +20,8 @@ export const getSupervisors = async () => {
 };
 
 export const assignSupervisor = async (internshipId, supervisorId) => {
-  const response = await axios.put(
-    `${API_URL}/internships/${internshipId}/assign-supervisor`,
+  const response = await axios.patch(
+    `${INTERNSHIP_URL}/${internshipId}/assign-supervisor`,
     { supervisorId },
     getToken(),
   );

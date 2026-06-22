@@ -17,7 +17,7 @@ export const redirectByRole = (role, navigate) => {
       break;
 
     case "DEPARTMENT_HEAD":
-      navigate("/head/dashboard");
+      navigate("/department-head/dashboard");
       break;
 
     default:

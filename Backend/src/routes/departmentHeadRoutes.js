@@ -1,6 +1,5 @@
 import { Router } from "express";
 import {
-  assignSupervisor,
   getInternships,
   getSupervisors,
 } from "../controllers/departmentHeadController.js";
@@ -21,11 +20,4 @@ router.get(
   roleMiddleware("DEPARTMENT_HEAD"),
   getSupervisors,
 );
-router.put(
-  "/internships/:id/assign-supervisor",
-  authMiddleware,
-  roleMiddleware("DEPARTMENT_HEAD"),
-  assignSupervisor,
-);
-
 export default router;

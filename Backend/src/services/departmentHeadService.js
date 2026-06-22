@@ -16,11 +16,29 @@ const includeRelations = {
   },
 };
 
-export const getCompleteInternships = async () => {
+const validatedStatuses = [
+  "ADMIN_VALIDATED",
+  "SUPERVISOR_ASSIGNED",
+  "SUBJECT_PENDING",
+  "SUBJECT_VALIDATED",
+  "IN_PROGRESS",
+  "REPORT_LATE",
+  "REPORT_WRITING",
+  "READY_FOR_DEFENSE",
+  "DEFENSE_AUTHORIZED",
+  "DEFENSE_NOT_AUTHORIZED",
+  "CLOSED",
+];
+
+export const getValidatedInternships = async () => {
   return await prisma.internship.findMany({
     where: {
-      status: "ADMIN_VALIDATED",
-      supervisorId: null,
+      status: {
+        in: validatedStatuses,
+      },
+      NOT: {
+        administrativeStatus: "REJECTED",
+      },
     },
     include: includeRelations,
     orderBy: {

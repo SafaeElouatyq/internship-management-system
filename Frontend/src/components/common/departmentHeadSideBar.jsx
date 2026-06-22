@@ -1,6 +1,13 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { logout } from "../../services/authService.jsx";
-import { LayoutDashboard, UserPlus, LogOut } from "lucide-react";
+import {
+  LayoutDashboard,
+  BriefcaseBusiness,
+  Users,
+  Bell,
+  Settings,
+  LogOut,
+} from "lucide-react";
 
 function DepartmentHeadSideBar() {
   const navigate = useNavigate();
@@ -13,13 +20,31 @@ function DepartmentHeadSideBar() {
   const menu = [
     {
       title: "Tableau de bord",
-      path: "/head/dashboard",
+      path: "/department-head/dashboard",
       icon: LayoutDashboard,
     },
     {
-      title: "Affectation des encadrants",
-      path: "/head/assign-supervisors",
-      icon: UserPlus,
+      title: "Stages validés",
+      path: "/department-head/internships",
+      icon: BriefcaseBusiness,
+    },
+    {
+      title: "Encadrants",
+      path: "/department-head/supervisors",
+      icon: Users,
+    },
+    {
+      title: "Notifications",
+      path: "/department-head/notifications",
+      icon: Bell,
+    },
+  ];
+
+  const others = [
+    {
+      title: "Paramètres",
+      path: "/department-head/settings",
+      icon: Settings,
     },
   ];
 
@@ -28,6 +53,32 @@ function DepartmentHeadSideBar() {
       <div className="pt-10">
         <nav className="px-5 space-y-2">
           {menu.map((item) => {
+            const Icon = item.icon;
+
+            return (
+              <NavLink
+                key={item.title}
+                to={item.path}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                    isActive
+                      ? "bg-blue-500 text-white shadow-md"
+                      : "text-slate-600 hover:bg-slate-100"
+                  }`
+                }
+              >
+                <Icon size={20} />
+
+                <span className="font-medium">{item.title}</span>
+              </NavLink>
+            );
+          })}
+        </nav>
+
+        <div className="mx-5 my-7 border-t border-slate-200"></div>
+
+        <nav className="px-5 space-y-2">
+          {others.map((item) => {
             const Icon = item.icon;
 
             return (

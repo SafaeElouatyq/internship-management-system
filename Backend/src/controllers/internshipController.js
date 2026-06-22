@@ -6,11 +6,11 @@ import {
   addInternship,
   updateInternship,
   deleteInternship,
-  assignSupervisor,
   updateAdministrativeStatus,
   validateInternshipDeclaration,
   rejectInternshipDeclaration,
 } from "../services/internshipServie.js";
+import { assignAcademicSupervisor } from "../services/departmentHeadService.js";
 
 export const getInternships = async (req, res) => {
   try {
@@ -108,10 +108,13 @@ export const assignInternshipSupervisor = async (req, res) => {
   try {
     const { supervisorId } = req.body;
 
-    const internship = await assignSupervisor(req.params.id, supervisorId);
+    const internship = await assignAcademicSupervisor(
+      req.params.id,
+      supervisorId,
+    );
 
     res.status(200).json({
-      message: "Supervisor assigned successfully",
+      message: "Encadrant affecté avec succès",
       internship,
     });
   } catch (error) {

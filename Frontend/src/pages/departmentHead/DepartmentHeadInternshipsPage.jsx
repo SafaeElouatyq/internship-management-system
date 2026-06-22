@@ -1,18 +1,16 @@
 import { useEffect, useState } from "react";
 import AssignSupervisorModal from "../../components/departmentHead/AssignSupervisorModal";
 import InternshipTable from "../../components/departmentHead/InternshipTable";
-import InternshipDetailsModal from "../../components/internshipManager/InternshipDetailsModal";
 import {
   assignSupervisor,
   getInternships,
   getSupervisors,
 } from "../../services/departmentHeadService.jsx";
 
-function DepartmentHeadPage() {
+function DepartmentHeadInternshipsPage() {
   const [internships, setInternships] = useState([]);
   const [supervisors, setSupervisors] = useState([]);
   const [selectedInternship, setSelectedInternship] = useState(null);
-  const [detailsInternship, setDetailsInternship] = useState(null);
   const [supervisorId, setSupervisorId] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -20,32 +18,23 @@ function DepartmentHeadPage() {
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
-    loadInternships();
-    loadSupervisors();
+    loadData();
   }, []);
 
-  const loadInternships = async () => {
+  const loadData = async () => {
     try {
-      const data = await getInternships();
-      setInternships(data);
+      const [internshipsData, supervisorsData] = await Promise.all([
+        getInternships(),
+        getSupervisors(),
+      ]);
+
+      setInternships(internshipsData);
+      setSupervisors(supervisorsData);
     } catch (error) {
       setError(error.response?.data?.message || "Erreur lors du chargement");
     } finally {
       setLoading(false);
     }
-  };
-
-  const loadSupervisors = async () => {
-    try {
-      const data = await getSupervisors();
-      setSupervisors(data);
-    } catch (error) {
-      setError(error.response?.data?.message || "Erreur lors du chargement");
-    }
-  };
-
-  const View = (internship) => {
-    setDetailsInternship(internship);
   };
 
   const OpenAssign = (internship) => {
@@ -74,7 +63,7 @@ function DepartmentHeadPage() {
       await assignSupervisor(selectedInternship.id, supervisorId);
       setSuccess("Encadrant affecté avec succès");
       CloseAssign();
-      loadInternships();
+      loadData();
     } catch (error) {
       setError(error.response?.data?.message || "Erreur lors de l'affectation");
     } finally {
@@ -86,11 +75,11 @@ function DepartmentHeadPage() {
     <>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-800">
-          Tableau de bord chef de département
+          Stages validés
         </h1>
 
         <p className="text-slate-500 mt-2">
-          Affectez les encadrants aux stages validés par l'administration.
+          Affectez un encadrant académique aux stages validés par le gestionnaire.
         </p>
       </div>
 
@@ -111,18 +100,7 @@ function DepartmentHeadPage() {
           Chargement...
         </div>
       ) : (
-        <InternshipTable
-          internships={internships}
-          onView={View}
-          onAssign={OpenAssign}
-        />
-      )}
-
-      {detailsInternship && (
-        <InternshipDetailsModal
-          internship={detailsInternship}
-          onClose={() => setDetailsInternship(null)}
-        />
+        <InternshipTable internships={internships} onAssign={OpenAssign} />
       )}
 
       {selectedInternship && (
@@ -140,4 +118,4 @@ function DepartmentHeadPage() {
   );
 }
 
-export default DepartmentHeadPage;
+export default DepartmentHeadInternshipsPage;
