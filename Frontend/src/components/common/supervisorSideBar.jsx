@@ -3,6 +3,7 @@ import { logout } from "../../services/authService.jsx";
 import {
   LayoutDashboard,
   FileText,
+  CalendarDays,
   Settings,
   LogOut,
 } from "lucide-react";
@@ -25,6 +26,11 @@ function SupervisorSideBar() {
       title: "Rapports",
       path: "/supervisor/reports",
       icon: FileText,
+    },
+    {
+      title: "Mes réunions",
+      path: "/supervisor/meetings",
+      icon: CalendarDays,
     },
   ];
 

@@ -6,12 +6,16 @@ import UsersPage from "../pages/admin/usersPage.jsx";
 import StudentDashboard from "../pages/student/StudentDashboard.jsx";
 import StudentInternshipPage from "../pages/student/StudentInternshipPage.jsx";
 import StudentReportsPage from "../pages/student/StudentReportsPage.jsx";
+import StudentMeetingsPage from "../pages/student/StudentMeetingsPage.jsx";
+import StudentDocumentsPage from "../pages/student/StudentDocumentsPage.jsx";
 import SupervisorDashboard from "../pages/supervisor/SupervisorDashboard.jsx";
 import SupervisorReportsPage from "../pages/supervisor/SupervisorReportsPage.jsx";
+import SupervisorMeetingsPage from "../pages/supervisor/SupervisorMeetingsPage.jsx";
 import SupervisorSettingsPage from "../pages/supervisor/SupervisorSettingsPage.jsx";
 import InternshipManagerDashboard from "../pages/internshipManager/InternshipManagerDashboard.jsx";
 import InternshipManagementPage from "../pages/internshipManager/InternshipManagementPage.jsx";
 import InternshipDetailPage from "../pages/internshipManager/InternshipDetailPage.jsx";
+import InternshipManagerDocumentsPage from "../pages/internshipManager/InternshipManagerDocumentsPage.jsx";
 import DepartmentHeadDashboard from "../pages/departmentHead/DepartmentHeadDashboard.jsx";
 import DepartmentHeadInternshipsPage from "../pages/departmentHead/DepartmentHeadInternshipsPage.jsx";
 import DepartmentHeadSupervisorsPage from "../pages/departmentHead/DepartmentHeadSupervisorsPage.jsx";
@@ -70,6 +74,8 @@ function AppRoutes() {
         <Route path="dashboard" element={<StudentDashboard />} />
         <Route path="internship" element={<StudentInternshipPage />} />
         <Route path="reports" element={<StudentReportsPage />} />
+        <Route path="meetings" element={<StudentMeetingsPage />} />
+        <Route path="documents" element={<StudentDocumentsPage />} />
       </Route>
 
       <Route
@@ -83,6 +89,7 @@ function AppRoutes() {
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<SupervisorDashboard />} />
         <Route path="reports" element={<SupervisorReportsPage />} />
+        <Route path="meetings" element={<SupervisorMeetingsPage />} />
         <Route path="settings" element={<SupervisorSettingsPage />} />
       </Route>
 
@@ -98,6 +105,7 @@ function AppRoutes() {
         <Route path="dashboard" element={<InternshipManagerDashboard />} />
         <Route path="internships" element={<InternshipManagementPage />} />
         <Route path="internships/:id" element={<InternshipDetailPage />} />
+        <Route path="documents" element={<InternshipManagerDocumentsPage />} />
       </Route>
 
       <Route
