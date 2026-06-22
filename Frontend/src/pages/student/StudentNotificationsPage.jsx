@@ -1,6 +1,6 @@
 import NotificationsList from "../../components/notifications/NotificationsList.jsx";
 
-function InternshipManagerNotificationsPage() {
+function StudentNotificationsPage() {
   return (
     <>
       <div className="mb-8">
@@ -13,4 +13,4 @@ function InternshipManagerNotificationsPage() {
   );
 }
 
-export default InternshipManagerNotificationsPage;
+export default StudentNotificationsPage;

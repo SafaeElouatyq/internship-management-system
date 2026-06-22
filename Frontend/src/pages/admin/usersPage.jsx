@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import UserTable from "../../components/users/UserTable";
 import UserForm from "../../components/users/UserForm";
 import { getUsers, deleteUser } from "../../services/userService";
@@ -14,6 +15,7 @@ const roleOptions = [
 ];
 
 function UsersPage() {
+  const [searchParams] = useSearchParams();
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
@@ -22,6 +24,14 @@ function UsersPage() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+    const role = searchParams.get("role");
+
+    if (role) {
+      setRoleFilter(role);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const timer = setTimeout(() => {

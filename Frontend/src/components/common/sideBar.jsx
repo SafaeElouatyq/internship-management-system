@@ -32,7 +32,7 @@ function Sidebar() {
     },
     {
       title: "Étudiants",
-      path: "/students",
+      path: "/admin/users?role=STUDENT",
       icon: GraduationCap,
     },
    
@@ -41,12 +41,12 @@ function Sidebar() {
   const others = [
     {
       title: "Paramètres",
-      path: "/settings",
+      path: "/admin/settings",
       icon: Settings,
     },
     {
       title: "Aide",
-      path: "/help",
+      path: "/admin/help",
       icon: CircleHelp,
     },
   ];

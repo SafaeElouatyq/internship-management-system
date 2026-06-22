@@ -6,6 +6,11 @@ import {
   PFE_CATEGORIES,
   PFE_CATEGORY_LABELS,
 } from "../utils/pfeDocumentRules.js";
+import { createNotification } from "./notificationService.js";
+import {
+  getInternshipUserIds,
+  syncPfeWorkflowStatus,
+} from "./internshipWorkflowService.js";
 
 const documentInclude = {
   internship: {
@@ -337,9 +342,9 @@ export const validatePfeDocument = async (
   }
 
   const supervisor = await getSupervisorByUserId(userId);
-  await getSupervisorDocument(supervisor.id, documentId);
+  const document = await getSupervisorDocument(supervisor.id, documentId);
 
-  return await prisma.document.update({
+  const updatedDocument = await prisma.document.update({
     where: {
       id: Number(documentId),
     },
@@ -349,6 +354,26 @@ export const validatePfeDocument = async (
     },
     include: documentInclude,
   });
+
+  await syncPfeWorkflowStatus(document.internshipId);
+
+  const userIds = await getInternshipUserIds(document.internshipId);
+
+  if (userIds?.studentUserId) {
+    const statusLabels = {
+      VALIDATED: "validé",
+      NEEDS_CORRECTION: "à corriger",
+      REJECTED: "rejeté",
+    };
+
+    await createNotification(
+      userIds.studentUserId,
+      "Décision sur un document PFE",
+      `Votre document a été ${statusLabels[validationStatus] || "mis à jour"}.`,
+    );
+  }
+
+  return updatedDocument;
 };
 
 export const getPfeDocumentByIdForSupervisor = async (userId, documentId) => {

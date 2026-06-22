@@ -14,6 +14,12 @@ import {
   getSubmissionWindowMessage,
   normalizeWeekStartDate,
 } from "../utils/reportWeekUtils.js";
+import { createNotification } from "./notificationService.js";
+import {
+  getInternshipUserIds,
+  syncReportLateStatus,
+  transitionAfterWeeklyReport,
+} from "./internshipWorkflowService.js";
 
 const reportInclude = {
   internship: {
@@ -270,7 +276,7 @@ export const createWeeklyReport = async (userId, reportData, files = []) => {
     );
   }
 
-  return await prisma.weeklyReport.create({
+  const report = await prisma.weeklyReport.create({
     data: {
       completedWork,
       difficulties: difficulties?.trim() || null,
@@ -291,6 +297,20 @@ export const createWeeklyReport = async (userId, reportData, files = []) => {
     },
     include: reportInclude,
   });
+
+  await transitionAfterWeeklyReport(internship.id);
+
+  const userIds = await getInternshipUserIds(internship.id);
+
+  if (userIds?.supervisorUserId) {
+    await createNotification(
+      userIds.supervisorUserId,
+      "Nouveau rapport hebdomadaire",
+      "Un étudiant a soumis un rapport hebdomadaire.",
+    );
+  }
+
+  return report;
 };
 
 export const updateWeeklyReport = async (userId, reportId, reportData, files = []) => {
@@ -444,6 +464,10 @@ export const getMyWeeklyReports = async (userId) => {
       normalizeWeekStartDate(report.weekStartDate) ===
       submissionContext.weekStartDate,
   );
+
+  if (internship) {
+    await syncReportLateStatus(internship.id, missingWeeks.length > 0);
+  }
 
   return {
     reports: enrichedReports,

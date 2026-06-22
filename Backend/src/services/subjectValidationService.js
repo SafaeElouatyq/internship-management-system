@@ -1,5 +1,7 @@
 import prisma from "../config/prisma.js";
 import { getSupervisorByUserId } from "./supervisorInternshipService.js";
+import { createNotification } from "./notificationService.js";
+import { getInternshipUserIds } from "./internshipWorkflowService.js";
 
 const internshipInclude = {
   student: {
@@ -112,13 +114,32 @@ export const createSubjectValidation = async (
       },
     });
 
-    return await tx.internship.update({
+    const updatedInternship = await tx.internship.update({
       where: {
         id: internship.id,
       },
       data: internshipUpdate,
       include: internshipInclude,
     });
+
+    const decisionLabels = {
+      ACCEPTED: "accepté",
+      ACCEPTED_WITH_REFORMULATION: "accepté avec reformulation",
+      NEEDS_CORRECTION: "à corriger",
+      REJECTED: "rejeté",
+    };
+
+    const userIds = await getInternshipUserIds(internship.id);
+
+    if (userIds?.studentUserId) {
+      await createNotification(
+        userIds.studentUserId,
+        "Décision sur le sujet de stage",
+        `Votre sujet a été ${decisionLabels[decision]}.`,
+      );
+    }
+
+    return updatedInternship;
   });
 };
 

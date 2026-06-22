@@ -7,7 +7,6 @@ import {
   CalendarDays,
   MessageSquareWarning,
   Bell,
-  User,
   Settings,
   CircleHelp,
   LogOut,
@@ -22,11 +21,11 @@ function StudentSideBar() {
   };
 
   const menu = [
-  // {
-  //   title: "Tableau de bord",
-  //   path: "/student/dashboard",
-  //   icon: LayoutDashboard,
-  // },
+  {
+    title: "Tableau de bord",
+    path: "/student/dashboard",
+    icon: LayoutDashboard,
+  },
   {
     title: "Mon Stage",
     path: "/student/internship",
@@ -47,21 +46,16 @@ function StudentSideBar() {
     path: "/student/documents",
     icon: FileText,
   },
-  // {
-  //   title: "Réclamations",
-  //   path: "/student/complaints",
-  //   icon: MessageSquareWarning,
-  // },
+  {
+    title: "Réclamations",
+    path: "/student/complaints",
+    icon: MessageSquareWarning,
+  },
   {
     title: "Notifications",
     path: "/student/notifications",
     icon: Bell,
   },
-  // {
-  //   title: "Mon Profil",
-  //   path: "/student/profile",
-  //   icon: User,
-  // },
 ];
 
   const others = [

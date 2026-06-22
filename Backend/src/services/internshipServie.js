@@ -1,4 +1,5 @@
 import prisma from "../config/prisma.js";
+import { createNotification } from "./notificationService.js";
 
 const includeRelations = {
   student: {
@@ -422,6 +423,20 @@ export const updateAdministrativeStatus = async (
     },
     data,
     include: includeRelations,
+  }).then(async (updatedInternship) => {
+    if (administrativeStatus === "COMPLETE") {
+      const studentUserId = updatedInternship.student?.user?.id;
+
+      if (studentUserId) {
+        await createNotification(
+          studentUserId,
+          "Dossier administratif validé",
+          "Votre dossier administratif a été marqué comme complet.",
+        );
+      }
+    }
+
+    return updatedInternship;
   });
 };
 
@@ -440,6 +455,12 @@ export const validateInternshipDeclaration = async (internshipId) => {
     throw new Error("Cette déclaration a déjà été refusée");
   }
 
+  if (internship.administrativeStatus !== "COMPLETE") {
+    throw new Error(
+      "Le dossier administratif doit être complet avant validation",
+    );
+  }
+
   const pendingStatuses = ["DECLARED", "ADMIN_PENDING"];
 
   if (!pendingStatuses.includes(internship.status)) {
@@ -452,8 +473,21 @@ export const validateInternshipDeclaration = async (internshipId) => {
     },
     data: {
       status: "ADMIN_VALIDATED",
+      administrativeStatus: "COMPLETE",
     },
     include: includeRelations,
+  }).then(async (updatedInternship) => {
+    const studentUserId = updatedInternship.student?.user?.id;
+
+    if (studentUserId) {
+      await createNotification(
+        studentUserId,
+        "Déclaration de stage validée",
+        "Votre déclaration de stage a été validée par le gestionnaire.",
+      );
+    }
+
+    return updatedInternship;
   });
 };
 

@@ -1,4 +1,6 @@
 import prisma from "../config/prisma.js";
+import { createNotification } from "./notificationService.js";
+import { getInternshipUserIds } from "./internshipWorkflowService.js";
 
 const internshipInclude = {
   student: {
@@ -121,5 +123,19 @@ export const createFinalDecision = async ({
       },
       include: internshipInclude,
     });
+  }).then(async (updatedInternship) => {
+    const userIds = await getInternshipUserIds(updatedInternship.id);
+
+    if (userIds?.studentUserId) {
+      await createNotification(
+        userIds.studentUserId,
+        "Décision de soutenance",
+        decision === "DEFENSE_AUTHORIZED"
+          ? "Votre soutenance a été autorisée."
+          : "Votre soutenance n'a pas été autorisée.",
+      );
+    }
+
+    return updatedInternship;
   });
 };

@@ -1,4 +1,6 @@
 import prisma from "../config/prisma.js";
+import { createNotification } from "./notificationService.js";
+import { getInternshipUserIds } from "./internshipWorkflowService.js";
 
 const includeRelations = {
   student: {
@@ -105,5 +107,25 @@ export const assignAcademicSupervisor = async (internshipId, supervisorId) => {
       status: "SUPERVISOR_ASSIGNED",
     },
     include: includeRelations,
+  }).then(async (updatedInternship) => {
+    const userIds = await getInternshipUserIds(updatedInternship.id);
+
+    if (userIds?.studentUserId) {
+      await createNotification(
+        userIds.studentUserId,
+        "Encadrant assigné",
+        "Un encadrant académique a été assigné à votre stage.",
+      );
+    }
+
+    if (userIds?.supervisorUserId) {
+      await createNotification(
+        userIds.supervisorUserId,
+        "Nouveau stagiaire",
+        "Un nouveau stage vous a été assigné.",
+      );
+    }
+
+    return updatedInternship;
   });
 };

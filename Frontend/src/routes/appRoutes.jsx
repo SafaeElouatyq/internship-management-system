@@ -8,6 +8,10 @@ import StudentInternshipPage from "../pages/student/StudentInternshipPage.jsx";
 import StudentReportsPage from "../pages/student/StudentReportsPage.jsx";
 import StudentMeetingsPage from "../pages/student/StudentMeetingsPage.jsx";
 import StudentDocumentsPage from "../pages/student/StudentDocumentsPage.jsx";
+import StudentNotificationsPage from "../pages/student/StudentNotificationsPage.jsx";
+import StudentComplaintsPage from "../pages/student/StudentComplaintsPage.jsx";
+import StudentSettingsPage from "../pages/student/StudentSettingsPage.jsx";
+import StudentHelpPage from "../pages/student/StudentHelpPage.jsx";
 import SupervisorDashboard from "../pages/supervisor/SupervisorDashboard.jsx";
 import SupervisorStudentsPage from "../pages/supervisor/SupervisorStudentsPage.jsx";
 import SupervisorInternshipDetailPage from "../pages/supervisor/SupervisorInternshipDetailPage.jsx";
@@ -20,12 +24,16 @@ import InternshipManagementPage from "../pages/internshipManager/InternshipManag
 import InternshipDetailPage from "../pages/internshipManager/InternshipDetailPage.jsx";
 import InternshipManagerDocumentsPage from "../pages/internshipManager/InternshipManagerDocumentsPage.jsx";
 import InternshipManagerNotificationsPage from "../pages/internshipManager/InternshipManagerNotificationsPage.jsx";
+import InternshipManagerSettingsPage from "../pages/internshipManager/InternshipManagerSettingsPage.jsx";
+import InternshipManagerHelpPage from "../pages/internshipManager/InternshipManagerHelpPage.jsx";
 import DepartmentHeadDashboard from "../pages/departmentHead/DepartmentHeadDashboard.jsx";
 import DepartmentHeadInternshipsPage from "../pages/departmentHead/DepartmentHeadInternshipsPage.jsx";
 import DepartmentHeadSupervisorsPage from "../pages/departmentHead/DepartmentHeadSupervisorsPage.jsx";
 import DepartmentHeadNotificationsPage from "../pages/departmentHead/DepartmentHeadNotificationsPage.jsx";
 import DepartmentHeadSettingsPage from "../pages/departmentHead/DepartmentHeadSettingsPage.jsx";
 import DepartmentHeadFinalDecisionsPage from "../pages/departmentHead/DepartmentHeadFinalDecisionsPage.jsx";
+import AdminHelpPage from "../pages/admin/AdminHelpPage.jsx";
+import AdminSettingsPage from "../pages/admin/AdminSettingsPage.jsx";
 import AdminLayout from "../components/layout/AdminLayout.jsx";
 import StudentLayout from "../components/layout/StudentLayout.jsx";
 import InternshipManagerLayout from "../components/layout/InternshipManagerLayout.jsx";
@@ -65,6 +73,8 @@ function AppRoutes() {
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="users" element={<UsersPage />} />
+        <Route path="settings" element={<AdminSettingsPage />} />
+        <Route path="help" element={<AdminHelpPage />} />
       </Route>
 
       <Route
@@ -81,6 +91,10 @@ function AppRoutes() {
         <Route path="reports" element={<StudentReportsPage />} />
         <Route path="meetings" element={<StudentMeetingsPage />} />
         <Route path="documents" element={<StudentDocumentsPage />} />
+        <Route path="complaints" element={<StudentComplaintsPage />} />
+        <Route path="notifications" element={<StudentNotificationsPage />} />
+        <Route path="settings" element={<StudentSettingsPage />} />
+        <Route path="help" element={<StudentHelpPage />} />
       </Route>
 
       <Route
@@ -115,6 +129,8 @@ function AppRoutes() {
         <Route path="internships/:id" element={<InternshipDetailPage />} />
         <Route path="documents" element={<InternshipManagerDocumentsPage />} />
         <Route path="notifications" element={<InternshipManagerNotificationsPage />} />
+        <Route path="settings" element={<InternshipManagerSettingsPage />} />
+        <Route path="help" element={<InternshipManagerHelpPage />} />
       </Route>
 
       <Route
