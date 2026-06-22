@@ -11,10 +11,16 @@ function InternshipForm({
       onSubmit={onSubmit}
       className="bg-white rounded-2xl shadow-sm p-6 border border-slate-200 mb-8"
     >
+      <h2 className="text-xl font-bold text-slate-800 mb-5">
+        {selectedInternship
+          ? "Modifier la déclaration"
+          : "Nouvelle déclaration de stage"}
+      </h2>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
           <label className="block text-sm font-medium mb-2">
-            Titre du stage
+            Sujet du stage
           </label>
 
           <input
@@ -114,6 +120,20 @@ function InternshipForm({
           />
         </div>
 
+        <div>
+          <label className="block text-sm font-medium mb-2">
+            Encadrant professionnel
+          </label>
+
+          <input
+            type="text"
+            name="professionalSupervisor"
+            value={formData.professionalSupervisor}
+            onChange={onChange}
+            className="w-full border border-slate-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
         <div className="md:col-span-2">
           <label className="block text-sm font-medium mb-2">
             Description
@@ -128,6 +148,11 @@ function InternshipForm({
           />
         </div>
       </div>
+
+      <p className="text-sm text-slate-500 mt-4">
+        Les documents se téléversent séparément dans la section Documents après
+        la création de la déclaration.
+      </p>
 
       <div className="flex justify-end gap-4 mt-6">
         <button

@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
-import DocumentTable from "../../components/documents/DocumentTable";
-import DocumentUploadForm from "../../components/documents/DocumentUploadForm";
+import PfeDocumentDetailsModal from "../../components/pfeDocuments/PfeDocumentDetailsModal";
+import PfeDocumentTable from "../../components/pfeDocuments/PfeDocumentTable";
+import PfeDocumentUploadForm from "../../components/pfeDocuments/PfeDocumentUploadForm";
 import {
-  deleteDocument,
-  getDocuments,
-  uploadDocument,
-} from "../../services/documentService.jsx";
+  deletePfeDocument,
+  getMyPfeDocuments,
+  uploadPfeDocument,
+} from "../../services/pfeDocumentService.jsx";
 
 function StudentDocumentsPage() {
   const [documents, setDocuments] = useState([]);
-  const [name, setName] = useState("");
+  const [missingCategories, setMissingCategories] = useState([]);
+  const [category, setCategory] = useState("");
   const [file, setFile] = useState(null);
+  const [selectedDocument, setSelectedDocument] = useState(null);
   const [openForm, setOpenForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -23,8 +26,9 @@ function StudentDocumentsPage() {
 
   const loadDocuments = async () => {
     try {
-      const data = await getDocuments();
-      setDocuments(data);
+      const data = await getMyPfeDocuments();
+      setDocuments(data.documents);
+      setMissingCategories(data.missingCategories);
     } catch (error) {
       setError(error.response?.data?.message || "Erreur lors du chargement");
     } finally {
@@ -33,7 +37,7 @@ function StudentDocumentsPage() {
   };
 
   const OpenForm = () => {
-    setName("");
+    setCategory("");
     setFile(null);
     setOpenForm(true);
     setError("");
@@ -41,28 +45,28 @@ function StudentDocumentsPage() {
   };
 
   const CloseForm = () => {
-    setName("");
+    setCategory("");
     setFile(null);
     setOpenForm(false);
   };
 
-  const ChangeName = (e) => {
-    setName(e.target.value);
+  const ChangeCategory = (event) => {
+    setCategory(event.target.value);
   };
 
-  const ChangeFile = (e) => {
-    setFile(e.target.files[0] || null);
+  const ChangeFile = (event) => {
+    setFile(event.target.files[0] || null);
   };
 
-  const Submit = async (e) => {
-    e.preventDefault();
+  const Submit = async (event) => {
+    event.preventDefault();
     setSaving(true);
     setError("");
     setSuccess("");
 
     try {
-      await uploadDocument(name, file);
-      setSuccess("Document téléversé avec succès");
+      await uploadPfeDocument(category, file);
+      setSuccess("Document PFE téléversé avec succès");
       CloseForm();
       loadDocuments();
     } catch (error) {
@@ -78,7 +82,7 @@ function StudentDocumentsPage() {
     if (!confirmDelete) return;
 
     try {
-      await deleteDocument(document.id);
+      await deletePfeDocument(document.id);
       setSuccess("Document supprimé avec succès");
       loadDocuments();
     } catch (error) {
@@ -88,14 +92,15 @@ function StudentDocumentsPage() {
 
   return (
     <>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-800">
-            Documents
+            Rapport PFE
           </h1>
 
           <p className="text-slate-500 mt-2">
-            Téléversez les documents liés à votre stage.
+            Téléversez la version initiale, corrigée, finale et la présentation
+            de votre rapport PFE.
           </p>
         </div>
 
@@ -122,10 +127,10 @@ function StudentDocumentsPage() {
       )}
 
       {openForm && (
-        <DocumentUploadForm
-          name={name}
+        <PfeDocumentUploadForm
+          category={category}
           file={file}
-          onNameChange={ChangeName}
+          onCategoryChange={ChangeCategory}
           onFileChange={ChangeFile}
           onSubmit={Submit}
           onCancel={CloseForm}
@@ -138,7 +143,19 @@ function StudentDocumentsPage() {
           Chargement...
         </div>
       ) : (
-        <DocumentTable documents={documents} onDelete={Delete} />
+        <PfeDocumentTable
+          documents={documents}
+          missingCategories={missingCategories}
+          onView={setSelectedDocument}
+          onDelete={Delete}
+        />
+      )}
+
+      {selectedDocument && (
+        <PfeDocumentDetailsModal
+          document={selectedDocument}
+          onClose={() => setSelectedDocument(null)}
+        />
       )}
     </>
   );

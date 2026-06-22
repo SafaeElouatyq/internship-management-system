@@ -1,6 +1,13 @@
 import MeetingRow from "./MeetingRow";
 
-function MeetingTable({ meetings, onView, showStudent = false, title }) {
+function MeetingTable({
+  meetings,
+  onView,
+  onEdit,
+  onDelete,
+  showStudent = false,
+  title,
+}) {
   if (!meetings.length) {
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-12 text-center">
@@ -34,8 +41,8 @@ function MeetingTable({ meetings, onView, showStudent = false, title }) {
               <th className="text-left px-4 py-4">Date</th>
               <th className="text-left px-4 py-4">Type</th>
               <th className="text-left px-4 py-4">Statut</th>
-              {onView && (
-                <th className="text-center px-2 py-4 w-32">Action</th>
+              {(onView || onEdit || onDelete) && (
+                <th className="text-center px-2 py-4 w-40">Actions</th>
               )}
             </tr>
           </thead>
@@ -46,6 +53,8 @@ function MeetingTable({ meetings, onView, showStudent = false, title }) {
                 key={meeting.id}
                 meeting={meeting}
                 onView={onView}
+                onEdit={onEdit}
+                onDelete={onDelete}
                 showStudent={showStudent}
               />
             ))}

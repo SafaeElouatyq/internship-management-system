@@ -1,6 +1,6 @@
 import InternshipRow from "./InternshipRow";
 
-function InternshipTable({ internships, onView, onValidate, onReject }) {
+function InternshipTable({ internships, onView, onVerify, onValidate, onReject }) {
   if (!internships.length) {
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-12 text-center">
@@ -17,7 +17,7 @@ function InternshipTable({ internships, onView, onValidate, onReject }) {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[980px]">
+        <table className="w-full min-w-[1100px]">
           <thead className="bg-slate-100">
             <tr>
               <th className="text-left px-4 py-4">Étudiant</th>
@@ -30,8 +30,9 @@ function InternshipTable({ internships, onView, onValidate, onReject }) {
                 Date fin
               </th>
               <th className="text-left px-4 py-4">Statut</th>
+              <th className="text-left px-4 py-4">Dossier admin.</th>
               <th className="text-left px-4 py-4">Documents</th>
-              <th className="text-center px-2 py-4 w-44">Actions</th>
+              <th className="text-center px-2 py-4 w-52">Actions</th>
             </tr>
           </thead>
 
@@ -41,6 +42,7 @@ function InternshipTable({ internships, onView, onValidate, onReject }) {
                 key={internship.id}
                 internship={internship}
                 onView={onView}
+                onVerify={onVerify}
                 onValidate={onValidate}
                 onReject={onReject}
               />

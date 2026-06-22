@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
+import LicenceMeetingsCompliance from "../../components/meetings/LicenceMeetingsCompliance";
 import MeetingDetailsModal from "../../components/meetings/MeetingDetailsModal";
 import MeetingForm from "../../components/meetings/MeetingForm";
 import MeetingTable from "../../components/meetings/MeetingTable";
 import {
   createMeeting,
+  deleteMeeting,
   getSupervisorMeetings,
+  updateMeeting,
 } from "../../services/supervisorMeetingService.jsx";
+import { toDateTimeLocalValue } from "../../utils/meetingUtils.jsx";
 
 const initialForm = {
   internshipId: "",
@@ -21,7 +25,9 @@ const initialForm = {
 function SupervisorMeetingsPage() {
   const [meetings, setMeetings] = useState([]);
   const [internships, setInternships] = useState([]);
+  const [licenceCompliance, setLicenceCompliance] = useState([]);
   const [formData, setFormData] = useState(initialForm);
+  const [editingMeeting, setEditingMeeting] = useState(null);
   const [selectedMeeting, setSelectedMeeting] = useState(null);
   const [openForm, setOpenForm] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -38,6 +44,7 @@ function SupervisorMeetingsPage() {
       const data = await getSupervisorMeetings();
       setMeetings(data.meetings);
       setInternships(data.internships);
+      setLicenceCompliance(data.licenceCompliance || []);
     } catch (error) {
       setError(error.response?.data?.message || "Erreur lors du chargement");
     } finally {
@@ -45,35 +52,61 @@ function SupervisorMeetingsPage() {
     }
   };
 
-  const Change = (e) => {
+  const Change = (event) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [event.target.name]: event.target.value,
     });
   };
 
-  const OpenForm = () => {
+  const ResetForm = () => {
     setFormData(initialForm);
+    setEditingMeeting(null);
+    setOpenForm(false);
+  };
+
+  const OpenCreateForm = () => {
+    setFormData(initialForm);
+    setEditingMeeting(null);
     setOpenForm(true);
     setError("");
     setSuccess("");
   };
 
-  const CloseForm = () => {
-    setFormData(initialForm);
-    setOpenForm(false);
+  const OpenEditForm = (meeting) => {
+    setEditingMeeting(meeting);
+    setFormData({
+      internshipId: String(meeting.internshipId),
+      date: toDateTimeLocalValue(meeting.date),
+      type: meeting.type,
+      summary: meeting.summary || "",
+      discussedPoints: meeting.discussedPoints || "",
+      decisions: meeting.decisions || "",
+      assignedWork: meeting.assignedWork || "",
+      supervisorComment: meeting.supervisorComment || "",
+    });
+    setOpenForm(true);
+    setSelectedMeeting(null);
+    setError("");
+    setSuccess("");
   };
 
-  const Submit = async (e) => {
-    e.preventDefault();
+  const Submit = async (event) => {
+    event.preventDefault();
     setSaving(true);
     setError("");
     setSuccess("");
 
     try {
-      await createMeeting(formData);
-      setSuccess("Réunion planifiée avec succès");
-      CloseForm();
+      if (editingMeeting) {
+        await updateMeeting(editingMeeting.id, formData);
+        setSuccess("Réunion modifiée avec succès");
+      } else {
+        await createMeeting(formData);
+        setSuccess("Réunion planifiée avec succès");
+      }
+
+      ResetForm();
       loadMeetings();
     } catch (error) {
       setError(error.response?.data?.message || "Erreur lors de l'enregistrement");
@@ -82,23 +115,44 @@ function SupervisorMeetingsPage() {
     }
   };
 
+  const Delete = async (meeting) => {
+    const confirmDelete = window.confirm("Supprimer cette réunion ?");
+
+    if (!confirmDelete) return;
+
+    setSaving(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      await deleteMeeting(meeting.id);
+      setSuccess("Réunion supprimée avec succès");
+      setSelectedMeeting(null);
+      loadMeetings();
+    } catch (error) {
+      setError(error.response?.data?.message || "Erreur lors de la suppression");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-800">
             Mes réunions
           </h1>
 
           <p className="text-slate-500 mt-2">
-            Planifiez et suivez les réunions avec vos étudiants.
+            Planifiez, modifiez et suivez les réunions avec vos étudiants.
           </p>
         </div>
 
         {!openForm && (
           <button
-            onClick={OpenForm}
-            disabled={!internships.length}
+            onClick={OpenCreateForm}
+            disabled={!internships.length || saving}
             className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-medium disabled:opacity-50"
           >
             Planifier une réunion
@@ -118,14 +172,17 @@ function SupervisorMeetingsPage() {
         </div>
       )}
 
+      <LicenceMeetingsCompliance compliance={licenceCompliance} />
+
       {openForm && (
         <MeetingForm
           formData={formData}
           internships={internships}
           onChange={Change}
           onSubmit={Submit}
-          onCancel={CloseForm}
+          onCancel={ResetForm}
           saving={saving}
+          isEdit={Boolean(editingMeeting)}
         />
       )}
 
@@ -137,6 +194,8 @@ function SupervisorMeetingsPage() {
         <MeetingTable
           meetings={meetings}
           onView={setSelectedMeeting}
+          onEdit={OpenEditForm}
+          onDelete={Delete}
           showStudent
         />
       )}

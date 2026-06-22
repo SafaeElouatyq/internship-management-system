@@ -8,11 +8,14 @@ const getToken = () => ({
   },
 });
 
-export const getUsers = async (search = "") => {
-  const response = await axios.get(
-    `${API_URL}?search=${search}`,
-    getToken()
-  );
+export const getUsers = async (search = "", role = "") => {
+  const response = await axios.get(API_URL, {
+    ...getToken(),
+    params: {
+      search,
+      role,
+    },
+  });
 
   return response.data;
 };

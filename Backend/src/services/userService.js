@@ -1,30 +1,40 @@
 import prisma from "../config/prisma.js";
 import bcrypt from "bcryptjs";
 
-export const getAllUsers = async (search = "") => {
+export const getAllUsers = async (search = "", role = "") => {
+  const where = {};
+
+  if (search) {
+    where.OR = [
+      {
+        firstName: {
+          contains: search,
+          mode: "insensitive",
+        },
+      },
+      {
+        lastName: {
+          contains: search,
+          mode: "insensitive",
+        },
+      },
+      {
+        email: {
+          contains: search,
+          mode: "insensitive",
+        },
+      },
+    ];
+  }
+
+  if (role) {
+    where.role = {
+      name: role,
+    };
+  }
+
   return await prisma.user.findMany({
-    where: {
-      OR: [
-        {
-          firstName: {
-            contains: search,
-            mode: "insensitive",
-          },
-        },
-        {
-          lastName: {
-            contains: search,
-            mode: "insensitive",
-          },
-        },
-        {
-          email: {
-            contains: search,
-            mode: "insensitive",
-          },
-        },
-      ],
-    },
+    where,
 
     include: {
       role: true,
@@ -54,6 +64,31 @@ export const getAllUsers = async (search = "") => {
   });
 };
 
+const validateRoleFields = (role, fields) => {
+  const { studentCode, level, department, speciality } = fields;
+
+  if (role === "STUDENT") {
+    if (!studentCode || !level || !department) {
+      throw new Error(
+        "Code étudiant, niveau et département sont obligatoires pour un étudiant",
+      );
+    }
+  }
+
+  if (role === "SUPERVISOR") {
+    if (!department || !speciality) {
+      throw new Error(
+        "Département et spécialité sont obligatoires pour un encadrant",
+      );
+    }
+  }
+
+  if (role === "DEPARTMENT_HEAD") {
+    if (!department) {
+      throw new Error("Le département est obligatoire pour un chef de département");
+    }
+  }
+};
 
 export const createUser = async (userData) => {
   const {
@@ -67,6 +102,21 @@ export const createUser = async (userData) => {
     department,
     speciality,
   } = userData;
+
+  if (!firstName || !lastName || !email || !password || !role) {
+    throw new Error("Prénom, nom, email, mot de passe et rôle sont obligatoires");
+  }
+
+  if (password.length < 6) {
+    throw new Error("Le mot de passe doit contenir au moins 6 caractères");
+  }
+
+  validateRoleFields(role, {
+    studentCode,
+    level,
+    department,
+    speciality,
+  });
 
   const existingUser = await prisma.user.findUnique({
     where: { email },
@@ -110,6 +160,7 @@ export const createUser = async (userData) => {
         email,
         password: hashedPassword,
         roleId: roleData.id,
+        mustChangePassword: true,
       },
       include: {
         role: true,
@@ -167,7 +218,29 @@ export const createUser = async (userData) => {
         throw new Error("Rôle invalide");
     }
 
-    return user;
+    return await tx.user.findUnique({
+      where: {
+        id: user.id,
+      },
+      include: {
+        role: true,
+        student: {
+          include: {
+            department: true,
+          },
+        },
+        supervisor: {
+          include: {
+            department: true,
+          },
+        },
+        departmentHead: {
+          include: {
+            department: true,
+          },
+        },
+      },
+    });
   });
 };
 
@@ -236,6 +309,31 @@ export const updateUser = async (userId, userData) => {
     throw new Error("Utilisateur introuvable");
   }
 
+  if (!firstName || !lastName || !email) {
+    throw new Error("Prénom, nom et email sont obligatoires");
+  }
+
+  if (password && password.length < 6) {
+    throw new Error("Le mot de passe doit contenir au moins 6 caractères");
+  }
+
+  if (email !== user.email) {
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      throw new Error("Cet email est déjà utilisé");
+    }
+  }
+
+  validateRoleFields(user.role.name, {
+    studentCode,
+    level,
+    department,
+    speciality,
+  });
+
   const data = {
     firstName,
     lastName,
@@ -244,6 +342,7 @@ export const updateUser = async (userId, userData) => {
 
   if (password) {
     data.password = await bcrypt.hash(password, 10);
+    data.mustChangePassword = true;
   }
 
   let departmentData = null;
@@ -254,6 +353,10 @@ export const updateUser = async (userId, userData) => {
         name: department,
       },
     });
+
+    if (!departmentData) {
+      throw new Error("Département introuvable");
+    }
   }
 
   return await prisma.$transaction(async (tx) => {

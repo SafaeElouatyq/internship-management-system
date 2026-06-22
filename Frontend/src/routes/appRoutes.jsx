@@ -9,13 +9,17 @@ import StudentReportsPage from "../pages/student/StudentReportsPage.jsx";
 import StudentMeetingsPage from "../pages/student/StudentMeetingsPage.jsx";
 import StudentDocumentsPage from "../pages/student/StudentDocumentsPage.jsx";
 import SupervisorDashboard from "../pages/supervisor/SupervisorDashboard.jsx";
+import SupervisorStudentsPage from "../pages/supervisor/SupervisorStudentsPage.jsx";
+import SupervisorInternshipDetailPage from "../pages/supervisor/SupervisorInternshipDetailPage.jsx";
 import SupervisorReportsPage from "../pages/supervisor/SupervisorReportsPage.jsx";
 import SupervisorMeetingsPage from "../pages/supervisor/SupervisorMeetingsPage.jsx";
+import SupervisorPfeDocumentsPage from "../pages/supervisor/SupervisorPfeDocumentsPage.jsx";
 import SupervisorSettingsPage from "../pages/supervisor/SupervisorSettingsPage.jsx";
 import InternshipManagerDashboard from "../pages/internshipManager/InternshipManagerDashboard.jsx";
 import InternshipManagementPage from "../pages/internshipManager/InternshipManagementPage.jsx";
 import InternshipDetailPage from "../pages/internshipManager/InternshipDetailPage.jsx";
 import InternshipManagerDocumentsPage from "../pages/internshipManager/InternshipManagerDocumentsPage.jsx";
+import InternshipManagerNotificationsPage from "../pages/internshipManager/InternshipManagerNotificationsPage.jsx";
 import DepartmentHeadDashboard from "../pages/departmentHead/DepartmentHeadDashboard.jsx";
 import DepartmentHeadInternshipsPage from "../pages/departmentHead/DepartmentHeadInternshipsPage.jsx";
 import DepartmentHeadSupervisorsPage from "../pages/departmentHead/DepartmentHeadSupervisorsPage.jsx";
@@ -89,8 +93,11 @@ function AppRoutes() {
       >
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<SupervisorDashboard />} />
+        <Route path="students" element={<SupervisorStudentsPage />} />
+        <Route path="internships/:id" element={<SupervisorInternshipDetailPage />} />
         <Route path="reports" element={<SupervisorReportsPage />} />
         <Route path="meetings" element={<SupervisorMeetingsPage />} />
+        <Route path="pfe-documents" element={<SupervisorPfeDocumentsPage />} />
         <Route path="settings" element={<SupervisorSettingsPage />} />
       </Route>
 
@@ -107,6 +114,7 @@ function AppRoutes() {
         <Route path="internships" element={<InternshipManagementPage />} />
         <Route path="internships/:id" element={<InternshipDetailPage />} />
         <Route path="documents" element={<InternshipManagerDocumentsPage />} />
+        <Route path="notifications" element={<InternshipManagerNotificationsPage />} />
       </Route>
 
       <Route

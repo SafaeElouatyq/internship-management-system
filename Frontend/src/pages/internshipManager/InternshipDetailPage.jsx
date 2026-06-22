@@ -3,24 +3,16 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   getInternship,
   rejectInternship,
+  updateAdministrativeStatus,
   validateInternship,
 } from "../../services/internshipManagerService.jsx";
-
-const statusLabels = {
-  DECLARED: "Déclaré",
-  ADMIN_PENDING: "En attente",
-  ADMIN_VALIDATED: "Stage validé",
-  SUPERVISOR_ASSIGNED: "Encadrant affecté",
-  SUBJECT_PENDING: "Sujet en attente",
-  SUBJECT_VALIDATED: "Sujet validé",
-  IN_PROGRESS: "En cours",
-  REPORT_LATE: "Rapport en retard",
-  REPORT_WRITING: "Rédaction du rapport",
-  READY_FOR_DEFENSE: "Prêt pour soutenance",
-  DEFENSE_AUTHORIZED: "Soutenance autorisée",
-  DEFENSE_NOT_AUTHORIZED: "Soutenance non autorisée",
-  CLOSED: "Clôturé",
-};
+import { getDocumentUrl } from "../../services/documentService.jsx";
+import {
+  administrativeStatusLabels,
+  canManageInternship,
+  canVerifyAdministrativeFile,
+  statusLabels,
+} from "../../utils/internshipUtils.jsx";
 
 const levelLabels = {
   LICENCE: "Licence",
@@ -28,14 +20,19 @@ const levelLabels = {
   ENGINEER: "Ingénieur",
 };
 
-const canManageInternship = (internship) =>
-  ["DECLARED", "ADMIN_PENDING"].includes(internship.status) &&
-  internship.administrativeStatus !== "REJECTED";
+const administrativeStatusOptions = [
+  { value: "COMPLETE", label: "Complet" },
+  { value: "INCOMPLETE", label: "Incomplet" },
+  { value: "PENDING_DOCUMENTS", label: "Documents en attente" },
+  { value: "REJECTED", label: "Rejeté" },
+];
 
 function InternshipDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [internship, setInternship] = useState(null);
+  const [selectedAdministrativeStatus, setSelectedAdministrativeStatus] =
+    useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -46,7 +43,10 @@ function InternshipDetailPage() {
 
     getInternship(id)
       .then((data) => {
-        if (active) setInternship(data);
+        if (active) {
+          setInternship(data);
+          setSelectedAdministrativeStatus(data.administrativeStatus || "");
+        }
       })
       .catch((error) => {
         if (active) {
@@ -94,9 +94,37 @@ function InternshipDetailPage() {
     try {
       const response = await rejectInternship(id);
       setInternship(response.internship);
+      setSelectedAdministrativeStatus(response.internship.administrativeStatus || "");
       setSuccess("Stage refusé avec succès");
     } catch (error) {
       setError(error.response?.data?.message || "Erreur lors du refus");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const SubmitAdministrativeStatus = async (event) => {
+    event.preventDefault();
+
+    if (!selectedAdministrativeStatus) return;
+
+    setSaving(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const response = await updateAdministrativeStatus(
+        id,
+        selectedAdministrativeStatus,
+      );
+      setInternship(response.internship);
+      setSelectedAdministrativeStatus(response.internship.administrativeStatus || "");
+      setSuccess("Dossier administratif mis à jour avec succès");
+    } catch (error) {
+      setError(
+        error.response?.data?.message ||
+          "Erreur lors de la vérification administrative",
+      );
     } finally {
       setSaving(false);
     }
@@ -122,6 +150,7 @@ function InternshipDetailPage() {
   const company = internship.company;
   const documents = internship.documents || [];
   const canManage = canManageInternship(internship);
+  const canVerify = canVerifyAdministrativeFile(internship);
 
   return (
     <>
@@ -279,7 +308,9 @@ function InternshipDetailPage() {
                   </div>
 
                   <a
-                    href={document.path}
+                    href={getDocumentUrl(document.path)}
+                    target="_blank"
+                    rel="noreferrer"
                     className="text-blue-600 hover:text-blue-700 font-medium"
                   >
                     Ouvrir
@@ -318,7 +349,64 @@ function InternshipDetailPage() {
                 {statusLabels[internship.status] || internship.status || "-"}
               </p>
             </div>
+
+            <div>
+              <p className="text-sm text-slate-500">Dossier administratif</p>
+              <p className="font-medium">
+                {administrativeStatusLabels[internship.administrativeStatus] ||
+                  internship.administrativeStatus ||
+                  "-"}
+              </p>
+            </div>
           </div>
+        </section>
+
+        <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 xl:col-span-2">
+          <h2 className="text-xl font-bold text-slate-800 mb-5">
+            Vérification administrative
+          </h2>
+
+          <form onSubmit={SubmitAdministrativeStatus} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium mb-2 text-slate-700">
+                Statut administratif
+              </label>
+
+              <select
+                value={selectedAdministrativeStatus}
+                onChange={(event) =>
+                  setSelectedAdministrativeStatus(event.target.value)
+                }
+                disabled={!canVerify || saving}
+                className="w-full max-w-md border border-slate-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100"
+                required
+              >
+                <option value="">Sélectionner un statut</option>
+
+                {administrativeStatusOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+
+              {!canVerify && (
+                <p className="text-sm text-slate-500 mt-2">
+                  Ce dossier ne peut plus être modifié.
+                </p>
+              )}
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                type="submit"
+                disabled={saving || !canVerify || !selectedAdministrativeStatus}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-medium disabled:opacity-60"
+              >
+                {saving ? "Enregistrement..." : "Enregistrer le statut"}
+              </button>
+            </div>
+          </form>
         </section>
       </div>
 

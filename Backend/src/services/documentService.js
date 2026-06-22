@@ -83,6 +83,7 @@ export const uploadDocument = async (userId, { name }, file) => {
       name: name.trim(),
       path: `/uploads/${file.filename}`,
       type: getFileType(file.mimetype),
+      validationStatus: "PENDING",
       internship: {
         connect: {
           id: internship.id,

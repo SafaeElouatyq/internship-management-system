@@ -1,15 +1,22 @@
-import { useState } from "react";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { X, Eye, EyeOff } from "lucide-react";
 import Alert from "../common/alert.jsx";
 import { createUser, updateUser } from "../../services/userService";
 import { getDepartments } from "../../services/departementService.jsx";
 import { getRoles } from "../../services/roleService.jsx";
 
+const roleLabels = {
+  ADMIN: "Administrateur",
+  STUDENT: "Étudiant",
+  SUPERVISOR: "Encadrant",
+  INTERNSHIP_MANAGER: "Responsable des stages",
+  DEPARTMENT_HEAD: "Chef de département",
+};
+
 function UserForm({ onClose, onSuccess, user }) {
   const [alert, setAlert] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
-
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -40,10 +47,10 @@ function UserForm({ onClose, onSuccess, user }) {
         user.supervisor?.department?.name ||
         user.departmentHead?.department?.name ||
         "",
-
       speciality: user.supervisor?.speciality || "",
     });
   }, [user]);
+
   useEffect(() => {
     loadDepartments();
     loadRoles();
@@ -56,8 +63,56 @@ function UserForm({ onClose, onSuccess, user }) {
     });
   };
 
+  const validateForm = () => {
+    if (!formData.firstName || !formData.lastName || !formData.email) {
+      return "Prénom, nom et email sont obligatoires";
+    }
+
+    if (!user && !formData.password) {
+      return "Le mot de passe est obligatoire";
+    }
+
+    if (formData.password && formData.password.length < 6) {
+      return "Le mot de passe doit contenir au moins 6 caractères";
+    }
+
+    if (!user && !formData.role) {
+      return "Le rôle est obligatoire";
+    }
+
+    if (formData.role === "STUDENT") {
+      if (!formData.studentCode || !formData.level || !formData.department) {
+        return "Code étudiant, niveau et département sont obligatoires";
+      }
+    }
+
+    if (formData.role === "SUPERVISOR") {
+      if (!formData.department || !formData.speciality) {
+        return "Département et spécialité sont obligatoires";
+      }
+    }
+
+    if (formData.role === "DEPARTMENT_HEAD" && !formData.department) {
+      return "Le département est obligatoire";
+    }
+
+    return null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const validationError = validateForm();
+
+    if (validationError) {
+      setAlert({
+        type: "error",
+        message: validationError,
+      });
+      return;
+    }
+
+    setSaving(true);
 
     try {
       if (user) {
@@ -76,29 +131,18 @@ function UserForm({ onClose, onSuccess, user }) {
         }
 
         await updateUser(user.id, data);
-
-        setAlert({
-          type: "success",
-          message: "Utilisateur modifié avec succès",
-        });
       } else {
         await createUser(formData);
-
-        setAlert({
-          type: "success",
-          message: "Utilisateur créé avec succès",
-        });
       }
 
       onSuccess();
     } catch (error) {
-      console.log(error);
-
-      console.log(error.response);
-
-      console.log(error.response?.data);
-
-      alert(error.response?.data?.message || error.message);
+      setAlert({
+        type: "error",
+        message: error.response?.data?.message || "Erreur lors de l'enregistrement",
+      });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -107,7 +151,10 @@ function UserForm({ onClose, onSuccess, user }) {
       const data = await getDepartments();
       setDepartments(data);
     } catch (error) {
-      console.log(error);
+      setAlert({
+        type: "error",
+        message: error.response?.data?.message || "Erreur lors du chargement",
+      });
     }
   };
 
@@ -116,12 +163,23 @@ function UserForm({ onClose, onSuccess, user }) {
       const data = await getRoles();
       setRoles(data);
     } catch (error) {
-      console.log(error);
+      setAlert({
+        type: "error",
+        message: error.response?.data?.message || "Erreur lors du chargement",
+      });
     }
   };
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+      {alert && (
+        <Alert
+          message={alert.message}
+          type={alert.type}
+          onClose={() => setAlert(null)}
+        />
+      )}
+
       <div className="bg-white rounded-3xl shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-8">
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -132,7 +190,7 @@ function UserForm({ onClose, onSuccess, user }) {
             <p className="text-slate-500 mt-1">
               {user
                 ? "Modifiez les informations."
-                : "Remplissez les informations du nouvel utilisateur."}{" "}
+                : "Remplissez les informations du nouvel utilisateur."}
             </p>
           </div>
 
@@ -190,7 +248,7 @@ function UserForm({ onClose, onSuccess, user }) {
 
           <div>
             <label className="block text-sm font-medium mb-2">
-              Mot de passe
+              {user ? "Réinitialiser le mot de passe" : "Mot de passe"}
             </label>
 
             <div className="relative">
@@ -199,6 +257,9 @@ function UserForm({ onClose, onSuccess, user }) {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
+                placeholder={
+                  user ? "Laisser vide pour ne pas changer" : "Mot de passe"
+                }
                 className="w-full border border-slate-300 rounded-xl px-4 py-3 pr-12 outline-none focus:ring-2 focus:ring-blue-500"
                 required={!user}
               />
@@ -211,6 +272,13 @@ function UserForm({ onClose, onSuccess, user }) {
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
+
+            {user && (
+              <p className="text-sm text-slate-500 mt-2">
+                Si vous définissez un mot de passe, l'utilisateur devra le
+                changer à la prochaine connexion.
+              </p>
+            )}
           </div>
 
           <div>
@@ -220,18 +288,24 @@ function UserForm({ onClose, onSuccess, user }) {
               name="role"
               value={formData.role}
               onChange={handleChange}
-              className="w-full border border-slate-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-slate-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100"
               required
-              
+              disabled={Boolean(user)}
             >
               <option value="">Sélectionner un rôle</option>
 
               {roles.map((role) => (
                 <option key={role.id} value={role.name}>
-                  {role.name}
+                  {roleLabels[role.name] || role.name}
                 </option>
               ))}
             </select>
+
+            {user && (
+              <p className="text-sm text-slate-500 mt-2">
+                Le rôle ne peut pas être modifié après la création.
+              </p>
+            )}
           </div>
 
           {formData.role === "STUDENT" && (
@@ -324,9 +398,10 @@ function UserForm({ onClose, onSuccess, user }) {
 
             <button
               type="submit"
-              className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium"
+              disabled={saving}
+              className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium disabled:opacity-50"
             >
-              {user ? "Modifier" : "Créer"}
+              {saving ? "Enregistrement..." : user ? "Modifier" : "Créer"}
             </button>
           </div>
         </form>

@@ -47,6 +47,33 @@ enum MeetingType {
   REMOTE
 }
 
+enum SubjectDecision {
+  ACCEPTED
+  ACCEPTED_WITH_REFORMULATION
+  NEEDS_CORRECTION
+  REJECTED
+}
+
+enum WeeklyReportStatus {
+  SUBMITTED_ON_TIME
+  SUBMITTED_LATE
+  MISSING
+}
+
+enum PfeDocumentCategory {
+  INITIAL
+  CORRECTED
+  FINAL
+  PRESENTATION
+}
+
+enum PfeDocumentValidationStatus {
+  PENDING
+  VALIDATED
+  NEEDS_CORRECTION
+  REJECTED
+}
+
 enum ComplaintStatus {
   PENDING
   IN_PROGRESS
@@ -187,7 +214,8 @@ model Internship {
   documents     Document[]
   complaints    Complaint[]
 
-  finalDecision FinalDecision?
+  finalDecision      FinalDecision?
+  subjectValidations SubjectValidation[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -202,10 +230,33 @@ model WeeklyReport {
 
   progress Int
 
+  weekStartDate DateTime @db.Date
+  status        WeeklyReportStatus
+
+  supervisorComment String?
+
   submittedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   internshipId Int
   internship   Internship @relation(fields: [internshipId], references: [id])
+
+  attachments ReportAttachment[]
+
+  @@unique([internshipId, weekStartDate])
+}
+
+model ReportAttachment {
+  id Int @id @default(autoincrement())
+
+  name String
+  path String
+  type String
+
+  weeklyReportId Int
+  weeklyReport   WeeklyReport @relation(fields: [weeklyReportId], references: [id], onDelete: Cascade)
+
+  uploadedAt DateTime @default(now())
 }
 
 model Meeting {
@@ -232,10 +283,17 @@ model Document {
   path String
   type String
 
+  category         PfeDocumentCategory?
+  validationStatus PfeDocumentValidationStatus @default(PENDING)
+  supervisorComment String?
+
   internshipId Int
   internship   Internship @relation(fields: [internshipId], references: [id])
 
   uploadedAt DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([internshipId, category])
 }
 
 model Complaint {
@@ -259,6 +317,19 @@ model FinalDecision {
   comment  String?
 
   internshipId Int        @unique
+  internship   Internship @relation(fields: [internshipId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model SubjectValidation {
+  id Int @id @default(autoincrement())
+
+  decision          SubjectDecision
+  comment           String?
+  reformulatedTitle String?
+
+  internshipId Int
   internship   Internship @relation(fields: [internshipId], references: [id])
 
   createdAt DateTime @default(now())

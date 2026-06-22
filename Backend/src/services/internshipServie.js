@@ -80,6 +80,22 @@ const getStudentInternship = async (internshipId, userId) => {
   return internship;
 };
 
+const canModifyDeclaration = (internship) => {
+  if (internship.administrativeStatus === "REJECTED") {
+    return false;
+  }
+
+  return ["DECLARED", "ADMIN_PENDING", "SUBJECT_PENDING"].includes(internship.status);
+};
+
+const assertCanModifyDeclaration = (internship) => {
+  if (!canModifyDeclaration(internship)) {
+    throw new Error(
+      "Cette déclaration ne peut plus être modifiée ou supprimée après validation",
+    );
+  }
+};
+
 export const getMyInternships = async (userId) => {
   const student = await getStudentByUserId(userId);
 
@@ -94,7 +110,12 @@ export const getMyInternships = async (userId) => {
   });
 };
 
-export const getAllInternships = async ({ student = "", company = "", status = "" }) => {
+export const getAllInternships = async ({
+  student = "",
+  company = "",
+  status = "",
+  administrativeStatus = "",
+}) => {
   const where = {};
 
   if (student) {
@@ -129,6 +150,10 @@ export const getAllInternships = async ({ student = "", company = "", status = "
 
   if (status) {
     where.status = status;
+  }
+
+  if (administrativeStatus) {
+    where.administrativeStatus = administrativeStatus;
   }
 
   return await prisma.internship.findMany({
@@ -180,8 +205,10 @@ export const addInternship = async (internshipData, userId) => {
     companyPhone,
   } = internshipData;
 
-  if (!title || !startDate || !endDate) {
-    throw new Error("Le sujet, la date de début et la date de fin sont obligatoires");
+  if (!title || !startDate || !endDate || !companyName) {
+    throw new Error(
+      "Le sujet, l'entreprise, la date de début et la date de fin sont obligatoires",
+    );
   }
 
   if (new Date(startDate) > new Date(endDate)) {
@@ -229,6 +256,9 @@ export const addInternship = async (internshipData, userId) => {
 
 export const updateInternship = async (internshipId, internshipData, userId) => {
   const internship = await getStudentInternship(internshipId, userId);
+
+  assertCanModifyDeclaration(internship);
+
   const {
     title,
     description,
@@ -241,6 +271,10 @@ export const updateInternship = async (internshipId, internshipData, userId) => 
     companyEmail,
     companyPhone,
   } = internshipData;
+
+  if (title !== undefined && !title) {
+    throw new Error("Le sujet du stage est obligatoire");
+  }
 
   const data = {};
 
@@ -294,6 +328,8 @@ export const updateInternship = async (internshipId, internshipData, userId) => 
 
 export const deleteInternship = async (internshipId, userId) => {
   const internship = await getStudentInternship(internshipId, userId);
+
+  assertCanModifyDeclaration(internship);
 
   await prisma.internship.delete({
     where: {
@@ -354,17 +390,37 @@ export const updateAdministrativeStatus = async (
     throw new Error("Déclaration de stage introuvable");
   }
 
-  const status =
-    administrativeStatus === "COMPLETE" ? "ADMIN_VALIDATED" : "ADMIN_PENDING";
+  if (internship.administrativeStatus === "REJECTED") {
+    throw new Error("Cette déclaration a déjà été refusée");
+  }
+
+  const pendingStatuses = ["DECLARED", "ADMIN_PENDING"];
+
+  if (!pendingStatuses.includes(internship.status)) {
+    throw new Error("Le dossier administratif ne peut plus être modifié");
+  }
+
+  let data;
+
+  if (administrativeStatus === "REJECTED") {
+    data = { administrativeStatus: "REJECTED" };
+  } else if (administrativeStatus === "COMPLETE") {
+    data = {
+      administrativeStatus: "COMPLETE",
+      status: "ADMIN_VALIDATED",
+    };
+  } else {
+    data = {
+      administrativeStatus,
+      status: "ADMIN_PENDING",
+    };
+  }
 
   return await prisma.internship.update({
     where: {
       id: Number(internshipId),
     },
-    data: {
-      administrativeStatus,
-      status,
-    },
+    data,
     include: includeRelations,
   });
 };

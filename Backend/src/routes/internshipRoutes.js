@@ -5,6 +5,7 @@ import {
   createInternship,
   editInternship,
   removeInternship,
+  verifyAdministrativeFile,
   validateInternship,
   rejectInternship,
   assignInternshipSupervisor,
@@ -15,6 +16,12 @@ import { roleMiddleware } from "../middlewares/roleMiddleware.js";
 const router = Router();
 
 router.get("/", authMiddleware, roleMiddleware("STUDENT", "INTERNSHIP_MANAGER"), getInternships);
+router.patch(
+  "/:id/administrative",
+  authMiddleware,
+  roleMiddleware("INTERNSHIP_MANAGER"),
+  verifyAdministrativeFile,
+);
 router.patch(
   "/:id/validate",
   authMiddleware,

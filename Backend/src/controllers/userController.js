@@ -8,8 +8,9 @@ import {
 export const getUsers = async (req, res) => {
   try {
     const search = req.query.search || "";
+    const role = req.query.role || "";
 
-    const users = await getAllUsers(search);
+    const users = await getAllUsers(search, role);
 
     res.status(200).json(users);
   } catch (error) {

@@ -43,7 +43,7 @@ function StudentSideBar() {
     icon: CalendarDays,
   },
   {
-    title: "Documents",
+    title: "Rapport PFE",
     path: "/student/documents",
     icon: FileText,
   },

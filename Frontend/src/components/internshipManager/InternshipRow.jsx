@@ -1,29 +1,22 @@
-import { Check, Eye, X } from "lucide-react";
+import { Check, ClipboardCheck, Eye, X } from "lucide-react";
+import {
+  administrativeStatusLabels,
+  canManageInternship,
+  canVerifyAdministrativeFile,
+  statusLabels,
+} from "../../utils/internshipUtils.jsx";
 
-const statusLabels = {
-  DECLARED: "Déclaré",
-  ADMIN_PENDING: "En attente",
-  ADMIN_VALIDATED: "Stage validé",
-  SUPERVISOR_ASSIGNED: "Encadrant affecté",
-  SUBJECT_PENDING: "Sujet en attente",
-  SUBJECT_VALIDATED: "Sujet validé",
-  IN_PROGRESS: "En cours",
-  REPORT_LATE: "Rapport en retard",
-  REPORT_WRITING: "Rédaction du rapport",
-  READY_FOR_DEFENSE: "Prêt pour soutenance",
-  DEFENSE_AUTHORIZED: "Soutenance autorisée",
-  DEFENSE_NOT_AUTHORIZED: "Soutenance non autorisée",
-  CLOSED: "Clôturé",
-};
-
-const canManageInternship = (internship) =>
-  ["DECLARED", "ADMIN_PENDING"].includes(internship.status) &&
-  internship.administrativeStatus !== "REJECTED";
-
-function InternshipRow({ internship, onView, onValidate, onReject }) {
+function InternshipRow({
+  internship,
+  onView,
+  onVerify,
+  onValidate,
+  onReject,
+}) {
   const student = internship.student?.user;
   const documentCount = internship.documents?.length || 0;
   const canManage = canManageInternship(internship);
+  const canVerify = canVerifyAdministrativeFile(internship);
 
   return (
     <tr className="border-t border-slate-200 hover:bg-slate-50">
@@ -59,6 +52,14 @@ function InternshipRow({ internship, onView, onValidate, onReject }) {
       </td>
 
       <td className="px-4 py-4">
+        <span className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-sm font-medium text-amber-700">
+          {administrativeStatusLabels[internship.administrativeStatus] ||
+            internship.administrativeStatus ||
+            "-"}
+        </span>
+      </td>
+
+      <td className="px-4 py-4">
         <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
           {documentCount} document{documentCount > 1 ? "s" : ""}
         </span>
@@ -74,6 +75,17 @@ function InternshipRow({ internship, onView, onValidate, onReject }) {
             aria-label="Voir dossier"
           >
             <Eye size={18} />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onVerify(internship)}
+            disabled={!canVerify}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-blue-600 hover:bg-blue-50 hover:text-blue-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
+            title="Vérifier le dossier administratif"
+            aria-label="Vérifier le dossier administratif"
+          >
+            <ClipboardCheck size={18} />
           </button>
 
           <button

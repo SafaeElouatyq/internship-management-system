@@ -13,6 +13,11 @@ export const getInternships = async () => {
   return response.data;
 };
 
+export const getInternship = async (internshipId) => {
+  const response = await axios.get(`${API_URL}/${internshipId}`, getToken());
+  return response.data;
+};
+
 export const createInternship = async (internshipData) => {
   const response = await axios.post(API_URL, internshipData, getToken());
   return response.data;

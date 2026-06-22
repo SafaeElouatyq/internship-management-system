@@ -20,6 +20,7 @@ export const getInternships = async (req, res) => {
             student: req.query.student || "",
             company: req.query.company || "",
             status: req.query.status || "",
+            administrativeStatus: req.query.administrativeStatus || "",
           })
         : await getMyInternships(req.user.id);
 

@@ -1,6 +1,9 @@
 import { Router } from "express";
 import {
   scheduleMeeting,
+  editMeeting,
+  removeMeeting,
+  getMeeting,
   getMeetingsForStudent,
   getMeetingsForSupervisor,
 } from "../controllers/meetingController.js";
@@ -21,6 +24,24 @@ router.get(
   authMiddleware,
   roleMiddleware("SUPERVISOR"),
   getMeetingsForSupervisor,
+);
+router.get(
+  "/:id",
+  authMiddleware,
+  roleMiddleware("SUPERVISOR"),
+  getMeeting,
+);
+router.put(
+  "/:id",
+  authMiddleware,
+  roleMiddleware("SUPERVISOR"),
+  editMeeting,
+);
+router.delete(
+  "/:id",
+  authMiddleware,
+  roleMiddleware("SUPERVISOR"),
+  removeMeeting,
 );
 
 export default router;

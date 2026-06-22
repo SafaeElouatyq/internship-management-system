@@ -1,6 +1,5 @@
-import { useEffect } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
-import { redirectByRole } from "../utils/redirectByRole.jsx";
+import { Navigate } from "react-router-dom";
+import { getDashboardPath } from "../utils/redirectByRole.jsx";
 
 const getUser = () => {
   try {
@@ -16,26 +15,8 @@ function ProtectedRoute({
   publicOnly = false,
   allowChangePassword = false,
 }) {
-  const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const user = getUser();
-
-  useEffect(() => {
-    if (!token || !user) return;
-
-    if (publicOnly && user.mustChangePassword !== true) {
-      redirectByRole(user.role, navigate);
-    }
-
-    if (
-      !publicOnly &&
-      roles.length > 0 &&
-      !roles.includes(user.role) &&
-      user.mustChangePassword !== true
-    ) {
-      redirectByRole(user.role, navigate);
-    }
-  }, [token, user, publicOnly, roles, navigate]);
 
   if (publicOnly) {
     if (!token || !user) {
@@ -46,7 +27,7 @@ function ProtectedRoute({
       return <Navigate to="/change-password" replace />;
     }
 
-    return null;
+    return <Navigate to={getDashboardPath(user.role)} replace />;
   }
 
   if (!token || !user) {
@@ -58,7 +39,7 @@ function ProtectedRoute({
   }
 
   if (roles.length > 0 && !roles.includes(user.role)) {
-    return null;
+    return <Navigate to={getDashboardPath(user.role)} replace />;
   }
 
   return children;

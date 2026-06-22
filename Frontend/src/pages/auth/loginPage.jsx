@@ -27,6 +27,12 @@ function LoginPage() {
     setLoading(true);
     setError("");
 
+    if (!formData.email || !formData.password) {
+      setError("Email et mot de passe requis");
+      setLoading(false);
+      return;
+    }
+
     try {
       const data = await login(formData);
       localStorage.setItem("token", data.token);
