@@ -3,6 +3,7 @@ import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import departmentRoutes from "./routes/departmentRoutes.js";
 import roleRoutes from "./routes/roleRoutes.js";
+import internshipRoutes from "./routes/internshipRoutes.js";
 import cors from "cors";
 
 
@@ -15,6 +16,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/departments", departmentRoutes);
 app.use("/api/roles", roleRoutes);
+app.use("/api/internships", internshipRoutes);
+
 
 
 export default app;

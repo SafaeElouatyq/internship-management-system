@@ -176,6 +176,7 @@ model Internship {
   student   Student @relation(fields: [studentId], references: [id])
 
   companyId Int
+  companyName String?
   company   Company @relation(fields: [companyId], references: [id])
 
   supervisorId Int?
