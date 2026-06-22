@@ -11,16 +11,13 @@ export const login = async (email, password) => {
   });
 
   if (!user) {
-    throw new Error("Invalid credentials");
+    throw new Error("Identifiants incorrects");
   }
 
-  const isPasswordValid = await bcrypt.compare(
-    password,
-    user.password
-  );
+  const isPasswordValid = await bcrypt.compare(password, user.password);
 
   if (!isPasswordValid) {
-    throw new Error("Invalid credentials");
+    throw new Error("Identifiants incorrects");
   }
 
   const token = jwt.sign(
@@ -31,7 +28,7 @@ export const login = async (email, password) => {
     process.env.JWT_SECRET,
     {
       expiresIn: "1d",
-    }
+    },
   );
 
   return {
@@ -42,6 +39,7 @@ export const login = async (email, password) => {
       lastName: user.lastName,
       email: user.email,
       role: user.role.name,
+      mustChangePassword: user.mustChangePassword,
     },
   };
 };

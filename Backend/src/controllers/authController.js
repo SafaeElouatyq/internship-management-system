@@ -1,4 +1,6 @@
 import * as authService from "../services/authService.js";
+import prisma from "../config/prisma.js";
+import bcrypt from "bcryptjs";
 
 export const login = async (req,res)=>
 {
@@ -18,3 +20,41 @@ export const login = async (req,res)=>
   }
 
 }
+
+export const changePassword = async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+
+    if (!newPassword) {
+      return res.status(400).json({
+        message: "Mot de passe requis",
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        message: "Le mot de passe doit contenir au moins 6 caractères",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await prisma.user.update({
+      where: {
+        id: Number(req.user.id),
+      },
+      data: {
+        password: hashedPassword,
+        mustChangePassword: false,
+      },
+    });
+
+    res.status(200).json({
+      message: "Mot de passe changé avec succès",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
