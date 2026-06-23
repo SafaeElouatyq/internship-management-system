@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import FirstMeetingForm from "../../components/supervisor/FirstMeetingForm";
 import SubjectValidationForm from "../../components/supervisor/SubjectValidationForm";
 import SubjectValidationHistory from "../../components/supervisor/SubjectValidationHistory";
-import { getDocumentUrl } from "../../services/documentService.jsx";
+import InternshipDocumentsPanel from "../../components/internshipDocuments/InternshipDocumentsPanel";
 import { createMeeting } from "../../services/supervisorMeetingService.jsx";
 import {
   getAssignedInternship,
@@ -141,7 +141,6 @@ function SupervisorInternshipDetailPage() {
 
   const student = internship.student?.user;
   const company = internship.company;
-  const documents = internship.documents || [];
   const meetings = internship.meetings || [];
   const validations = internship.subjectValidations || [];
   const showFirstMeetingForm = canScheduleFirstMeeting(internship);
@@ -283,42 +282,13 @@ function SupervisorInternshipDetailPage() {
           </div>
         </section>
 
-        <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 xl:col-span-2">
-          <h2 className="text-xl font-bold text-slate-800 mb-5">
-            Documents
-          </h2>
-
-          {documents.length ? (
-            <div className="space-y-3">
-              {documents.map((document) => (
-                <div
-                  key={document.id}
-                  className="flex items-center justify-between border border-slate-200 rounded-xl px-4 py-3"
-                >
-                  <div>
-                    <p className="font-medium text-slate-800">
-                      {document.name}
-                    </p>
-                    <p className="text-sm text-slate-500">
-                      {document.type || "Document"}
-                    </p>
-                  </div>
-
-                  <a
-                    href={getDocumentUrl(document.path)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-blue-600 hover:text-blue-700 font-medium"
-                  >
-                    Ouvrir
-                  </a>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-slate-500">Aucun document disponible.</p>
-          )}
-        </section>
+        <div className="xl:col-span-2">
+          <InternshipDocumentsPanel
+            internshipId={internship.id}
+            title="Documents de stage"
+            description="Convention, attestation et autres documents administratifs."
+          />
+        </div>
       </div>
 
       {showFirstMeetingForm && (

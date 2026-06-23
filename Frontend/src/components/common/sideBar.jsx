@@ -30,11 +30,7 @@ function Sidebar() {
       path: "/admin/users",
       icon: Users,
     },
-    {
-      title: "Étudiants",
-      path: "/admin/users?role=STUDENT",
-      icon: GraduationCap,
-    },
+    
    
   ];
 

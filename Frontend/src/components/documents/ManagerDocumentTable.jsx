@@ -21,7 +21,7 @@ function ManagerDocumentTable({ documents }) {
           <thead className="bg-slate-100">
             <tr>
               <th className="text-left px-4 py-4">Étudiant</th>
-              <th className="text-left px-4 py-4">Document</th>
+              <th className="text-left px-4 py-4">Type / Fichier</th>
               <th className="text-left px-4 py-4">Date</th>
               <th className="text-center px-2 py-4 w-44">Actions</th>
             </tr>

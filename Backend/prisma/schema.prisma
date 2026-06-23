@@ -81,6 +81,12 @@ enum ComplaintStatus {
   REJECTED
 }
 
+enum InternshipDocumentType {
+  CONVENTION
+  ATTESTATION
+  OTHER
+}
+
 model Role {
   id   Int    @id @default(autoincrement())
   name String @unique
@@ -106,6 +112,7 @@ model User {
   admin             Admin?
 
   notifications Notification[]
+  internshipDocumentsUploaded InternshipDocument[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -212,6 +219,7 @@ model Internship {
   weeklyReports WeeklyReport[]
   meetings      Meeting[]
   documents     Document[]
+  internshipDocuments InternshipDocument[]
   complaints    Complaint[]
 
   finalDecision      FinalDecision?
@@ -294,6 +302,21 @@ model Document {
   updatedAt  DateTime @updatedAt
 
   @@unique([internshipId, category])
+}
+
+model InternshipDocument {
+  id Int @id @default(autoincrement())
+
+  type    InternshipDocumentType
+  fileUrl String
+
+  internshipId Int
+  internship   Internship @relation(fields: [internshipId], references: [id], onDelete: Cascade)
+
+  uploadedById Int?
+  uploadedBy   User? @relation(fields: [uploadedById], references: [id])
+
+  createdAt DateTime @default(now())
 }
 
 model Complaint {

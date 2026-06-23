@@ -9,6 +9,11 @@ const internshipInclude = {
   },
   company: true,
   documents: true,
+  internshipDocuments: {
+    orderBy: {
+      createdAt: "desc",
+    },
+  },
   meetings: {
     orderBy: {
       date: "asc",

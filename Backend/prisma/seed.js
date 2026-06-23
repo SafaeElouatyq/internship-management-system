@@ -66,9 +66,9 @@ console.log(" Departments seeded");
 
   await prisma.user.create({
     data: {
-      firstName: "System",
+      firstName: "test",
       lastName: "Admin",
-      email: process.env.ADMIN_EMAIL || "admin@internship.com",
+      email: process.env.ADMIN_EMAIL || "adminTest@internship.com",
       password: hashedPassword,
       roleId: adminRole.id,
 

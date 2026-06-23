@@ -15,6 +15,21 @@ const includeRelations = {
     },
   },
   documents: true,
+  internshipDocuments: {
+    include: {
+      uploadedBy: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  },
 };
 
 const getStudentByUserId = async (userId) => {

@@ -14,7 +14,7 @@ function InternshipRow({
   onReject,
 }) {
   const student = internship.student?.user;
-  const documentCount = internship.documents?.length || 0;
+  const documentCount = internship.internshipDocuments?.length || 0;
   const canManage = canManageInternship(internship);
   const canVerify = canVerifyAdministrativeFile(internship);
 

@@ -1,9 +1,8 @@
-import { getDocumentUrl } from "../../services/documentService.jsx";
+import InternshipDocumentsPanel from "../internshipDocuments/InternshipDocumentsPanel";
 import { statusLabels } from "../../utils/internshipUtils.jsx";
 
 function StudentInternshipDetailsModal({ internship, onClose }) {
   const company = internship.company;
-  const documents = internship.documents || [];
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
@@ -96,40 +95,16 @@ function StudentInternshipDetailsModal({ internship, onClose }) {
             </div>
           </section>
 
-          <section>
-            <h3 className="text-lg font-semibold text-slate-800 mb-3">
-              Documents
-            </h3>
+          <InternshipDocumentsPanel
+            internshipId={internship.id}
+            canUpload
+            title="Documents de stage"
+            description="Convention, attestation et autres documents administratifs."
+          />
 
-            {documents.length ? (
-              <div className="space-y-2">
-                {documents.map((document) => (
-                  <div
-                    key={document.id}
-                    className="flex items-center justify-between border border-slate-200 rounded-xl px-4 py-3"
-                  >
-                    <div>
-                      <p className="font-medium">{document.name}</p>
-                      <p className="text-sm text-slate-500">{document.type}</p>
-                    </div>
-
-                    <a
-                      href={getDocumentUrl(document.path)}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-blue-600 hover:text-blue-700 font-medium"
-                    >
-                      Télécharger
-                    </a>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-slate-500">
-                Aucun document. Ajoutez vos documents dans la section Documents.
-              </p>
-            )}
-          </section>
+          <p className="text-sm text-slate-500">
+            Le rapport PFE se gère dans la section « Rapport PFE ».
+          </p>
         </div>
       </div>
     </div>
