@@ -12,6 +12,32 @@ import {
   syncPfeWorkflowStatus,
 } from "./internshipWorkflowService.js";
 
+const notifySupervisorPfeUpload = async (internship, category) => {
+  if (!internship.supervisorId) {
+    return;
+  }
+
+  const userIds = await getInternshipUserIds(internship.id);
+
+  if (!userIds?.supervisorUserId) {
+    return;
+  }
+
+  const isFinal = category === "FINAL";
+
+  await createNotification(
+    userIds.supervisorUserId,
+    isFinal ? "Rapport final PFE déposé" : "Nouveau document PFE",
+    isFinal
+      ? "Un étudiant a téléversé la version finale de son rapport PFE."
+      : `Un étudiant a téléversé un document PFE (${PFE_CATEGORY_LABELS[category]}).`,
+    {
+      type: "ACTION",
+      link: "/supervisor/pfe-documents",
+    },
+  );
+};
+
 const documentInclude = {
   internship: {
     include: {
@@ -186,16 +212,20 @@ export const uploadPfeDocument = async (userId, { category }, file) => {
   if (existingDocument) {
     removeFile(existingDocument.path);
 
-    return await prisma.document.update({
+    const updated = await prisma.document.update({
       where: {
         id: existingDocument.id,
       },
       data: documentData,
       include: documentInclude,
     });
+
+    await notifySupervisorPfeUpload(internship, category);
+
+    return updated;
   }
 
-  return await prisma.document.create({
+  const created = await prisma.document.create({
     data: {
       ...documentData,
       internship: {
@@ -206,6 +236,10 @@ export const uploadPfeDocument = async (userId, { category }, file) => {
     },
     include: documentInclude,
   });
+
+  await notifySupervisorPfeUpload(internship, category);
+
+  return created;
 };
 
 export const getMyPfeDocuments = async (userId) => {
@@ -370,6 +404,10 @@ export const validatePfeDocument = async (
       userIds.studentUserId,
       "Décision sur un document PFE",
       `Votre document a été ${statusLabels[validationStatus] || "mis à jour"}.`,
+      {
+        type: validationStatus === "VALIDATED" ? "SUCCESS" : "WARNING",
+        link: "/student/documents",
+      },
     );
   }
 

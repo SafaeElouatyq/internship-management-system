@@ -307,6 +307,10 @@ export const createWeeklyReport = async (userId, reportData, files = []) => {
       userIds.supervisorUserId,
       "Nouveau rapport hebdomadaire",
       "Un étudiant a soumis un rapport hebdomadaire.",
+      {
+        type: "ACTION",
+        link: "/supervisor/reports",
+      },
     );
   }
 
@@ -540,9 +544,9 @@ export const updateSupervisorReportComment = async (
   supervisorComment,
 ) => {
   const supervisor = await getSupervisorByUserId(userId);
-  await getSupervisorReportById(supervisor.id, reportId);
+  const report = await getSupervisorReportById(supervisor.id, reportId);
 
-  return await prisma.weeklyReport.update({
+  const updatedReport = await prisma.weeklyReport.update({
     where: {
       id: Number(reportId),
     },
@@ -551,6 +555,22 @@ export const updateSupervisorReportComment = async (
     },
     include: reportInclude,
   });
+
+  const studentUserId = report.internship?.student?.user?.id;
+
+  if (studentUserId && supervisorComment?.trim()) {
+    await createNotification(
+      studentUserId,
+      "Commentaire sur votre rapport",
+      "Votre encadrant a laissé un commentaire sur un rapport hebdomadaire.",
+      {
+        type: "INFO",
+        link: "/student/reports",
+      },
+    );
+  }
+
+  return updatedReport;
 };
 
 export const getSupervisorReportStats = async (userId) => {

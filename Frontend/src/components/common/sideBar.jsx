@@ -1,11 +1,8 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { logout } from "../../services/authService.jsx";
+import SidebarNotificationLink from "../notifications/SidebarNotificationLink.jsx";
 import {
-  LayoutDashboard,
   Users,
-  GraduationCap,
-  BriefcaseBusiness,
-  Building2,
   Settings,
   CircleHelp,
   LogOut,
@@ -21,17 +18,10 @@ function Sidebar() {
 
   const menu = [
     {
-      title: "Tableau de bord",
-      path: "/admin/dashboard",
-      icon: LayoutDashboard,
-    },
-    {
       title: "Utilisateurs",
       path: "/admin/users",
       icon: Users,
     },
-    
-   
   ];
 
   const others = [
@@ -67,11 +57,12 @@ function Sidebar() {
                 }
               >
                 <Icon size={20} />
-
                 <span className="font-medium">{item.title}</span>
               </NavLink>
             );
           })}
+
+          <SidebarNotificationLink path="/admin/notifications" />
         </nav>
 
         <div className="mx-5 my-7 border-t border-slate-200"></div>
@@ -93,7 +84,6 @@ function Sidebar() {
                 }
               >
                 <Icon size={20} />
-
                 <span className="font-medium">{item.title}</span>
               </NavLink>
             );

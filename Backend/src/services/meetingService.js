@@ -1,5 +1,6 @@
 import prisma from "../config/prisma.js";
 import { MIN_MEETINGS_BY_LEVEL } from "../utils/meetingRules.js";
+import { notifyDepartmentHeads } from "../utils/notificationHelpers.js";
 
 const meetingInclude = {
   internship: {
@@ -167,6 +168,9 @@ export const createMeeting = async (userId, meetingData) => {
       id: Number(internshipId),
       supervisorId: supervisor.id,
     },
+    include: {
+      student: true,
+    },
   });
 
   if (!internship) {
@@ -207,6 +211,13 @@ export const createMeeting = async (userId, meetingData) => {
       data: {
         status: "SUBJECT_PENDING",
       },
+    });
+
+    await notifyDepartmentHeads(internship.student?.departmentId, {
+      title: "Sujet en attente de validation",
+      message: "Un sujet de stage est en attente après la première réunion.",
+      type: "ACTION",
+      link: "/department-head/internships",
     });
   }
 

@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { logout } from "../../services/authService.jsx";
+import SidebarNotificationLink from "../notifications/SidebarNotificationLink.jsx";
 import {
-  LayoutDashboard,
   FileText,
   CalendarDays,
   Users,
@@ -19,11 +19,6 @@ function SupervisorSideBar() {
   };
 
   const menu = [
-    {
-      title: "Tableau de bord",
-      path: "/supervisor/dashboard",
-      icon: LayoutDashboard,
-    },
     {
       title: "Mes étudiants",
       path: "/supervisor/students",
@@ -74,11 +69,12 @@ function SupervisorSideBar() {
                 }
               >
                 <Icon size={20} />
-
                 <span className="font-medium">{item.title}</span>
               </NavLink>
             );
           })}
+
+          <SidebarNotificationLink path="/supervisor/notifications" />
         </nav>
 
         <div className="mx-5 my-7 border-t border-slate-200"></div>
@@ -100,7 +96,6 @@ function SupervisorSideBar() {
                 }
               >
                 <Icon size={20} />
-
                 <span className="font-medium">{item.title}</span>
               </NavLink>
             );

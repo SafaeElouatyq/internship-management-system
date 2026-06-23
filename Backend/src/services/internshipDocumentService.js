@@ -2,6 +2,9 @@ import fs from "fs";
 import path from "path";
 import prisma from "../config/prisma.js";
 import { uploadDir } from "../config/upload.js";
+import { createNotification } from "./notificationService.js";
+import { notifyInternshipManagers } from "../utils/notificationHelpers.js";
+import { getInternshipUserIds } from "./internshipWorkflowService.js";
 
 const ALLOWED_TYPES = ["CONVENTION", "ATTESTATION", "OTHER"];
 
@@ -130,7 +133,7 @@ export const uploadInternshipDocument = async (
 
   await assertStudentOwnsInternship(userId, internshipId);
 
-  return await prisma.internshipDocument.create({
+  const document = await prisma.internshipDocument.create({
     data: {
       type,
       fileUrl: `/uploads/${file.filename}`,
@@ -147,6 +150,29 @@ export const uploadInternshipDocument = async (
     },
     include: documentInclude,
   });
+
+  const userIds = await getInternshipUserIds(Number(internshipId));
+
+  if (userIds?.supervisorUserId) {
+    await createNotification(
+      userIds.supervisorUserId,
+      "Nouveau document de stage",
+      "Un étudiant a téléversé un document administratif de stage.",
+      {
+        type: "INFO",
+        link: `/supervisor/internships/${internshipId}`,
+      },
+    );
+  }
+
+  await notifyInternshipManagers({
+    title: "Document de stage téléversé",
+    message: "Un étudiant a téléversé un document administratif.",
+    type: "ACTION",
+    link: `/manager/internships/${internshipId}`,
+  });
+
+  return document;
 };
 
 export const getInternshipDocuments = async (userId, role, internshipId) => {

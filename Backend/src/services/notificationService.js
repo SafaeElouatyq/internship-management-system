@@ -1,14 +1,25 @@
 import prisma from "../config/prisma.js";
 
-export const createNotification = async (userId, title, message) => {
+const ALLOWED_TYPES = ["INFO", "SUCCESS", "WARNING", "ACTION"];
+
+export const createNotification = async (
+  userId,
+  title,
+  message,
+  { type = "INFO", link = null } = {},
+) => {
   if (!userId || !title?.trim() || !message?.trim()) {
     return null;
   }
+
+  const notificationType = ALLOWED_TYPES.includes(type) ? type : "INFO";
 
   return await prisma.notification.create({
     data: {
       title: title.trim(),
       message: message.trim(),
+      type: notificationType,
+      link: link?.trim() || null,
       user: {
         connect: {
           id: Number(userId),
@@ -16,6 +27,19 @@ export const createNotification = async (userId, title, message) => {
       },
     },
   });
+};
+
+export const notifyUsers = async (
+  userIds,
+  { title, message, type = "INFO", link = null },
+) => {
+  const uniqueUserIds = [...new Set(userIds.filter(Boolean).map(Number))];
+
+  await Promise.all(
+    uniqueUserIds.map((userId) =>
+      createNotification(userId, title, message, { type, link }),
+    ),
+  );
 };
 
 export const getMyNotifications = async (userId) => {
@@ -38,6 +62,17 @@ export const getMyNotifications = async (userId) => {
   };
 };
 
+export const getUnreadCount = async (userId) => {
+  const unreadCount = await prisma.notification.count({
+    where: {
+      userId: Number(userId),
+      isRead: false,
+    },
+  });
+
+  return { unreadCount };
+};
+
 export const markNotificationAsRead = async (userId, notificationId) => {
   const notification = await prisma.notification.findFirst({
     where: {
@@ -48,6 +83,10 @@ export const markNotificationAsRead = async (userId, notificationId) => {
 
   if (!notification) {
     throw new Error("Notification introuvable");
+  }
+
+  if (notification.isRead) {
+    return notification;
   }
 
   return await prisma.notification.update({

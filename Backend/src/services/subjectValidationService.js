@@ -132,10 +132,18 @@ export const createSubjectValidation = async (
     const userIds = await getInternshipUserIds(internship.id);
 
     if (userIds?.studentUserId) {
+      const isApproved = ["ACCEPTED", "ACCEPTED_WITH_REFORMULATION"].includes(
+        decision,
+      );
+
       await createNotification(
         userIds.studentUserId,
         "Décision sur le sujet de stage",
         `Votre sujet a été ${decisionLabels[decision]}.`,
+        {
+          type: isApproved ? "SUCCESS" : "WARNING",
+          link: "/student/internship",
+        },
       );
     }
 

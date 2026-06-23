@@ -1,10 +1,10 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { logout } from "../../services/authService.jsx";
+import SidebarNotificationLink from "../notifications/SidebarNotificationLink.jsx";
 import {
   LayoutDashboard,
   BriefcaseBusiness,
   Users,
-  Bell,
   Settings,
   LogOut,
   Gavel,
@@ -39,11 +39,6 @@ function DepartmentHeadSideBar() {
       path: "/department-head/final-decisions",
       icon: Gavel,
     },
-    {
-      title: "Notifications",
-      path: "/department-head/notifications",
-      icon: Bell,
-    },
   ];
 
   const others = [
@@ -74,11 +69,12 @@ function DepartmentHeadSideBar() {
                 }
               >
                 <Icon size={20} />
-
                 <span className="font-medium">{item.title}</span>
               </NavLink>
             );
           })}
+
+          <SidebarNotificationLink path="/department-head/notifications" />
         </nav>
 
         <div className="mx-5 my-7 border-t border-slate-200"></div>
@@ -100,7 +96,6 @@ function DepartmentHeadSideBar() {
                 }
               >
                 <Icon size={20} />
-
                 <span className="font-medium">{item.title}</span>
               </NavLink>
             );

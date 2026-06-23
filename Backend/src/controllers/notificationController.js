@@ -1,5 +1,6 @@
 import {
   getMyNotifications,
+  getUnreadCount,
   markAllNotificationsAsRead,
   markNotificationAsRead,
 } from "../services/notificationService.js";
@@ -7,6 +8,20 @@ import {
 export const getNotifications = async (req, res) => {
   try {
     const data = await getMyNotifications(req.user.id);
+
+    res.status(200).json(data);
+  } catch (error) {
+    console.error(error);
+
+    res.status(400).json({
+      message: error.message,
+    });
+  }
+};
+
+export const getUnreadNotificationsCount = async (req, res) => {
+  try {
+    const data = await getUnreadCount(req.user.id);
 
     res.status(200).json(data);
   } catch (error) {

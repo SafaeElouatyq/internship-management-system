@@ -133,6 +133,10 @@ export const createFinalDecision = async ({
         decision === "DEFENSE_AUTHORIZED"
           ? "Votre soutenance a été autorisée."
           : "Votre soutenance n'a pas été autorisée.",
+        {
+          type: decision === "DEFENSE_AUTHORIZED" ? "SUCCESS" : "WARNING",
+          link: "/student/internship",
+        },
       );
     }
 

@@ -1,12 +1,11 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { logout } from "../../services/authService.jsx";
+import SidebarNotificationLink from "../notifications/SidebarNotificationLink.jsx";
 import {
-  LayoutDashboard,
   BriefcaseBusiness,
   FileText,
   CalendarDays,
   MessageSquareWarning,
-  Bell,
   Settings,
   CircleHelp,
   LogOut,
@@ -21,42 +20,32 @@ function StudentSideBar() {
   };
 
   const menu = [
-  {
-    title: "Tableau de bord",
-    path: "/student/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Mon Stage",
-    path: "/student/internship",
-    icon: BriefcaseBusiness,
-  },
-  {
-    title: "Rapports",
-    path: "/student/reports",
-    icon: FileText,
-  },
-  {
-    title: "Réunions",
-    path: "/student/meetings",
-    icon: CalendarDays,
-  },
-  {
-    title: "Rapport PFE",
-    path: "/student/documents",
-    icon: FileText,
-  },
-  {
-    title: "Réclamations",
-    path: "/student/complaints",
-    icon: MessageSquareWarning,
-  },
-  {
-    title: "Notifications",
-    path: "/student/notifications",
-    icon: Bell,
-  },
-];
+    {
+      title: "Mon Stage",
+      path: "/student/internship",
+      icon: BriefcaseBusiness,
+    },
+    {
+      title: "Rapports",
+      path: "/student/reports",
+      icon: FileText,
+    },
+    {
+      title: "Réunions",
+      path: "/student/meetings",
+      icon: CalendarDays,
+    },
+    {
+      title: "Rapport PFE",
+      path: "/student/documents",
+      icon: FileText,
+    },
+    {
+      title: "Réclamations",
+      path: "/student/complaints",
+      icon: MessageSquareWarning,
+    },
+  ];
 
   const others = [
     {
@@ -91,11 +80,12 @@ function StudentSideBar() {
                 }
               >
                 <Icon size={20} />
-
                 <span className="font-medium">{item.title}</span>
               </NavLink>
             );
           })}
+
+          <SidebarNotificationLink path="/student/notifications" />
         </nav>
 
         <div className="mx-5 my-7 border-t border-slate-200"></div>
@@ -117,7 +107,6 @@ function StudentSideBar() {
                 }
               >
                 <Icon size={20} />
-
                 <span className="font-medium">{item.title}</span>
               </NavLink>
             );

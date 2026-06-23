@@ -1,16 +1,16 @@
-export const getDashboardPath = (role) => {
+export const getHomePath = (role) => {
   switch (role) {
     case "ADMIN":
-      return "/admin/dashboard";
+      return "/admin/users";
 
     case "STUDENT":
-      return "/student/dashboard";
+      return "/student/internship";
 
     case "SUPERVISOR":
-      return "/supervisor/dashboard";
+      return "/supervisor/students";
 
     case "INTERNSHIP_MANAGER":
-      return "/manager/dashboard";
+      return "/manager/internships";
 
     case "DEPARTMENT_HEAD":
       return "/department-head/dashboard";
@@ -20,6 +20,8 @@ export const getDashboardPath = (role) => {
   }
 };
 
+export const getDashboardPath = getHomePath;
+
 export const redirectByRole = (role, navigate) => {
-  navigate(getDashboardPath(role));
+  navigate(getHomePath(role));
 };

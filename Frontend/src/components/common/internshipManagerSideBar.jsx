@@ -1,9 +1,8 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { logout } from "../../services/authService.jsx";
+import SidebarNotificationLink from "../notifications/SidebarNotificationLink.jsx";
 import {
-  LayoutDashboard,
   FileText,
-  Bell,
   Settings,
   CircleHelp,
   LogOut,
@@ -19,11 +18,6 @@ function InternshipManagerSideBar() {
 
   const menu = [
     {
-      title: "Tableau de bord",
-      path: "/manager/dashboard",
-      icon: LayoutDashboard,
-    },
-    {
       title: "Déclarations de stage",
       path: "/manager/internships",
       icon: FileText,
@@ -32,11 +26,6 @@ function InternshipManagerSideBar() {
       title: "Documents",
       path: "/manager/documents",
       icon: FileText,
-    },
-    {
-      title: "Notifications",
-      path: "/manager/notifications",
-      icon: Bell,
     },
   ];
 
@@ -73,11 +62,12 @@ function InternshipManagerSideBar() {
                 }
               >
                 <Icon size={20} />
-
                 <span className="font-medium">{item.title}</span>
               </NavLink>
             );
           })}
+
+          <SidebarNotificationLink path="/manager/notifications" />
         </nav>
 
         <div className="mx-5 my-7 border-t border-slate-200"></div>
@@ -99,7 +89,6 @@ function InternshipManagerSideBar() {
                 }
               >
                 <Icon size={20} />
-
                 <span className="font-medium">{item.title}</span>
               </NavLink>
             );

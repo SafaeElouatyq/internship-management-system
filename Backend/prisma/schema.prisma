@@ -81,6 +81,13 @@ enum ComplaintStatus {
   REJECTED
 }
 
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ACTION
+}
+
 enum InternshipDocumentType {
   CONVENTION
   ATTESTATION
@@ -365,6 +372,8 @@ model Notification {
   message String
 
   isRead Boolean @default(false)
+  type   NotificationType @default(INFO)
+  link   String?
 
   userId Int
   user   User @relation(fields: [userId], references: [id])

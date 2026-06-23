@@ -1,9 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "../pages/auth/loginPage.jsx";
 import ChangePasswordPage from "../pages/auth/ChangePasswordPage.jsx";
-import DashboardPage from "../pages/admin/dashBoard.jsx";
 import UsersPage from "../pages/admin/usersPage.jsx";
-import StudentDashboard from "../pages/student/StudentDashboard.jsx";
 import StudentInternshipPage from "../pages/student/StudentInternshipPage.jsx";
 import StudentReportsPage from "../pages/student/StudentReportsPage.jsx";
 import StudentMeetingsPage from "../pages/student/StudentMeetingsPage.jsx";
@@ -12,14 +10,13 @@ import StudentNotificationsPage from "../pages/student/StudentNotificationsPage.
 import StudentComplaintsPage from "../pages/student/StudentComplaintsPage.jsx";
 import StudentSettingsPage from "../pages/student/StudentSettingsPage.jsx";
 import StudentHelpPage from "../pages/student/StudentHelpPage.jsx";
-import SupervisorDashboard from "../pages/supervisor/SupervisorDashboard.jsx";
 import SupervisorStudentsPage from "../pages/supervisor/SupervisorStudentsPage.jsx";
 import SupervisorInternshipDetailPage from "../pages/supervisor/SupervisorInternshipDetailPage.jsx";
 import SupervisorReportsPage from "../pages/supervisor/SupervisorReportsPage.jsx";
 import SupervisorMeetingsPage from "../pages/supervisor/SupervisorMeetingsPage.jsx";
 import SupervisorPfeDocumentsPage from "../pages/supervisor/SupervisorPfeDocumentsPage.jsx";
 import SupervisorSettingsPage from "../pages/supervisor/SupervisorSettingsPage.jsx";
-import InternshipManagerDashboard from "../pages/internshipManager/InternshipManagerDashboard.jsx";
+import SupervisorNotificationsPage from "../pages/supervisor/SupervisorNotificationsPage.jsx";
 import InternshipManagementPage from "../pages/internshipManager/InternshipManagementPage.jsx";
 import InternshipDetailPage from "../pages/internshipManager/InternshipDetailPage.jsx";
 import InternshipManagerDocumentsPage from "../pages/internshipManager/InternshipManagerDocumentsPage.jsx";
@@ -34,6 +31,7 @@ import DepartmentHeadSettingsPage from "../pages/departmentHead/DepartmentHeadSe
 import DepartmentHeadFinalDecisionsPage from "../pages/departmentHead/DepartmentHeadFinalDecisionsPage.jsx";
 import AdminHelpPage from "../pages/admin/AdminHelpPage.jsx";
 import AdminSettingsPage from "../pages/admin/AdminSettingsPage.jsx";
+import AdminNotificationsPage from "../pages/admin/AdminNotificationsPage.jsx";
 import AdminLayout from "../components/layout/AdminLayout.jsx";
 import StudentLayout from "../components/layout/StudentLayout.jsx";
 import InternshipManagerLayout from "../components/layout/InternshipManagerLayout.jsx";
@@ -70,11 +68,11 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="dashboard" replace />} />
-        <Route path="dashboard" element={<DashboardPage />} />
+        <Route index element={<Navigate to="users" replace />} />
         <Route path="users" element={<UsersPage />} />
         <Route path="settings" element={<AdminSettingsPage />} />
         <Route path="help" element={<AdminHelpPage />} />
+        <Route path="notifications" element={<AdminNotificationsPage />} />
       </Route>
 
       <Route
@@ -85,8 +83,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="dashboard" replace />} />
-        <Route path="dashboard" element={<StudentDashboard />} />
+        <Route index element={<Navigate to="internship" replace />} />
         <Route path="internship" element={<StudentInternshipPage />} />
         <Route path="reports" element={<StudentReportsPage />} />
         <Route path="meetings" element={<StudentMeetingsPage />} />
@@ -105,14 +102,14 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="dashboard" replace />} />
-        <Route path="dashboard" element={<SupervisorDashboard />} />
+        <Route index element={<Navigate to="students" replace />} />
         <Route path="students" element={<SupervisorStudentsPage />} />
         <Route path="internships/:id" element={<SupervisorInternshipDetailPage />} />
         <Route path="reports" element={<SupervisorReportsPage />} />
         <Route path="meetings" element={<SupervisorMeetingsPage />} />
         <Route path="pfe-documents" element={<SupervisorPfeDocumentsPage />} />
         <Route path="settings" element={<SupervisorSettingsPage />} />
+        <Route path="notifications" element={<SupervisorNotificationsPage />} />
       </Route>
 
       <Route
@@ -123,8 +120,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="dashboard" replace />} />
-        <Route path="dashboard" element={<InternshipManagerDashboard />} />
+        <Route index element={<Navigate to="internships" replace />} />
         <Route path="internships" element={<InternshipManagementPage />} />
         <Route path="internships/:id" element={<InternshipDetailPage />} />
         <Route path="documents" element={<InternshipManagerDocumentsPage />} />
