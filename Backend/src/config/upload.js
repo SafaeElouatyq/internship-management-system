@@ -42,4 +42,55 @@ export const uploadDocument = multer({
   },
 });
 
+const reportAttachmentMimes = [
+  "application/pdf",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "image/png",
+  "image/jpeg",
+  "image/jpg",
+  "image/gif",
+  "image/webp",
+];
+
+const reportAttachmentFilter = (req, file, cb) => {
+  if (reportAttachmentMimes.includes(file.mimetype)) {
+    cb(null, true);
+    return;
+  }
+
+  cb(new Error("Seuls les fichiers PDF, DOCX et images sont acceptés"));
+};
+
+export const uploadReportAttachments = multer({
+  storage,
+  fileFilter: reportAttachmentFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024,
+    files: 5,
+  },
+});
+
+const pfeDocumentMimes = [
+  "application/pdf",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+];
+
+const pfeDocumentFilter = (req, file, cb) => {
+  if (pfeDocumentMimes.includes(file.mimetype)) {
+    cb(null, true);
+    return;
+  }
+
+  cb(new Error("Seuls les fichiers PDF, DOCX et PPTX sont acceptés"));
+};
+
+export const uploadPfeDocument = multer({
+  storage,
+  fileFilter: pfeDocumentFilter,
+  limits: {
+    fileSize: 15 * 1024 * 1024,
+  },
+});
+
 export { uploadDir };

@@ -1,12 +1,12 @@
+import { PFE_CATEGORY_LABELS } from "./pfeDocumentUtils.jsx";
+
 export const getFinalReportLabel = (internship) => {
   const documents = internship.documents || [];
   const finalReport = documents.find(
-    (document) =>
-      document.type === "RAPPORT_FINAL" ||
-      document.name?.toLowerCase().includes("rapport"),
+    (document) => document.category === "FINAL",
   );
 
-  return finalReport?.name || "-";
+  return finalReport?.name || PFE_CATEGORY_LABELS.FINAL || "-";
 };
 
 export const getDecisionLabel = (internship) => {

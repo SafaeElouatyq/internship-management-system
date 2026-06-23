@@ -30,23 +30,19 @@ function Sidebar() {
       path: "/admin/users",
       icon: Users,
     },
-    {
-      title: "Étudiants",
-      path: "/students",
-      icon: GraduationCap,
-    },
+    
    
   ];
 
   const others = [
     {
       title: "Paramètres",
-      path: "/settings",
+      path: "/admin/settings",
       icon: Settings,
     },
     {
       title: "Aide",
-      path: "/help",
+      path: "/admin/help",
       icon: CircleHelp,
     },
   ];

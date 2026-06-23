@@ -1,17 +1,30 @@
 import { useEffect, useState } from "react";
+import { getAssignedInternships } from "../../services/supervisorInternshipService.jsx";
 import { getSupervisorReports } from "../../services/supervisorReportService.jsx";
 
 function SupervisorDashboard() {
-  const [stats, setStats] = useState({ submittedCount: 0, lateCount: 0 });
+  const [stats, setStats] = useState({
+    assignedCount: 0,
+    pendingSubjectCount: 0,
+    validatedSubjectCount: 0,
+    submittedCount: 0,
+    lateCount: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     let active = true;
 
-    getSupervisorReports()
-      .then((data) => {
-        if (active) setStats(data.stats);
+    Promise.all([getAssignedInternships(), getSupervisorReports()])
+      .then(([internshipsData, reportsData]) => {
+        if (active) {
+          setStats({
+            ...internshipsData.stats,
+            submittedCount: reportsData.stats.submittedCount,
+            missingCount: reportsData.stats.missingCount,
+          });
+        }
       })
       .catch((error) => {
         if (active) {
@@ -29,12 +42,24 @@ function SupervisorDashboard() {
 
   const cards = [
     {
+      title: "Étudiants assignés",
+      value: stats.assignedCount,
+    },
+    {
+      title: "Sujets en attente",
+      value: stats.pendingSubjectCount,
+    },
+    {
+      title: "Sujets validés",
+      value: stats.validatedSubjectCount,
+    },
+    {
       title: "Rapports soumis",
       value: stats.submittedCount,
     },
     {
-      title: "Rapports en retard",
-      value: stats.lateCount,
+      title: "Rapports manquants",
+      value: stats.missingCount ?? 0,
     },
   ];
 
@@ -46,7 +71,8 @@ function SupervisorDashboard() {
         </h1>
 
         <p className="text-slate-500 mt-2">
-          Suivez les rapports hebdomadaires de vos étudiants.
+          Suivez vos étudiants, la validation des sujets et les rapports
+          hebdomadaires.
         </p>
       </div>
 
@@ -61,7 +87,7 @@ function SupervisorDashboard() {
           Chargement...
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6">
           {cards.map((card) => (
             <div
               key={card.title}

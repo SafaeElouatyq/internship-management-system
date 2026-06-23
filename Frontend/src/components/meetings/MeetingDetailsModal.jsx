@@ -68,7 +68,7 @@ function MeetingDetailsModal({ meeting, onClose }) {
           </div>
 
           <div>
-            <p className="text-sm text-slate-500">Commentaire encadrant</p>
+            <p className="text-sm text-slate-500">Remarques encadrant</p>
             <p className="font-medium mt-1">
               {meeting.supervisorComment || "-"}
             </p>

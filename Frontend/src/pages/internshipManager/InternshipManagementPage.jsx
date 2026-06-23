@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import AdministrativeStatusForm from "../../components/internshipManager/AdministrativeStatusForm";
 import InternshipTable from "../../components/internshipManager/InternshipTable";
 import {
   getInternships,
   rejectInternship,
+  updateAdministrativeStatus,
   validateInternship,
 } from "../../services/internshipManagerService.jsx";
 
@@ -13,10 +15,14 @@ function InternshipManagementPage() {
   const [searchStudent, setSearchStudent] = useState("");
   const [searchCompany, setSearchCompany] = useState("");
   const [status, setStatus] = useState("");
+  const [administrativeStatus, setAdministrativeStatus] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [selectedInternship, setSelectedInternship] = useState(null);
+  const [selectedAdministrativeStatus, setSelectedAdministrativeStatus] =
+    useState("");
 
   async function loadInternships() {
     try {
@@ -24,6 +30,7 @@ function InternshipManagementPage() {
         student: searchStudent,
         company: searchCompany,
         status,
+        administrativeStatus,
       });
 
       setInternships(data);
@@ -63,6 +70,49 @@ function InternshipManagementPage() {
 
   const View = (internship) => {
     navigate(`/manager/internships/${internship.id}`);
+  };
+
+  const OpenVerify = (internship) => {
+    setSelectedInternship(internship);
+    setSelectedAdministrativeStatus(internship.administrativeStatus || "");
+    setError("");
+    setSuccess("");
+  };
+
+  const CloseVerify = () => {
+    setSelectedInternship(null);
+    setSelectedAdministrativeStatus("");
+  };
+
+  const HandleAdministrativeChange = (event) => {
+    setSelectedAdministrativeStatus(event.target.value);
+  };
+
+  const SubmitAdministrativeStatus = async (event) => {
+    event.preventDefault();
+
+    if (!selectedInternship || !selectedAdministrativeStatus) return;
+
+    setSaving(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      await updateAdministrativeStatus(
+        selectedInternship.id,
+        selectedAdministrativeStatus,
+      );
+      setSuccess("Dossier administratif mis à jour avec succès");
+      CloseVerify();
+      loadInternships();
+    } catch (error) {
+      setError(
+        error.response?.data?.message ||
+          "Erreur lors de la vérification administrative",
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
   const Validate = async (internship) => {
@@ -113,7 +163,8 @@ function InternshipManagementPage() {
         </h1>
 
         <p className="text-slate-500 mt-2">
-          Consultez les déclarations et validez ou refusez les stages proposés.
+          Consultez les déclarations, vérifiez les dossiers administratifs et
+          validez ou refusez les stages proposés.
         </p>
       </div>
 
@@ -133,7 +184,7 @@ function InternshipManagementPage() {
         onSubmit={Search}
         className="bg-white rounded-2xl shadow-sm p-5 border border-slate-200 mb-6"
       >
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_1fr_auto] gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_1fr_auto] gap-4">
           <input
             type="text"
             value={searchStudent}
@@ -166,6 +217,18 @@ function InternshipManagementPage() {
             <option value="CLOSED">Clôturé</option>
           </select>
 
+          <select
+            value={administrativeStatus}
+            onChange={(e) => setAdministrativeStatus(e.target.value)}
+            className="w-full border border-slate-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Tous les dossiers admin.</option>
+            <option value="COMPLETE">Complet</option>
+            <option value="INCOMPLETE">Incomplet</option>
+            <option value="PENDING_DOCUMENTS">Documents en attente</option>
+            <option value="REJECTED">Rejeté</option>
+          </select>
+
           <button
             type="submit"
             className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-medium disabled:opacity-60"
@@ -184,8 +247,20 @@ function InternshipManagementPage() {
         <InternshipTable
           internships={internships}
           onView={View}
+          onVerify={OpenVerify}
           onValidate={Validate}
           onReject={Reject}
+        />
+      )}
+
+      {selectedInternship && (
+        <AdministrativeStatusForm
+          internship={selectedInternship}
+          administrativeStatus={selectedAdministrativeStatus}
+          onChange={HandleAdministrativeChange}
+          onSubmit={SubmitAdministrativeStatus}
+          onCancel={CloseVerify}
+          saving={saving}
         />
       )}
     </>

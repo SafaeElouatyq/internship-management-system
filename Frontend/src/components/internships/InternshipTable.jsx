@@ -1,6 +1,6 @@
 import InternshipRow from "./InternshipRow";
 
-function InternshipTable({ internships, onEdit, onDelete }) {
+function InternshipTable({ internships, onView, onEdit, onDelete }) {
   if (!internships.length) {
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-12 text-center">
@@ -43,12 +43,13 @@ function InternshipTable({ internships, onEdit, onDelete }) {
 
         <tbody>
           {internships.map((internship) => (
-            <InternshipRow
-              key={internship.id}
-              internship={internship}
-              onEdit={onEdit}
-              onDelete={onDelete}
-            />
+              <InternshipRow
+                key={internship.id}
+                internship={internship}
+                onView={onView}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
           ))}
         </tbody>
       </table>

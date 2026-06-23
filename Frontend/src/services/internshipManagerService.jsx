@@ -45,3 +45,13 @@ export const rejectInternship = async (internshipId) => {
 
   return response.data;
 };
+
+export const updateAdministrativeStatus = async (internshipId, administrativeStatus) => {
+  const response = await axios.patch(
+    `${INTERNSHIP_URL}/${internshipId}/administrative`,
+    { administrativeStatus },
+    getToken(),
+  );
+
+  return response.data;
+};

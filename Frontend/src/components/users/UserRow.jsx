@@ -9,14 +9,20 @@ const roleLabels = {
 };
 
 function UserRow({ user, onEdit, onDelete }) {
+  const departmentName =
+    user.student?.department?.name ||
+    user.supervisor?.department?.name ||
+    user.departmentHead?.department?.name ||
+    "";
+
   return (
     <tr className="border-t border-slate-200 hover:bg-slate-50">
       <td className="px-6 py-4">
         <div className="font-medium text-slate-800">
           {user.firstName} {user.lastName}
         </div>
-        {user.department && (
-          <div className="text-sm text-slate-500">{user.department}</div>
+        {departmentName && (
+          <div className="text-sm text-slate-500">{departmentName}</div>
         )}
       </td>
 

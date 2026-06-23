@@ -4,6 +4,8 @@ import {
   LayoutDashboard,
   FileText,
   CalendarDays,
+  Users,
+  BookOpen,
   Settings,
   LogOut,
 } from "lucide-react";
@@ -23,6 +25,11 @@ function SupervisorSideBar() {
       icon: LayoutDashboard,
     },
     {
+      title: "Mes étudiants",
+      path: "/supervisor/students",
+      icon: Users,
+    },
+    {
       title: "Rapports",
       path: "/supervisor/reports",
       icon: FileText,
@@ -31,6 +38,11 @@ function SupervisorSideBar() {
       title: "Mes réunions",
       path: "/supervisor/meetings",
       icon: CalendarDays,
+    },
+    {
+      title: "Rapports PFE",
+      path: "/supervisor/pfe-documents",
+      icon: BookOpen,
     },
   ];
 

@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import InternshipForm from "../../components/internships/InternshipForm";
 import InternshipTable from "../../components/internships/InternshipTable";
+import InternshipDocumentsPanel from "../../components/internshipDocuments/InternshipDocumentsPanel";
+import StudentInternshipDetailsModal from "../../components/internships/StudentInternshipDetailsModal";
 import {
   createInternship,
   deleteInternship,
+  getInternship,
   getInternships,
   updateInternship,
 } from "../../services/internshipService.jsx";
+import { canModifyInternship } from "../../utils/internshipUtils.jsx";
 
 const initialForm = {
   title: "",
@@ -17,12 +21,14 @@ const initialForm = {
   companyAddress: "",
   companyEmail: "",
   companyPhone: "",
+  professionalSupervisor: "",
 };
 
 function StudentInternshipPage() {
   const [internships, setInternships] = useState([]);
   const [formData, setFormData] = useState(initialForm);
   const [selectedInternship, setSelectedInternship] = useState(null);
+  const [detailsInternship, setDetailsInternship] = useState(null);
   const [openForm, setOpenForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -66,6 +72,8 @@ function StudentInternshipPage() {
   };
 
   const Edit = (internship) => {
+    if (!canModifyInternship(internship)) return;
+
     setSelectedInternship(internship);
     setFormData({
       title: internship.title || "",
@@ -76,13 +84,25 @@ function StudentInternshipPage() {
       companyAddress: internship.company?.address || "",
       companyEmail: internship.company?.email || "",
       companyPhone: internship.company?.phone || "",
+      professionalSupervisor: internship.professionalSupervisor || "",
     });
     setOpenForm(true);
     setError("");
     setSuccess("");
   };
 
+  const View = async (internship) => {
+    try {
+      const data = await getInternship(internship.id);
+      setDetailsInternship(data);
+    } catch (error) {
+      setError(error.response?.data?.message || "Erreur lors du chargement");
+    }
+  };
+
   const Delete = async (internship) => {
+    if (!canModifyInternship(internship)) return;
+
     const confirmDelete = window.confirm("Supprimer cette déclaration ?");
 
     if (!confirmDelete) return;
@@ -101,6 +121,16 @@ function StudentInternshipPage() {
     setSaving(true);
     setError("");
     setSuccess("");
+
+    if (
+      formData.startDate &&
+      formData.endDate &&
+      new Date(formData.startDate) > new Date(formData.endDate)
+    ) {
+      setError("La date de fin doit être postérieure à la date de début");
+      setSaving(false);
+      return;
+    }
 
     try {
       if (selectedInternship) {
@@ -171,10 +201,29 @@ function StudentInternshipPage() {
           Chargement...
         </div>
       ) : (
-        <InternshipTable
-          internships={internships}
-          onEdit={Edit}
-          onDelete={Delete}
+        <>
+          <InternshipTable
+            internships={internships}
+            onView={View}
+            onEdit={Edit}
+            onDelete={Delete}
+          />
+
+          {internships[0] && (
+            <div className="mt-8">
+              <InternshipDocumentsPanel
+                internshipId={internships[0].id}
+                canUpload
+              />
+            </div>
+          )}
+        </>
+      )}
+
+      {detailsInternship && (
+        <StudentInternshipDetailsModal
+          internship={detailsInternship}
+          onClose={() => setDetailsInternship(null)}
         />
       )}
     </>

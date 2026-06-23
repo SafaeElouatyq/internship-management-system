@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
+import ReportDetailsModal from "../../components/reports/ReportDetailsModal";
 import ReportForm from "../../components/reports/ReportForm";
 import ReportTable from "../../components/reports/ReportTable";
-import { createReport, getMyReports } from "../../services/reportService.jsx";
+import {
+  createReport,
+  deleteReport,
+  getMyReports,
+  updateReport,
+} from "../../services/reportService.jsx";
 
 const initialForm = {
   completedWork: "",
@@ -12,7 +18,13 @@ const initialForm = {
 
 function StudentReportsPage() {
   const [reports, setReports] = useState([]);
+  const [missingWeeks, setMissingWeeks] = useState([]);
+  const [submissionContext, setSubmissionContext] = useState(null);
   const [formData, setFormData] = useState(initialForm);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [removedAttachmentIds, setRemovedAttachmentIds] = useState([]);
+  const [editingReport, setEditingReport] = useState(null);
+  const [selectedReport, setSelectedReport] = useState(null);
   const [openForm, setOpenForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -26,7 +38,9 @@ function StudentReportsPage() {
   const loadReports = async () => {
     try {
       const data = await getMyReports();
-      setReports(data);
+      setReports(data.reports);
+      setMissingWeeks(data.missingWeeks);
+      setSubmissionContext(data.submissionContext);
     } catch (error) {
       setError(error.response?.data?.message || "Erreur lors du chargement");
     } finally {
@@ -34,38 +48,105 @@ function StudentReportsPage() {
     }
   };
 
-  const Change = (e) => {
+  const ResetForm = () => {
+    setFormData(initialForm);
+    setSelectedFiles([]);
+    setRemovedAttachmentIds([]);
+    setEditingReport(null);
+    setOpenForm(false);
+  };
+
+  const Change = (event) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [event.target.name]: event.target.value,
     });
   };
 
-  const OpenForm = () => {
+  const FileChange = (event) => {
+    setSelectedFiles(Array.from(event.target.files || []));
+  };
+
+  const RemoveExistingAttachment = (attachmentId) => {
+    setRemovedAttachmentIds((current) =>
+      current.includes(attachmentId)
+        ? current.filter((id) => id !== attachmentId)
+        : [...current, attachmentId],
+    );
+  };
+
+  const OpenCreateForm = () => {
     setFormData(initialForm);
+    setSelectedFiles([]);
+    setRemovedAttachmentIds([]);
+    setEditingReport(null);
     setOpenForm(true);
     setError("");
     setSuccess("");
   };
 
-  const CloseForm = () => {
-    setFormData(initialForm);
-    setOpenForm(false);
+  const OpenEditForm = (report) => {
+    setEditingReport(report);
+    setFormData({
+      completedWork: report.completedWork,
+      difficulties: report.difficulties || "",
+      nextWeekPlan: report.nextWeekPlan || "",
+      progress: String(report.progress),
+    });
+    setSelectedFiles([]);
+    setRemovedAttachmentIds([]);
+    setOpenForm(true);
+    setSelectedReport(null);
+    setError("");
+    setSuccess("");
   };
 
-  const Submit = async (e) => {
-    e.preventDefault();
+  const Submit = async (event) => {
+    event.preventDefault();
     setSaving(true);
     setError("");
     setSuccess("");
 
     try {
-      await createReport(formData);
-      setSuccess("Rapport soumis avec succès");
-      CloseForm();
+      const payload = {
+        ...formData,
+        ...(removedAttachmentIds.length && {
+          removedAttachmentIds: removedAttachmentIds.join(","),
+        }),
+      };
+
+      if (editingReport) {
+        await updateReport(editingReport.id, payload, selectedFiles);
+        setSuccess("Rapport modifié avec succès");
+      } else {
+        await createReport(payload, selectedFiles);
+        setSuccess("Rapport soumis avec succès");
+      }
+
+      ResetForm();
       loadReports();
     } catch (error) {
-      setError(error.response?.data?.message || "Erreur lors de l'envoi");
+      setError(error.response?.data?.message || "Erreur lors de l'enregistrement");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const Delete = async (report) => {
+    const confirmDelete = window.confirm("Supprimer ce rapport ?");
+
+    if (!confirmDelete) return;
+
+    setSaving(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      await deleteReport(report.id);
+      setSuccess("Rapport supprimé avec succès");
+      loadReports();
+    } catch (error) {
+      setError(error.response?.data?.message || "Erreur lors de la suppression");
     } finally {
       setSaving(false);
     }
@@ -73,7 +154,7 @@ function StudentReportsPage() {
 
   return (
     <>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-800">
             Rapports hebdomadaires
@@ -86,13 +167,23 @@ function StudentReportsPage() {
 
         {!openForm && (
           <button
-            onClick={OpenForm}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-medium"
+            onClick={OpenCreateForm}
+            disabled={!submissionContext?.canCreate}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-medium disabled:opacity-50"
           >
             Nouveau rapport
           </button>
         )}
       </div>
+
+      {submissionContext && (
+        <div className="mb-6 bg-blue-50 border border-blue-200 text-blue-800 px-5 py-4 rounded-2xl">
+          <p className="font-medium">
+            Semaine en cours : {submissionContext.weekLabel}
+          </p>
+          <p className="text-sm mt-1">{submissionContext.message}</p>
+        </div>
+      )}
 
       {error && (
         <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-5 py-3 rounded-2xl">
@@ -109,10 +200,16 @@ function StudentReportsPage() {
       {openForm && (
         <ReportForm
           formData={formData}
+          existingAttachments={editingReport?.attachments || []}
+          removedAttachmentIds={removedAttachmentIds}
+          selectedFiles={selectedFiles}
           onChange={Change}
+          onFileChange={FileChange}
+          onRemoveExistingAttachment={RemoveExistingAttachment}
           onSubmit={Submit}
-          onCancel={CloseForm}
+          onCancel={ResetForm}
           saving={saving}
+          isEdit={Boolean(editingReport)}
         />
       )}
 
@@ -121,7 +218,20 @@ function StudentReportsPage() {
           Chargement...
         </div>
       ) : (
-        <ReportTable reports={reports} />
+        <ReportTable
+          reports={reports}
+          missingWeeks={missingWeeks}
+          onView={setSelectedReport}
+          onEdit={OpenEditForm}
+          onDelete={Delete}
+        />
+      )}
+
+      {selectedReport && (
+        <ReportDetailsModal
+          report={selectedReport}
+          onClose={() => setSelectedReport(null)}
+        />
       )}
     </>
   );

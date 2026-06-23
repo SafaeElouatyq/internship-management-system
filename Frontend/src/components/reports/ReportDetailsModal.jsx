@@ -1,5 +1,17 @@
-function ReportDetailsModal({ report, onClose }) {
+import ReportStatusBadge from "./ReportStatusBadge";
+import { getReportAttachmentUrl } from "../../utils/reportUtils.jsx";
+
+function ReportDetailsModal({
+  report,
+  onClose,
+  showSupervisorComment = false,
+  supervisorComment = "",
+  onCommentChange,
+  onCommentSubmit,
+  savingComment = false,
+}) {
   const student = report.internship?.student?.user;
+  const attachments = report.attachments || [];
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
@@ -11,8 +23,10 @@ function ReportDetailsModal({ report, onClose }) {
             </h2>
 
             <p className="text-slate-500 mt-1">
-              {student?.firstName} {student?.lastName} —{" "}
-              {report.submittedAt?.slice(0, 10)}
+              {student
+                ? `${student.firstName} ${student.lastName} — `
+                : ""}
+              {report.weekLabel || report.weekStartDate || report.submittedAt?.slice(0, 10)}
             </p>
           </div>
 
@@ -23,6 +37,10 @@ function ReportDetailsModal({ report, onClose }) {
           >
             Fermer
           </button>
+        </div>
+
+        <div className="mb-6">
+          <ReportStatusBadge status={report.status} />
         </div>
 
         <div className="space-y-5 text-slate-700">
@@ -45,6 +63,68 @@ function ReportDetailsModal({ report, onClose }) {
             <p className="text-sm text-slate-500">Progression</p>
             <p className="font-medium mt-1">{report.progress}%</p>
           </div>
+
+          <div>
+            <p className="text-sm text-slate-500">Date de soumission</p>
+            <p className="font-medium mt-1">
+              {report.submittedAt?.slice(0, 16).replace("T", " ")}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-sm text-slate-500">Pièces jointes</p>
+
+            {attachments.length ? (
+              <div className="mt-2 space-y-2">
+                {attachments.map((attachment) => (
+                  <a
+                    key={attachment.id}
+                    href={getReportAttachmentUrl(attachment.path)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    {attachment.name}
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <p className="font-medium mt-1">-</p>
+            )}
+          </div>
+
+          {!showSupervisorComment && report.supervisorComment && (
+            <div>
+              <p className="text-sm text-slate-500">Commentaire encadrant</p>
+              <p className="font-medium mt-1">{report.supervisorComment}</p>
+            </div>
+          )}
+
+          {showSupervisorComment && (
+            <form onSubmit={onCommentSubmit} className="pt-2">
+              <label className="block text-sm font-medium mb-2">
+                Commentaire encadrant
+              </label>
+
+              <textarea
+                value={supervisorComment}
+                onChange={onCommentChange}
+                rows={4}
+                className="w-full border border-slate-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Ajoutez un commentaire pour l'étudiant..."
+              />
+
+              <div className="flex justify-end mt-4">
+                <button
+                  type="submit"
+                  disabled={savingComment}
+                  className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium disabled:opacity-50"
+                >
+                  {savingComment ? "Enregistrement..." : "Enregistrer le commentaire"}
+                </button>
+              </div>
+            </form>
+          )}
         </div>
       </div>
     </div>

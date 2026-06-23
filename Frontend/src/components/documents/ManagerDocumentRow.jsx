@@ -1,5 +1,9 @@
 import { Download } from "lucide-react";
-import { getDocumentUrl } from "../../services/documentService.jsx";
+import InternshipDocumentTypeBadge from "../internshipDocuments/InternshipDocumentTypeBadge";
+import { getDocumentUrl } from "../../services/internshipDocumentService.jsx";
+import {
+  getFileNameFromUrl,
+} from "../../utils/internshipDocumentUtils.jsx";
 
 function ManagerDocumentRow({ document }) {
   const student = document.internship?.student?.user;
@@ -16,18 +20,22 @@ function ManagerDocumentRow({ document }) {
       </td>
 
       <td className="px-4 py-4">
-        <div className="font-medium text-slate-800">{document.name}</div>
-        <div className="text-sm text-slate-500">{document.type}</div>
+        <div className="flex items-center gap-3 flex-wrap">
+          <InternshipDocumentTypeBadge type={document.type} />
+          <span className="font-medium text-slate-800">
+            {getFileNameFromUrl(document.fileUrl)}
+          </span>
+        </div>
       </td>
 
       <td className="px-4 py-4 text-slate-600 whitespace-nowrap">
-        {document.uploadedAt?.slice(0, 10)}
+        {document.createdAt?.slice(0, 10)}
       </td>
 
       <td className="px-2 py-4">
         <div className="flex items-center justify-center">
           <a
-            href={getDocumentUrl(document.path)}
+            href={getDocumentUrl(document.fileUrl)}
             download
             target="_blank"
             rel="noreferrer"

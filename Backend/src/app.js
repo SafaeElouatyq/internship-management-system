@@ -9,7 +9,11 @@ import departmentHeadRoutes from "./routes/departmentHeadRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
 import meetingRoutes from "./routes/meetingRoutes.js";
 import documentRoutes from "./routes/documentRoutes.js";
+import pfeDocumentRoutes from "./routes/pfeDocumentRoutes.js";
 import finalDecisionRoutes from "./routes/finalDecisionRoutes.js";
+import supervisorInternshipRoutes from "./routes/supervisorInternshipRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
+import complaintRoutes from "./routes/complaintRoutes.js";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -33,8 +37,10 @@ app.use("/api/department-head", departmentHeadRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/meetings", meetingRoutes);
 app.use("/api/documents", documentRoutes);
+app.use("/api/pfe-documents", pfeDocumentRoutes);
 app.use("/api/final-decisions", finalDecisionRoutes);
-
-
+app.use("/api/supervisor", supervisorInternshipRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/complaints", complaintRoutes);
 
 export default app;

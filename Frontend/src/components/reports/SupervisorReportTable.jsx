@@ -21,8 +21,9 @@ function SupervisorReportTable({ reports, onView }) {
           <thead className="bg-slate-100">
             <tr>
               <th className="text-left px-4 py-4">Étudiant</th>
-              <th className="text-left px-4 py-4">Date</th>
+              <th className="text-left px-4 py-4">Semaine</th>
               <th className="text-left px-4 py-4">Progression</th>
+              <th className="text-left px-4 py-4">Statut</th>
               <th className="text-center px-2 py-4 w-44">Action</th>
             </tr>
           </thead>
