@@ -7,6 +7,7 @@ import {
   markNotificationAsRead,
 } from "../../services/notificationService.jsx";
 import { useNotifications } from "../../context/NotificationContext.jsx";
+import { openNotificationLink } from "../../utils/notificationNavigation.jsx";
 import {
   getNotificationTypeStyle,
   NOTIFICATION_TYPE_LABELS,
@@ -39,18 +40,26 @@ function NotificationsList() {
     }
   };
 
+  const MarkReadLocally = (notificationId) => {
+    setNotifications((current) =>
+      current.map((notification) =>
+        notification.id === notificationId
+          ? { ...notification, isRead: true }
+          : notification,
+      ),
+    );
+    setUnreadCount((current) => Math.max(0, current - 1));
+  };
+
   const OpenNotification = async (notification) => {
     try {
-      if (!notification.isRead) {
-        await markNotificationAsRead(notification.id);
-        await refreshUnreadCount();
-      }
-
-      if (notification.link) {
-        navigate(notification.link);
-      }
-
-      loadNotifications();
+      await openNotificationLink({
+        notification,
+        navigate,
+        markAsRead: markNotificationAsRead,
+        refreshUnreadCount,
+        onReadLocally: MarkReadLocally,
+      });
     } catch (error) {
       setError(
         error.response?.data?.message ||

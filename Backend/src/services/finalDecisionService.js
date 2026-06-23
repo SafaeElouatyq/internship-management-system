@@ -1,6 +1,7 @@
 import prisma from "../config/prisma.js";
 import { createNotification } from "./notificationService.js";
 import { getInternshipUserIds } from "./internshipWorkflowService.js";
+import { notificationLinks } from "../utils/notificationLinks.js";
 
 const internshipInclude = {
   student: {
@@ -135,7 +136,7 @@ export const createFinalDecision = async ({
           : "Votre soutenance n'a pas été autorisée.",
         {
           type: decision === "DEFENSE_AUTHORIZED" ? "SUCCESS" : "WARNING",
-          link: "/student/internship",
+          link: notificationLinks.student.internship({ detail: true }),
         },
       );
     }

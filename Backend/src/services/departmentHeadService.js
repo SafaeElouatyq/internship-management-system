@@ -1,6 +1,7 @@
 import prisma from "../config/prisma.js";
 import { createNotification } from "./notificationService.js";
 import { getInternshipUserIds } from "./internshipWorkflowService.js";
+import { notificationLinks } from "../utils/notificationLinks.js";
 
 const includeRelations = {
   student: {
@@ -117,7 +118,7 @@ export const assignAcademicSupervisor = async (internshipId, supervisorId) => {
         "Un encadrant académique a été assigné à votre stage.",
         {
           type: "SUCCESS",
-          link: "/student/internship",
+          link: notificationLinks.student.internship({ detail: true }),
         },
       );
     }
@@ -129,7 +130,9 @@ export const assignAcademicSupervisor = async (internshipId, supervisorId) => {
         "Un nouveau stage vous a été assigné.",
         {
           type: "ACTION",
-          link: `/supervisor/internships/${updatedInternship.id}`,
+          link: notificationLinks.supervisor.internshipDetail(
+            updatedInternship.id,
+          ),
         },
       );
     }

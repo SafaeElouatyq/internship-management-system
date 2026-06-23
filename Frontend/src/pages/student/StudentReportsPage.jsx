@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import ReportDetailsModal from "../../components/reports/ReportDetailsModal";
 import ReportForm from "../../components/reports/ReportForm";
 import ReportTable from "../../components/reports/ReportTable";
@@ -17,6 +18,7 @@ const initialForm = {
 };
 
 function StudentReportsPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [reports, setReports] = useState([]);
   const [missingWeeks, setMissingWeeks] = useState([]);
   const [submissionContext, setSubmissionContext] = useState(null);
@@ -34,6 +36,28 @@ function StudentReportsPage() {
   useEffect(() => {
     loadReports();
   }, []);
+
+  useEffect(() => {
+    if (loading) {
+      return;
+    }
+
+    const reportId = searchParams.get("reportId");
+
+    if (!reportId) {
+      return;
+    }
+
+    const report = reports.find((entry) => String(entry.id) === reportId);
+
+    if (report) {
+      setSelectedReport(report);
+    }
+
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("reportId");
+    setSearchParams(nextParams, { replace: true });
+  }, [loading, reports, searchParams, setSearchParams]);
 
   const loadReports = async () => {
     try {

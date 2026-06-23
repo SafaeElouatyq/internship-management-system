@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import PfeDocumentDetailsModal from "../../components/pfeDocuments/PfeDocumentDetailsModal";
 import PfeDocumentTable from "../../components/pfeDocuments/PfeDocumentTable";
 import {
@@ -11,6 +12,7 @@ import {
 } from "../../utils/pfeDocumentUtils.jsx";
 
 function SupervisorPfeDocumentsPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [documents, setDocuments] = useState([]);
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [validationStatus, setValidationStatus] = useState("");
@@ -26,6 +28,34 @@ function SupervisorPfeDocumentsPage() {
   useEffect(() => {
     loadDocuments();
   }, []);
+
+  useEffect(() => {
+    if (loading) {
+      return;
+    }
+
+    const documentId = searchParams.get("documentId");
+
+    if (!documentId) {
+      return;
+    }
+
+    const document = documents.find((entry) => String(entry.id) === documentId);
+
+    if (document) {
+      setSelectedDocument(document);
+      setValidationStatus(
+        document.validationStatus === "PENDING" ? "" : document.validationStatus,
+      );
+      setSupervisorComment(document.supervisorComment || "");
+      setError("");
+      setSuccess("");
+    }
+
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("documentId");
+    setSearchParams(nextParams, { replace: true });
+  }, [loading, documents, searchParams, setSearchParams]);
 
   const loadDocuments = async () => {
     try {

@@ -20,6 +20,7 @@ import {
   syncReportLateStatus,
   transitionAfterWeeklyReport,
 } from "./internshipWorkflowService.js";
+import { notificationLinks } from "../utils/notificationLinks.js";
 
 const reportInclude = {
   internship: {
@@ -309,7 +310,7 @@ export const createWeeklyReport = async (userId, reportData, files = []) => {
       "Un étudiant a soumis un rapport hebdomadaire.",
       {
         type: "ACTION",
-        link: "/supervisor/reports",
+        link: notificationLinks.supervisor.reports(report.id),
       },
     );
   }
@@ -565,7 +566,7 @@ export const updateSupervisorReportComment = async (
       "Votre encadrant a laissé un commentaire sur un rapport hebdomadaire.",
       {
         type: "INFO",
-        link: "/student/reports",
+        link: notificationLinks.student.reports(report.id),
       },
     );
   }

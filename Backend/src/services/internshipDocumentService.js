@@ -5,6 +5,7 @@ import { uploadDir } from "../config/upload.js";
 import { createNotification } from "./notificationService.js";
 import { notifyInternshipManagers } from "../utils/notificationHelpers.js";
 import { getInternshipUserIds } from "./internshipWorkflowService.js";
+import { notificationLinks } from "../utils/notificationLinks.js";
 
 const ALLOWED_TYPES = ["CONVENTION", "ATTESTATION", "OTHER"];
 
@@ -160,7 +161,7 @@ export const uploadInternshipDocument = async (
       "Un étudiant a téléversé un document administratif de stage.",
       {
         type: "INFO",
-        link: `/supervisor/internships/${internshipId}`,
+        link: notificationLinks.supervisor.internshipDetail(internshipId),
       },
     );
   }
@@ -169,7 +170,7 @@ export const uploadInternshipDocument = async (
     title: "Document de stage téléversé",
     message: "Un étudiant a téléversé un document administratif.",
     type: "ACTION",
-    link: `/manager/internships/${internshipId}`,
+    link: notificationLinks.manager.internshipDetail(internshipId),
   });
 
   return document;

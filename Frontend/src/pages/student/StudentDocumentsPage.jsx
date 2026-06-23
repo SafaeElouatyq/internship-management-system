@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import PfeDocumentDetailsModal from "../../components/pfeDocuments/PfeDocumentDetailsModal";
 import PfeDocumentTable from "../../components/pfeDocuments/PfeDocumentTable";
 import PfeDocumentUploadForm from "../../components/pfeDocuments/PfeDocumentUploadForm";
@@ -9,6 +10,7 @@ import {
 } from "../../services/pfeDocumentService.jsx";
 
 function StudentDocumentsPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [documents, setDocuments] = useState([]);
   const [missingCategories, setMissingCategories] = useState([]);
   const [category, setCategory] = useState("");
@@ -23,6 +25,28 @@ function StudentDocumentsPage() {
   useEffect(() => {
     loadDocuments();
   }, []);
+
+  useEffect(() => {
+    if (loading) {
+      return;
+    }
+
+    const documentId = searchParams.get("documentId");
+
+    if (!documentId) {
+      return;
+    }
+
+    const document = documents.find((entry) => String(entry.id) === documentId);
+
+    if (document) {
+      setSelectedDocument(document);
+    }
+
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("documentId");
+    setSearchParams(nextParams, { replace: true });
+  }, [loading, documents, searchParams, setSearchParams]);
 
   const loadDocuments = async () => {
     try {

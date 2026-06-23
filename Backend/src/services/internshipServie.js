@@ -1,6 +1,7 @@
 import prisma from "../config/prisma.js";
 import { createNotification } from "./notificationService.js";
 import { notifyInternshipManagers } from "../utils/notificationHelpers.js";
+import { notificationLinks } from "../utils/notificationLinks.js";
 
 const includeRelations = {
   student: {
@@ -274,7 +275,7 @@ export const addInternship = async (internshipData, userId) => {
       message: `${internship.student?.user?.firstName || "Un étudiant"} ${internship.student?.user?.lastName || ""}`.trim() +
         " a soumis une déclaration de stage.",
       type: "ACTION",
-      link: `/manager/internships/${internship.id}`,
+      link: notificationLinks.manager.internshipDetail(internship.id),
     });
 
     return internship;
@@ -460,7 +461,7 @@ export const updateAdministrativeStatus = async (
           "Votre dossier administratif a été marqué comme complet.",
           {
             type: "SUCCESS",
-            link: "/student/internship",
+            link: notificationLinks.student.internship({ detail: true }),
           },
         );
       }
@@ -476,7 +477,7 @@ export const updateAdministrativeStatus = async (
           "Veuillez compléter ou téléverser les documents manquants de votre dossier.",
           {
             type: "WARNING",
-            link: "/student/internship",
+            link: notificationLinks.student.internship(),
           },
         );
       }
@@ -532,7 +533,7 @@ export const validateInternshipDeclaration = async (internshipId) => {
         "Votre déclaration de stage a été validée par le gestionnaire.",
         {
           type: "SUCCESS",
-          link: "/student/internship",
+          link: notificationLinks.student.internship({ detail: true }),
         },
       );
     }
@@ -580,7 +581,7 @@ export const rejectInternshipDeclaration = async (internshipId) => {
         "Votre déclaration de stage a été refusée par le gestionnaire.",
         {
           type: "WARNING",
-          link: "/student/internship",
+          link: notificationLinks.student.internship({ detail: true }),
         },
       );
     }

@@ -11,8 +11,9 @@ import {
   getInternshipUserIds,
   syncPfeWorkflowStatus,
 } from "./internshipWorkflowService.js";
+import { notificationLinks } from "../utils/notificationLinks.js";
 
-const notifySupervisorPfeUpload = async (internship, category) => {
+const notifySupervisorPfeUpload = async (internship, category, documentId) => {
   if (!internship.supervisorId) {
     return;
   }
@@ -33,7 +34,7 @@ const notifySupervisorPfeUpload = async (internship, category) => {
       : `Un étudiant a téléversé un document PFE (${PFE_CATEGORY_LABELS[category]}).`,
     {
       type: "ACTION",
-      link: "/supervisor/pfe-documents",
+      link: notificationLinks.supervisor.pfeDocuments(documentId),
     },
   );
 };
@@ -220,7 +221,7 @@ export const uploadPfeDocument = async (userId, { category }, file) => {
       include: documentInclude,
     });
 
-    await notifySupervisorPfeUpload(internship, category);
+    await notifySupervisorPfeUpload(internship, category, updated.id);
 
     return updated;
   }
@@ -237,7 +238,7 @@ export const uploadPfeDocument = async (userId, { category }, file) => {
     include: documentInclude,
   });
 
-  await notifySupervisorPfeUpload(internship, category);
+  await notifySupervisorPfeUpload(internship, category, created.id);
 
   return created;
 };
@@ -399,14 +400,19 @@ export const validatePfeDocument = async (
       NEEDS_CORRECTION: "à corriger",
       REJECTED: "rejeté",
     };
+    const hasComment = supervisorComment?.trim();
 
     await createNotification(
       userIds.studentUserId,
-      "Décision sur un document PFE",
-      `Votre document a été ${statusLabels[validationStatus] || "mis à jour"}.`,
+      hasComment && validationStatus !== "VALIDATED"
+        ? "Commentaire sur votre rapport PFE"
+        : "Décision sur un document PFE",
+      hasComment && validationStatus !== "VALIDATED"
+        ? "Votre encadrant a laissé un commentaire sur votre document PFE."
+        : `Votre document a été ${statusLabels[validationStatus] || "mis à jour"}.`,
       {
         type: validationStatus === "VALIDATED" ? "SUCCESS" : "WARNING",
-        link: "/student/documents",
+        link: notificationLinks.student.documents(updatedDocument.id),
       },
     );
   }

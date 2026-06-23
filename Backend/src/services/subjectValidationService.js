@@ -2,6 +2,7 @@ import prisma from "../config/prisma.js";
 import { getSupervisorByUserId } from "./supervisorInternshipService.js";
 import { createNotification } from "./notificationService.js";
 import { getInternshipUserIds } from "./internshipWorkflowService.js";
+import { notificationLinks } from "../utils/notificationLinks.js";
 
 const internshipInclude = {
   student: {
@@ -142,7 +143,7 @@ export const createSubjectValidation = async (
         `Votre sujet a été ${decisionLabels[decision]}.`,
         {
           type: isApproved ? "SUCCESS" : "WARNING",
-          link: "/student/internship",
+          link: notificationLinks.student.internship({ detail: true }),
         },
       );
     }
