@@ -7,6 +7,7 @@ import {
   Users,
   BookOpen,
   Settings,
+  CircleHelp,
   LogOut,
 } from "lucide-react";
 
@@ -47,8 +48,14 @@ function SupervisorSideBar() {
       path: "/supervisor/settings",
       icon: Settings,
     },
+    // {
+    //   title : "Aide",
+    //   path : "/supervisor/help",
+    //   icon : circleHelp,
+    // },
   ];
-
+      
+  
   return (
     <aside className="w-72 bg-white border-r border-slate-200 flex flex-col justify-between">
       <div className="pt-10">

@@ -250,7 +250,7 @@ export const createWeeklyReport = async (userId, reportData, files = []) => {
 
   if (!submissionContext.canCreate) {
     throw new Error(
-      "La fenêtre de soumission est fermée. Soumission autorisée du samedi 19h00 au samedi 19h00 suivant (heure du Maroc).",
+      "La fenêtre de soumission est fermée. Soumission autorisée du samedi 19h00 au samedi 19h00 suivant .",
     );
   }
 
@@ -327,7 +327,7 @@ export const updateWeeklyReport = async (userId, reportId, reportData, files = [
 
   if (!canModifyReport(weekStartDate)) {
     throw new Error(
-      "Ce rapport est en lecture seule. Modification autorisée uniquement pendant la fenêtre du samedi 19h00 au lundi 10h00 (heure du Maroc).",
+      "Ce rapport est en lecture seule. Modification autorisée uniquement pendant la fenêtre du samedi 19h00 au lundi 10h00 .",
     );
   }
 
@@ -393,7 +393,7 @@ export const deleteWeeklyReport = async (userId, reportId) => {
 
   if (!canModifyReport(weekStartDate)) {
     throw new Error(
-      "La suppression n'est autorisée que pendant la fenêtre du samedi 19h00 au lundi 10h00 (heure du Maroc).",
+      "La suppression n'est autorisée que pendant la fenêtre du samedi 19h00 au lundi 10h00 .",
     );
   }
 
