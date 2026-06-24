@@ -11,7 +11,7 @@ import {
   administrativeStatusLabels,
   canManageInternship,
   canVerifyAdministrativeFile,
-  statusLabels,
+  getStatusLabel,
 } from "../../utils/internshipUtils.jsx";
 
 const levelLabels = {
@@ -316,7 +316,7 @@ function InternshipDetailPage() {
             <div>
               <p className="text-sm text-slate-500">Statut actuel</p>
               <p className="font-medium">
-                {statusLabels[internship.status] || internship.status || "-"}
+                {getStatusLabel(internship.status)}
               </p>
             </div>
 

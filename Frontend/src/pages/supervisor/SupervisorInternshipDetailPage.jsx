@@ -9,7 +9,7 @@ import {
   getAssignedInternship,
   validateSubject,
 } from "../../services/supervisorInternshipService.jsx";
-import { statusLabels } from "../../utils/internshipUtils.jsx";
+import { getStatusLabel } from "../../utils/internshipUtils.jsx";
 import {
   canScheduleFirstMeeting,
   canValidateSubject,
@@ -256,7 +256,7 @@ function SupervisorInternshipDetailPage() {
             <div>
               <p className="text-sm text-slate-500">Statut</p>
               <p className="font-medium">
-                {statusLabels[internship.status] || internship.status || "-"}
+                {getStatusLabel(internship.status)}
               </p>
             </div>
 

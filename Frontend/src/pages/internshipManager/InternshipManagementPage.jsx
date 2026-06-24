@@ -8,6 +8,7 @@ import {
   updateAdministrativeStatus,
   validateInternship,
 } from "../../services/internshipManagerService.jsx";
+import { internshipStatusOptions } from "../../utils/internshipUtils.jsx";
 
 function InternshipManagementPage() {
   const navigate = useNavigate();
@@ -207,14 +208,11 @@ function InternshipManagementPage() {
             className="w-full border border-slate-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Tous les statuts</option>
-            <option value="DECLARED">Déclaré</option>
-            <option value="ADMIN_PENDING">En attente</option>
-            <option value="ADMIN_VALIDATED">Stage validé</option>
-            <option value="SUPERVISOR_ASSIGNED">Encadrant affecté</option>
-            <option value="SUBJECT_PENDING">Sujet en attente</option>
-            <option value="SUBJECT_VALIDATED">Sujet validé</option>
-            <option value="IN_PROGRESS">En cours</option>
-            <option value="CLOSED">Clôturé</option>
+            {internshipStatusOptions.map(({ value, label }) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
           </select>
 
           <select

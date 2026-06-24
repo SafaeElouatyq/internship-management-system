@@ -3,7 +3,7 @@ import {
   administrativeStatusLabels,
   canManageInternship,
   canVerifyAdministrativeFile,
-  statusLabels,
+  getStatusLabel,
 } from "../../utils/internshipUtils.jsx";
 
 function InternshipRow({
@@ -47,7 +47,7 @@ function InternshipRow({
 
       <td className="px-4 py-4">
         <span className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
-          {statusLabels[internship.status] || internship.status}
+          {getStatusLabel(internship.status)}
         </span>
       </td>
 
