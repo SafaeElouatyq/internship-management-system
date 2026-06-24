@@ -17,6 +17,7 @@ function SupervisorReportsPage() {
   const [loading, setLoading] = useState(true);
   const [savingComment, setSavingComment] = useState(false);
   const [error, setError] = useState("");
+  const [commentError, setCommentError] = useState("");
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
@@ -38,7 +39,8 @@ function SupervisorReportsPage() {
 
     if (report) {
       setSelectedReport(report);
-      setSupervisorComment(report.supervisorComment || "");
+      setSupervisorComment("");
+      setCommentError("");
       setError("");
       setSuccess("");
     }
@@ -70,7 +72,8 @@ function SupervisorReportsPage() {
 
   const OpenReport = (report) => {
     setSelectedReport(report);
-    setSupervisorComment(report.supervisorComment || "");
+    setSupervisorComment("");
+    setCommentError("");
     setError("");
     setSuccess("");
   };
@@ -78,25 +81,27 @@ function SupervisorReportsPage() {
   const CloseReport = () => {
     setSelectedReport(null);
     setSupervisorComment("");
+    setCommentError("");
   };
 
   const SubmitComment = async (event) => {
     event.preventDefault();
     setSavingComment(true);
-    setError("");
+    setCommentError("");
     setSuccess("");
 
     try {
-      const response = await updateSupervisorReportComment(
+      await updateSupervisorReportComment(
         selectedReport.id,
         supervisorComment,
       );
 
-      setSelectedReport(response.report);
+      setSupervisorComment("");
+      setSelectedReport(null);
       setSuccess("Commentaire enregistré avec succès");
-      loadReports();
+      await loadReports();
     } catch (error) {
-      setError(
+      setCommentError(
         error.response?.data?.message ||
           "Erreur lors de l'enregistrement du commentaire",
       );
@@ -182,6 +187,7 @@ function SupervisorReportsPage() {
           onCommentChange={(event) => setSupervisorComment(event.target.value)}
           onCommentSubmit={SubmitComment}
           savingComment={savingComment}
+          commentError={commentError}
         />
       )}
     </>
