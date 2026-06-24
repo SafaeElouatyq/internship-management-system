@@ -1,5 +1,9 @@
 import prisma from "../config/prisma.js";
 import { MIN_MEETINGS_BY_LEVEL } from "../utils/meetingRules.js";
+import { notifyDepartmentHeads } from "../utils/notificationHelpers.js";
+import { createNotification } from "./notificationService.js";
+import { getInternshipUserIds } from "./internshipWorkflowService.js";
+import { notificationLinks } from "../utils/notificationLinks.js";
 
 const meetingInclude = {
   internship: {
@@ -167,6 +171,9 @@ export const createMeeting = async (userId, meetingData) => {
       id: Number(internshipId),
       supervisorId: supervisor.id,
     },
+    include: {
+      student: true,
+    },
   });
 
   if (!internship) {
@@ -208,6 +215,27 @@ export const createMeeting = async (userId, meetingData) => {
         status: "SUBJECT_PENDING",
       },
     });
+
+    await notifyDepartmentHeads(internship.student?.departmentId, {
+      title: "Sujet en attente de validation",
+      message: "Un sujet de stage est en attente après la première réunion.",
+      type: "ACTION",
+      link: notificationLinks.departmentHead.internships(),
+    });
+  }
+
+  const userIds = await getInternshipUserIds(internship.id);
+
+  if (userIds?.studentUserId) {
+    await createNotification(
+      userIds.studentUserId,
+      "Réunion planifiée",
+      "Votre encadrant a planifié une réunion de suivi.",
+      {
+        type: "INFO",
+        link: notificationLinks.student.meetings(),
+      },
+    );
   }
 
   return meeting;

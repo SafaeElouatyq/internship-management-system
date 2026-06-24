@@ -1,5 +1,5 @@
 import InternshipDocumentsPanel from "../internshipDocuments/InternshipDocumentsPanel";
-import { statusLabels } from "../../utils/internshipUtils.jsx";
+import { getStatusLabel } from "../../utils/internshipUtils.jsx";
 
 function StudentInternshipDetailsModal({ internship, onClose }) {
   const company = internship.company;
@@ -14,7 +14,7 @@ function StudentInternshipDetailsModal({ internship, onClose }) {
             </h2>
 
             <p className="text-slate-500 mt-1">
-              {statusLabels[internship.status] || internship.status}
+              {getStatusLabel(internship.status)}
             </p>
           </div>
 

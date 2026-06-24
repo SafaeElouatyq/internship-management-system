@@ -1,20 +1,7 @@
-const administrativeStatusLabels = {
-  COMPLETE: "Complet",
-  INCOMPLETE: "Incomplet",
-  PENDING_DOCUMENTS: "Documents en attente",
-  REJECTED: "Rejeté",
-};
-
-const statusLabels = {
-  DECLARED: "Déclaré",
-  ADMIN_PENDING: "En attente",
-  ADMIN_VALIDATED: "Stage validé",
-  SUPERVISOR_ASSIGNED: "Encadrant affecté",
-  SUBJECT_PENDING: "Sujet en attente",
-  SUBJECT_VALIDATED: "Sujet validé",
-  IN_PROGRESS: "En cours",
-  CLOSED: "Clôturé",
-};
+import {
+  administrativeStatusLabels,
+  getStatusLabel,
+} from "../../utils/internshipUtils.jsx";
 
 function InternshipDetailsModal({ internship, onClose }) {
   const student = internship.student?.user;
@@ -68,9 +55,7 @@ function InternshipDetailsModal({ internship, onClose }) {
 
           <div>
             <p className="text-sm text-slate-500">Statut</p>
-            <p className="font-medium">
-              {statusLabels[internship.status] || internship.status}
-            </p>
+            <p className="font-medium">{getStatusLabel(internship.status)}</p>
           </div>
 
           <div>

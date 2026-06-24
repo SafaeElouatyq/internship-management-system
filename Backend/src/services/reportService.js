@@ -20,6 +20,7 @@ import {
   syncReportLateStatus,
   transitionAfterWeeklyReport,
 } from "./internshipWorkflowService.js";
+import { notificationLinks } from "../utils/notificationLinks.js";
 
 const reportInclude = {
   internship: {
@@ -249,7 +250,7 @@ export const createWeeklyReport = async (userId, reportData, files = []) => {
 
   if (!submissionContext.canCreate) {
     throw new Error(
-      "La fenêtre de soumission est fermée. Soumission autorisée du samedi 19h00 au samedi 19h00 suivant (heure du Maroc).",
+      "La fenêtre de soumission est fermée. Soumission autorisée du samedi 19h00 au samedi 19h00 suivant .",
     );
   }
 
@@ -307,6 +308,10 @@ export const createWeeklyReport = async (userId, reportData, files = []) => {
       userIds.supervisorUserId,
       "Nouveau rapport hebdomadaire",
       "Un étudiant a soumis un rapport hebdomadaire.",
+      {
+        type: "ACTION",
+        link: notificationLinks.supervisor.reports(report.id),
+      },
     );
   }
 
@@ -322,7 +327,7 @@ export const updateWeeklyReport = async (userId, reportId, reportData, files = [
 
   if (!canModifyReport(weekStartDate)) {
     throw new Error(
-      "Ce rapport est en lecture seule. Modification autorisée uniquement pendant la fenêtre du samedi 19h00 au lundi 10h00 (heure du Maroc).",
+      "Ce rapport est en lecture seule. Modification autorisée uniquement pendant la fenêtre du samedi 19h00 au lundi 10h00 .",
     );
   }
 
@@ -388,7 +393,7 @@ export const deleteWeeklyReport = async (userId, reportId) => {
 
   if (!canModifyReport(weekStartDate)) {
     throw new Error(
-      "La suppression n'est autorisée que pendant la fenêtre du samedi 19h00 au lundi 10h00 (heure du Maroc).",
+      "La suppression n'est autorisée que pendant la fenêtre du samedi 19h00 au lundi 10h00 .",
     );
   }
 
@@ -540,9 +545,9 @@ export const updateSupervisorReportComment = async (
   supervisorComment,
 ) => {
   const supervisor = await getSupervisorByUserId(userId);
-  await getSupervisorReportById(supervisor.id, reportId);
+  const report = await getSupervisorReportById(supervisor.id, reportId);
 
-  return await prisma.weeklyReport.update({
+  const updatedReport = await prisma.weeklyReport.update({
     where: {
       id: Number(reportId),
     },
@@ -551,6 +556,22 @@ export const updateSupervisorReportComment = async (
     },
     include: reportInclude,
   });
+
+  const studentUserId = report.internship?.student?.user?.id;
+
+  if (studentUserId && supervisorComment?.trim()) {
+    await createNotification(
+      studentUserId,
+      "Commentaire sur votre rapport",
+      "Votre encadrant a laissé un commentaire sur un rapport hebdomadaire.",
+      {
+        type: "INFO",
+        link: notificationLinks.student.reports(report.id),
+      },
+    );
+  }
+
+  return updatedReport;
 };
 
 export const getSupervisorReportStats = async (userId) => {

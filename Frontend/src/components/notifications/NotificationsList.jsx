@@ -1,11 +1,21 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ExternalLink } from "lucide-react";
 import {
   getNotifications,
   markAllNotificationsAsRead,
   markNotificationAsRead,
 } from "../../services/notificationService.jsx";
+import { useNotifications } from "../../context/NotificationContext.jsx";
+import { openNotificationLink } from "../../utils/notificationNavigation.jsx";
+import {
+  getNotificationTypeStyle,
+  NOTIFICATION_TYPE_LABELS,
+} from "../../utils/notificationUtils.jsx";
 
 function NotificationsList() {
+  const navigate = useNavigate();
+  const { refreshUnreadCount } = useNotifications();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -22,6 +32,7 @@ function NotificationsList() {
       setNotifications(data.notifications);
       setUnreadCount(data.unreadCount);
       setError("");
+      await refreshUnreadCount();
     } catch (error) {
       setError(error.response?.data?.message || "Erreur lors du chargement");
     } finally {
@@ -29,14 +40,30 @@ function NotificationsList() {
     }
   };
 
-  const MarkAsRead = async (notificationId) => {
+  const MarkReadLocally = (notificationId) => {
+    setNotifications((current) =>
+      current.map((notification) =>
+        notification.id === notificationId
+          ? { ...notification, isRead: true }
+          : notification,
+      ),
+    );
+    setUnreadCount((current) => Math.max(0, current - 1));
+  };
+
+  const OpenNotification = async (notification) => {
     try {
-      await markNotificationAsRead(notificationId);
-      loadNotifications();
+      await openNotificationLink({
+        notification,
+        navigate,
+        markAsRead: markNotificationAsRead,
+        refreshUnreadCount,
+        onReadLocally: MarkReadLocally,
+      });
     } catch (error) {
       setError(
         error.response?.data?.message ||
-          "Erreur lors de la mise à jour de la notification",
+          "Erreur lors de l'ouverture de la notification",
       );
     }
   };
@@ -48,6 +75,7 @@ function NotificationsList() {
     try {
       await markAllNotificationsAsRead();
       setSuccess("Toutes les notifications ont été marquées comme lues");
+      await refreshUnreadCount();
       loadNotifications();
     } catch (error) {
       setError(
@@ -92,6 +120,26 @@ function NotificationsList() {
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-12 text-center text-slate-500">
           Chargement...
         </div>
+      ) : error ? (
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-12 text-center">
+          <h3 className="text-lg font-semibold text-slate-800">
+            Impossible de charger les notifications
+          </h3>
+          <p className="text-slate-500 mt-2">
+            Vérifiez votre connexion et réessayez.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              setLoading(true);
+              setError("");
+              loadNotifications();
+            }}
+            className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-medium"
+          >
+            Réessayer
+          </button>
+        </div>
       ) : notifications.length === 0 ? (
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-12 text-center">
           <h3 className="text-lg font-semibold text-slate-800">
@@ -106,15 +154,42 @@ function NotificationsList() {
           {notifications.map((notification) => (
             <div
               key={notification.id}
-              className={`bg-white rounded-2xl shadow-sm border p-5 ${
+              role="button"
+              tabIndex={0}
+              onClick={() => OpenNotification(notification)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  OpenNotification(notification);
+                }
+              }}
+              className={`rounded-2xl shadow-sm border p-5 cursor-pointer transition hover:shadow-md ${
                 notification.isRead
-                  ? "border-slate-200"
-                  : "border-blue-200 bg-blue-50/40"
+                  ? "bg-white border-slate-200"
+                  : "border-blue-300 bg-blue-50/60"
               }`}
             >
               <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h3 className="font-semibold text-slate-800">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-3 flex-wrap mb-2">
+                    <span
+                      className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${getNotificationTypeStyle(notification.type)}`}
+                    >
+                      {NOTIFICATION_TYPE_LABELS[notification.type] ||
+                        notification.type}
+                    </span>
+                    {!notification.isRead && (
+                      <span className="inline-flex rounded-full bg-red-500 text-white px-2 py-0.5 text-xs font-semibold">
+                        Non lu
+                      </span>
+                    )}
+                  </div>
+
+                  <h3
+                    className={`text-slate-800 ${
+                      notification.isRead ? "font-medium" : "font-bold"
+                    }`}
+                  >
                     {notification.title}
                   </h3>
                   <p className="text-slate-600 mt-1">{notification.message}</p>
@@ -123,13 +198,17 @@ function NotificationsList() {
                   </p>
                 </div>
 
-                {!notification.isRead && (
+                {notification.link && (
                   <button
                     type="button"
-                    onClick={() => MarkAsRead(notification.id)}
-                    className="text-sm text-blue-600 hover:text-blue-700 font-medium whitespace-nowrap"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      OpenNotification(notification);
+                    }}
+                    className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium whitespace-nowrap shrink-0"
                   >
-                    Marquer comme lu
+                    <ExternalLink size={16} />
+                    Ouvrir
                   </button>
                 )}
               </div>

@@ -13,6 +13,11 @@ export const getNotifications = async () => {
   return response.data;
 };
 
+export const getUnreadCount = async () => {
+  const response = await axios.get(`${API_URL}/unread-count`, getToken());
+  return response.data;
+};
+
 export const markNotificationAsRead = async (notificationId) => {
   const response = await axios.patch(
     `${API_URL}/${notificationId}/read`,

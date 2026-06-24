@@ -1,5 +1,5 @@
 import { Eye } from "lucide-react";
-import { statusLabels } from "../../utils/internshipUtils.jsx";
+import { getStatusLabel } from "../../utils/internshipUtils.jsx";
 import { subjectDecisionLabels } from "../../utils/subjectValidationUtils.jsx";
 
 function AssignedStudentRow({ internship, onView }) {
@@ -27,7 +27,7 @@ function AssignedStudentRow({ internship, onView }) {
 
       <td className="px-4 py-4">
         <span className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
-          {statusLabels[internship.status] || internship.status}
+          {getStatusLabel(internship.status)}
         </span>
       </td>
 

@@ -1,3 +1,20 @@
+/** Matches Backend/prisma/schema.prisma InternshipStatus enum (order preserved). */
+export const INTERNSHIP_STATUSES = [
+  "DECLARED",
+  "ADMIN_PENDING",
+  "ADMIN_VALIDATED",
+  "SUPERVISOR_ASSIGNED",
+  "SUBJECT_PENDING",
+  "SUBJECT_VALIDATED",
+  "IN_PROGRESS",
+  "REPORT_LATE",
+  "REPORT_WRITING",
+  "READY_FOR_DEFENSE",
+  "DEFENSE_AUTHORIZED",
+  "DEFENSE_NOT_AUTHORIZED",
+  "CLOSED",
+];
+
 export const statusLabels = {
   DECLARED: "Déclaré",
   ADMIN_PENDING: "En attente",
@@ -13,6 +30,14 @@ export const statusLabels = {
   DEFENSE_NOT_AUTHORIZED: "Soutenance refusée",
   CLOSED: "Clôturé",
 };
+
+export const internshipStatusOptions = INTERNSHIP_STATUSES.map((value) => ({
+  value,
+  label: statusLabels[value],
+}));
+
+export const getStatusLabel = (status) =>
+  statusLabels[status] || status || "-";
 
 export const administrativeStatusLabels = {
   COMPLETE: "Complet",

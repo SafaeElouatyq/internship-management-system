@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AssignedStudentsTable from "../../components/supervisor/AssignedStudentsTable";
 import { getAssignedInternships } from "../../services/supervisorInternshipService.jsx";
+import { internshipStatusOptions } from "../../utils/internshipUtils.jsx";
 
 function SupervisorStudentsPage() {
   const navigate = useNavigate();
@@ -77,10 +78,11 @@ function SupervisorStudentsPage() {
             className="w-full border border-slate-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Tous les statuts</option>
-            <option value="SUPERVISOR_ASSIGNED">Encadrant affecté</option>
-            <option value="SUBJECT_PENDING">Sujet en attente</option>
-            <option value="SUBJECT_VALIDATED">Sujet validé</option>
-            <option value="IN_PROGRESS">En cours</option>
+            {internshipStatusOptions.map(({ value, label }) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
           </select>
 
           <button

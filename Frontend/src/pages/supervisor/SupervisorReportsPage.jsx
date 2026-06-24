@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import ReportDetailsModal from "../../components/reports/ReportDetailsModal";
 import SupervisorReportTable from "../../components/reports/SupervisorReportTable";
 import {
@@ -7,6 +8,7 @@ import {
 } from "../../services/supervisorReportService.jsx";
 
 function SupervisorReportsPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [reports, setReports] = useState([]);
   const [selectedReport, setSelectedReport] = useState(null);
   const [supervisorComment, setSupervisorComment] = useState("");
@@ -20,6 +22,31 @@ function SupervisorReportsPage() {
   useEffect(() => {
     loadReports();
   }, []);
+
+  useEffect(() => {
+    if (loading) {
+      return;
+    }
+
+    const reportId = searchParams.get("reportId");
+
+    if (!reportId) {
+      return;
+    }
+
+    const report = reports.find((entry) => String(entry.id) === reportId);
+
+    if (report) {
+      setSelectedReport(report);
+      setSupervisorComment(report.supervisorComment || "");
+      setError("");
+      setSuccess("");
+    }
+
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("reportId");
+    setSearchParams(nextParams, { replace: true });
+  }, [loading, reports, searchParams, setSearchParams]);
 
   const loadReports = async () => {
     try {

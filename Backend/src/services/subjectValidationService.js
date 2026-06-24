@@ -2,6 +2,7 @@ import prisma from "../config/prisma.js";
 import { getSupervisorByUserId } from "./supervisorInternshipService.js";
 import { createNotification } from "./notificationService.js";
 import { getInternshipUserIds } from "./internshipWorkflowService.js";
+import { notificationLinks } from "../utils/notificationLinks.js";
 
 const internshipInclude = {
   student: {
@@ -132,10 +133,18 @@ export const createSubjectValidation = async (
     const userIds = await getInternshipUserIds(internship.id);
 
     if (userIds?.studentUserId) {
+      const isApproved = ["ACCEPTED", "ACCEPTED_WITH_REFORMULATION"].includes(
+        decision,
+      );
+
       await createNotification(
         userIds.studentUserId,
         "Décision sur le sujet de stage",
         `Votre sujet a été ${decisionLabels[decision]}.`,
+        {
+          type: isApproved ? "SUCCESS" : "WARNING",
+          link: notificationLinks.student.internship({ detail: true }),
+        },
       );
     }
 

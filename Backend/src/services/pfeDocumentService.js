@@ -11,6 +11,33 @@ import {
   getInternshipUserIds,
   syncPfeWorkflowStatus,
 } from "./internshipWorkflowService.js";
+import { notificationLinks } from "../utils/notificationLinks.js";
+
+const notifySupervisorPfeUpload = async (internship, category, documentId) => {
+  if (!internship.supervisorId) {
+    return;
+  }
+
+  const userIds = await getInternshipUserIds(internship.id);
+
+  if (!userIds?.supervisorUserId) {
+    return;
+  }
+
+  const isFinal = category === "FINAL";
+
+  await createNotification(
+    userIds.supervisorUserId,
+    isFinal ? "Rapport final PFE déposé" : "Nouveau document PFE",
+    isFinal
+      ? "Un étudiant a téléversé la version finale de son rapport PFE."
+      : `Un étudiant a téléversé un document PFE (${PFE_CATEGORY_LABELS[category]}).`,
+    {
+      type: "ACTION",
+      link: notificationLinks.supervisor.pfeDocuments(documentId),
+    },
+  );
+};
 
 const documentInclude = {
   internship: {
@@ -186,16 +213,20 @@ export const uploadPfeDocument = async (userId, { category }, file) => {
   if (existingDocument) {
     removeFile(existingDocument.path);
 
-    return await prisma.document.update({
+    const updated = await prisma.document.update({
       where: {
         id: existingDocument.id,
       },
       data: documentData,
       include: documentInclude,
     });
+
+    await notifySupervisorPfeUpload(internship, category, updated.id);
+
+    return updated;
   }
 
-  return await prisma.document.create({
+  const created = await prisma.document.create({
     data: {
       ...documentData,
       internship: {
@@ -206,6 +237,10 @@ export const uploadPfeDocument = async (userId, { category }, file) => {
     },
     include: documentInclude,
   });
+
+  await notifySupervisorPfeUpload(internship, category, created.id);
+
+  return created;
 };
 
 export const getMyPfeDocuments = async (userId) => {
@@ -365,11 +400,20 @@ export const validatePfeDocument = async (
       NEEDS_CORRECTION: "à corriger",
       REJECTED: "rejeté",
     };
+    const hasComment = supervisorComment?.trim();
 
     await createNotification(
       userIds.studentUserId,
-      "Décision sur un document PFE",
-      `Votre document a été ${statusLabels[validationStatus] || "mis à jour"}.`,
+      hasComment && validationStatus !== "VALIDATED"
+        ? "Commentaire sur votre rapport PFE"
+        : "Décision sur un document PFE",
+      hasComment && validationStatus !== "VALIDATED"
+        ? "Votre encadrant a laissé un commentaire sur votre document PFE."
+        : `Votre document a été ${statusLabels[validationStatus] || "mis à jour"}.`,
+      {
+        type: validationStatus === "VALIDATED" ? "SUCCESS" : "WARNING",
+        link: notificationLinks.student.documents(updatedDocument.id),
+      },
     );
   }
 

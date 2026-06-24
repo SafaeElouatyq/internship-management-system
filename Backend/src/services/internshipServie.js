@@ -1,5 +1,7 @@
 import prisma from "../config/prisma.js";
 import { createNotification } from "./notificationService.js";
+import { notifyInternshipManagers } from "../utils/notificationHelpers.js";
+import { notificationLinks } from "../utils/notificationLinks.js";
 
 const includeRelations = {
   student: {
@@ -267,6 +269,16 @@ export const addInternship = async (internshipData, userId) => {
       }),
     },
     include: includeRelations,
+  }).then(async (internship) => {
+    await notifyInternshipManagers({
+      title: "Nouvelle déclaration de stage",
+      message: `${internship.student?.user?.firstName || "Un étudiant"} ${internship.student?.user?.lastName || ""}`.trim() +
+        " a soumis une déclaration de stage.",
+      type: "ACTION",
+      link: notificationLinks.manager.internshipDetail(internship.id),
+    });
+
+    return internship;
   });
 };
 
@@ -447,6 +459,26 @@ export const updateAdministrativeStatus = async (
           studentUserId,
           "Dossier administratif validé",
           "Votre dossier administratif a été marqué comme complet.",
+          {
+            type: "SUCCESS",
+            link: notificationLinks.student.internship({ detail: true }),
+          },
+        );
+      }
+    } else if (
+      ["INCOMPLETE", "PENDING_DOCUMENTS"].includes(administrativeStatus)
+    ) {
+      const studentUserId = updatedInternship.student?.user?.id;
+
+      if (studentUserId) {
+        await createNotification(
+          studentUserId,
+          "Documents administratifs requis",
+          "Veuillez compléter ou téléverser les documents manquants de votre dossier.",
+          {
+            type: "WARNING",
+            link: notificationLinks.student.internship(),
+          },
         );
       }
     }
@@ -499,6 +531,10 @@ export const validateInternshipDeclaration = async (internshipId) => {
         studentUserId,
         "Déclaration de stage validée",
         "Votre déclaration de stage a été validée par le gestionnaire.",
+        {
+          type: "SUCCESS",
+          link: notificationLinks.student.internship({ detail: true }),
+        },
       );
     }
 
@@ -535,5 +571,21 @@ export const rejectInternshipDeclaration = async (internshipId) => {
       administrativeStatus: "REJECTED",
     },
     include: includeRelations,
+  }).then(async (updatedInternship) => {
+    const studentUserId = updatedInternship.student?.user?.id;
+
+    if (studentUserId) {
+      await createNotification(
+        studentUserId,
+        "Déclaration de stage refusée",
+        "Votre déclaration de stage a été refusée par le gestionnaire.",
+        {
+          type: "WARNING",
+          link: notificationLinks.student.internship({ detail: true }),
+        },
+      );
+    }
+
+    return updatedInternship;
   });
 };

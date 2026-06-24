@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import InternshipForm from "../../components/internships/InternshipForm";
 import InternshipTable from "../../components/internships/InternshipTable";
 import InternshipDocumentsPanel from "../../components/internshipDocuments/InternshipDocumentsPanel";
@@ -25,6 +26,7 @@ const initialForm = {
 };
 
 function StudentInternshipPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [internships, setInternships] = useState([]);
   const [formData, setFormData] = useState(initialForm);
   const [selectedInternship, setSelectedInternship] = useState(null);
@@ -38,6 +40,18 @@ function StudentInternshipPage() {
   useEffect(() => {
     loadInternships();
   }, []);
+
+  useEffect(() => {
+    if (loading || searchParams.get("detail") !== "1" || !internships.length) {
+      return;
+    }
+
+    setDetailsInternship(internships[0]);
+
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("detail");
+    setSearchParams(nextParams, { replace: true });
+  }, [loading, internships, searchParams, setSearchParams]);
 
   const loadInternships = async () => {
     try {
