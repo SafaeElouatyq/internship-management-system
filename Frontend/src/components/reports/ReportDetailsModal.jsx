@@ -9,6 +9,7 @@ function ReportDetailsModal({
   onCommentChange,
   onCommentSubmit,
   savingComment = false,
+  commentError = "",
 }) {
   const student = report.internship?.student?.user;
   const attachments = report.attachments || [];
@@ -96,28 +97,53 @@ function ReportDetailsModal({
           {!showSupervisorComment && report.supervisorComment && (
             <div>
               <p className="text-sm text-slate-500">Commentaire encadrant</p>
-              <p className="font-medium mt-1">{report.supervisorComment}</p>
+              <p className="font-medium mt-1 whitespace-pre-wrap">
+                {report.supervisorComment}
+              </p>
+            </div>
+          )}
+
+          {showSupervisorComment && report.supervisorComment && (
+            <div className="rounded-xl bg-slate-50 border border-slate-200 p-4">
+              <p className="text-sm font-medium text-slate-700">
+                Commentaire actuel
+              </p>
+              <p className="mt-2 text-slate-800 whitespace-pre-wrap">
+                {report.supervisorComment}
+              </p>
             </div>
           )}
 
           {showSupervisorComment && (
             <form onSubmit={onCommentSubmit} className="pt-2">
               <label className="block text-sm font-medium mb-2">
-                Commentaire encadrant
+                {report.supervisorComment
+                  ? "Nouveau commentaire"
+                  : "Commentaire encadrant"}
               </label>
+
+              {commentError && (
+                <div className="mb-3 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
+                  {commentError}
+                </div>
+              )}
 
               <textarea
                 value={supervisorComment}
                 onChange={onCommentChange}
                 rows={4}
                 className="w-full border border-slate-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Ajoutez un commentaire pour l'étudiant..."
+                placeholder={
+                  report.supervisorComment
+                    ? "Saisissez un nouveau commentaire pour remplacer l'actuel..."
+                    : "Ajoutez un commentaire pour l'étudiant..."
+                }
               />
 
               <div className="flex justify-end mt-4">
                 <button
                   type="submit"
-                  disabled={savingComment}
+                  disabled={savingComment || !supervisorComment.trim()}
                   className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium disabled:opacity-50"
                 >
                   {savingComment ? "Enregistrement..." : "Enregistrer le commentaire"}
