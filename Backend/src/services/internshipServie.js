@@ -32,6 +32,7 @@ const includeRelations = {
       createdAt: "desc",
     },
   },
+  finalDecision: true,
 };
 
 const getStudentByUserId = async (userId) => {

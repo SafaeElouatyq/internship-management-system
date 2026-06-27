@@ -3,6 +3,7 @@ export const notificationLinks = {
     internships: () => "/manager/internships",
     internshipDetail: (internshipId) => `/manager/internships/${internshipId}`,
     documents: () => "/manager/documents",
+    finalDecisions: () => "/manager/final-decisions",
   },
   student: {
     internship: (options = {}) => {
@@ -33,6 +34,7 @@ export const notificationLinks = {
       documentId
         ? `/supervisor/pfe-documents?documentId=${documentId}`
         : "/supervisor/pfe-documents",
+    finalDecisions: () => "/supervisor/final-decisions",
   },
   departmentHead: {
     dashboard: () => "/department-head/dashboard",

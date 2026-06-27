@@ -1,3 +1,4 @@
+import { Eye } from "lucide-react";
 import ReportStatusBadge from "./ReportStatusBadge";
 
 function SupervisorReportRow({ report, onView }) {
@@ -33,10 +34,11 @@ function SupervisorReportRow({ report, onView }) {
           <button
             type="button"
             onClick={() => onView(report)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-blue-600 hover:bg-blue-50 transition"
-            title="Voir rapport"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 transition"
+            title="Voir le rapport"
+            aria-label="Voir le rapport"
           >
-            Voir rapport
+            <Eye size={18} />
           </button>
         </div>
       </td>

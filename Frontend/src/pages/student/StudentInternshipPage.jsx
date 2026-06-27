@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import InternshipForm from "../../components/internships/InternshipForm";
 import InternshipTable from "../../components/internships/InternshipTable";
 import InternshipDocumentsPanel from "../../components/internshipDocuments/InternshipDocumentsPanel";
+import FinalDecisionPanel from "../../components/finalDecisions/FinalDecisionPanel";
 import StudentInternshipDetailsModal from "../../components/internships/StudentInternshipDetailsModal";
 import {
   createInternship,
@@ -224,7 +225,9 @@ function StudentInternshipPage() {
           />
 
           {internships[0] && (
-            <div className="mt-8">
+            <div className="mt-8 space-y-6">
+              <FinalDecisionPanel internship={internships[0]} />
+
               <InternshipDocumentsPanel
                 internshipId={internships[0].id}
                 canUpload

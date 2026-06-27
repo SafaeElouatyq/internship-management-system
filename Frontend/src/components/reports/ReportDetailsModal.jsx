@@ -1,5 +1,8 @@
 import ReportStatusBadge from "./ReportStatusBadge";
-import { getReportAttachmentUrl } from "../../utils/reportUtils.jsx";
+import {
+  formatReportDateTime,
+  getReportAttachmentUrl,
+} from "../../utils/reportUtils.jsx";
 
 function ReportDetailsModal({
   report,
@@ -68,7 +71,7 @@ function ReportDetailsModal({
           <div>
             <p className="text-sm text-slate-500">Date de soumission</p>
             <p className="font-medium mt-1">
-              {report.submittedAt?.slice(0, 16).replace("T", " ")}
+              {formatReportDateTime(report.submittedAt)}
             </p>
           </div>
 

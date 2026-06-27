@@ -3,7 +3,7 @@ import CompletedInternshipTable from "../../components/finalDecisions/CompletedI
 import FinalDecisionViewModal from "../../components/finalDecisions/FinalDecisionViewModal";
 import { getFinalDecisions } from "../../services/finalDecisionService.jsx";
 
-function DepartmentHeadFinalDecisionsPage() {
+function InternshipManagerFinalDecisionsPage() {
   const [internships, setInternships] = useState([]);
   const [viewInternship, setViewInternship] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -67,4 +67,4 @@ function DepartmentHeadFinalDecisionsPage() {
   );
 }
 
-export default DepartmentHeadFinalDecisionsPage;
+export default InternshipManagerFinalDecisionsPage;

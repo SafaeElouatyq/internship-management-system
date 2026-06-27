@@ -8,6 +8,7 @@ import {
   Settings,
   LogOut,
   Gavel,
+  CircleHelp,
 } from "lucide-react";
 
 function DepartmentHeadSideBar() {
@@ -46,6 +47,11 @@ function DepartmentHeadSideBar() {
       title: "Paramètres",
       path: "/department-head/settings",
       icon: Settings,
+    },
+    {
+      title: "Aide",
+      path: "/department-head/help",
+      icon: CircleHelp,
     },
   ];
 
