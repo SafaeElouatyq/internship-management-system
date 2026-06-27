@@ -7,6 +7,7 @@ import {
   CircleHelp,
   LogOut,
   Gavel,
+  MessageSquareWarning,
 } from "lucide-react";
 
 function InternshipManagerSideBar() {
@@ -32,6 +33,11 @@ function InternshipManagerSideBar() {
       title: "Décisions finales",
       path: "/manager/final-decisions",
       icon: Gavel,
+    },
+    {
+      title: "Réclamations",
+      path: "/manager/complaints",
+      icon: MessageSquareWarning,
     },
   ];
 

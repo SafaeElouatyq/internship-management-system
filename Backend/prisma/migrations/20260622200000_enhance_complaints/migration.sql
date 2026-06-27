@@ -1,0 +1,7 @@
+-- AlterTable
+ALTER TABLE "Complaint" ADD COLUMN "response" TEXT,
+ADD COLUMN "handledById" INTEGER,
+ADD COLUMN "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+-- AddForeignKey
+ALTER TABLE "Complaint" ADD CONSTRAINT "Complaint_handledById_fkey" FOREIGN KEY ("handledById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;

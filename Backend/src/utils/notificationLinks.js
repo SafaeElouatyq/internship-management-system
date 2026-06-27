@@ -4,6 +4,10 @@ export const notificationLinks = {
     internshipDetail: (internshipId) => `/manager/internships/${internshipId}`,
     documents: () => "/manager/documents",
     finalDecisions: () => "/manager/final-decisions",
+    complaints: (complaintId) =>
+      complaintId
+        ? `/manager/complaints?complaintId=${complaintId}`
+        : "/manager/complaints",
   },
   student: {
     internship: (options = {}) => {
@@ -21,6 +25,10 @@ export const notificationLinks = {
       documentId
         ? `/student/documents?documentId=${documentId}`
         : "/student/documents",
+    complaints: (complaintId) =>
+      complaintId
+        ? `/student/complaints?complaintId=${complaintId}`
+        : "/student/complaints",
   },
   supervisor: {
     students: () => "/supervisor/students",

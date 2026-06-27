@@ -23,6 +23,7 @@ import InternshipManagementPage from "../pages/internshipManager/InternshipManag
 import InternshipDetailPage from "../pages/internshipManager/InternshipDetailPage.jsx";
 import InternshipManagerDocumentsPage from "../pages/internshipManager/InternshipManagerDocumentsPage.jsx";
 import InternshipManagerFinalDecisionsPage from "../pages/internshipManager/InternshipManagerFinalDecisionsPage.jsx";
+import InternshipManagerComplaintsPage from "../pages/internshipManager/InternshipManagerComplaintsPage.jsx";
 import InternshipManagerNotificationsPage from "../pages/internshipManager/InternshipManagerNotificationsPage.jsx";
 import InternshipManagerSettingsPage from "../pages/internshipManager/InternshipManagerSettingsPage.jsx";
 import InternshipManagerHelpPage from "../pages/internshipManager/InternshipManagerHelpPage.jsx";
@@ -131,6 +132,7 @@ function AppRoutes() {
         <Route path="internships/:id" element={<InternshipDetailPage />} />
         <Route path="documents" element={<InternshipManagerDocumentsPage />} />
         <Route path="final-decisions" element={<InternshipManagerFinalDecisionsPage />} />
+        <Route path="complaints" element={<InternshipManagerComplaintsPage />} />
         <Route path="notifications" element={<InternshipManagerNotificationsPage />} />
         <Route path="settings" element={<InternshipManagerSettingsPage />} />
         <Route path="help" element={<InternshipManagerHelpPage />} />
