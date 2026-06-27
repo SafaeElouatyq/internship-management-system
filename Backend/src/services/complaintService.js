@@ -15,6 +15,14 @@ const complaintInclude = {
       company: true,
     },
   },
+  handledBy: {
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+    },
+  },
 };
 
 export const COMPLAINT_STATUSES = [
