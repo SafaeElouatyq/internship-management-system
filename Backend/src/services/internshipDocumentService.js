@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import prisma from "../config/prisma.js";
+import { assertCanAccessInternship } from "./fileAccessService.js";
 import { uploadDir } from "../config/upload.js";
 import { createNotification } from "./notificationService.js";
 import { notifyInternshipManagers } from "../utils/notificationHelpers.js";
@@ -65,33 +66,7 @@ const assertCanViewInternship = async (userId, role, internshipId) => {
     throw new Error("Accès refusé");
   }
 
-  const internship = await getInternshipById(internshipId);
-
-  if (role === "STUDENT") {
-    const student = await prisma.student.findUnique({
-      where: {
-        userId: Number(userId),
-      },
-    });
-
-    if (!student || internship.studentId !== student.id) {
-      throw new Error("Accès refusé à ce stage");
-    }
-  }
-
-  if (role === "SUPERVISOR") {
-    const supervisor = await prisma.supervisor.findUnique({
-      where: {
-        userId: Number(userId),
-      },
-    });
-
-    if (!supervisor || internship.supervisorId !== supervisor.id) {
-      throw new Error("Accès refusé à ce stage");
-    }
-  }
-
-  return internship;
+  return await assertCanAccessInternship(userId, role, internshipId);
 };
 
 const assertStudentOwnsInternship = async (userId, internshipId) => {

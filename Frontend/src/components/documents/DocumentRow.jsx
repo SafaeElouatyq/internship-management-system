@@ -1,5 +1,5 @@
 import { Download, Trash2 } from "lucide-react";
-import { getDocumentUrl } from "../../services/documentService.jsx";
+import SecureFileLink from "../common/SecureFileLink.jsx";
 
 function DocumentRow({ document, onDelete }) {
   return (
@@ -18,16 +18,14 @@ function DocumentRow({ document, onDelete }) {
 
       <td className="px-2 py-4">
         <div className="flex items-center justify-center gap-1">
-          <a
-            href={getDocumentUrl(document.path)}
-            download
-            target="_blank"
-            rel="noreferrer"
+          <SecureFileLink
+            filePath={document.path}
+            displayName={document.name}
             className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-blue-600 hover:bg-blue-50 transition"
             title="Télécharger"
           >
             <Download size={18} />
-          </a>
+          </SecureFileLink>
 
           <button
             type="button"

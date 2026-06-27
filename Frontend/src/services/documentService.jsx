@@ -1,8 +1,5 @@
 import axios from "axios";
-import {
-  getAllInternshipDocuments,
-  getDocumentUrl,
-} from "./internshipDocumentService.jsx";
+import { getAllInternshipDocuments } from "./internshipDocumentService.jsx";
 
 const API_URL = "http://localhost:5000/api/documents";
 
@@ -21,5 +18,3 @@ export const deleteDocument = async (documentId) => {
   const response = await axios.delete(`${API_URL}/${documentId}`, getToken());
   return response.data;
 };
-
-export { getDocumentUrl };

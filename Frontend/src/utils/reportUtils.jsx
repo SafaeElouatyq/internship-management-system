@@ -10,18 +10,6 @@ export const reportStatusStyles = {
   MISSING: "bg-red-50 text-red-700",
 };
 
-export const getReportAttachmentUrl = (attachmentPath) => {
-  if (!attachmentPath) {
-    return "#";
-  }
-
-  if (attachmentPath.startsWith("http")) {
-    return attachmentPath;
-  }
-
-  return `http://localhost:5000${attachmentPath}`;
-};
-
 export const formatReportDateTime = (value) => {
   if (!value) {
     return "-";

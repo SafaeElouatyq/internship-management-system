@@ -1,5 +1,5 @@
 import { Eye, Trash2 } from "lucide-react";
-import { getDocumentUrl } from "../../services/documentService.jsx";
+import SecureFileLink from "../common/SecureFileLink.jsx";
 import {
   PFE_CATEGORY_LABELS,
   canDeletePfeDocument,
@@ -48,14 +48,13 @@ function PfeDocumentRow({ document, onView, onDelete, showStudent }) {
             </button>
           )}
 
-          <a
-            href={getDocumentUrl(document.path)}
-            target="_blank"
-            rel="noreferrer"
+          <SecureFileLink
+            filePath={document.path}
+            displayName={document.name}
             className="inline-flex h-9 px-3 items-center justify-center rounded-lg text-sm font-medium text-blue-600 hover:bg-blue-50"
           >
             Ouvrir
-          </a>
+          </SecureFileLink>
 
           {onDelete && (
             <button

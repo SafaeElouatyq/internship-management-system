@@ -2,7 +2,6 @@ import axios from "axios";
 
 const INTERNSHIP_API_URL = "http://localhost:5000/api/internships";
 const DOCUMENTS_API_URL = "http://localhost:5000/api/documents";
-const FILE_URL = "http://localhost:5000";
 
 const getToken = () => ({
   headers: {
@@ -51,5 +50,3 @@ export const getAllInternshipDocuments = async () => {
   const response = await axios.get(DOCUMENTS_API_URL, getToken());
   return response.data;
 };
-
-export const getDocumentUrl = (fileUrl) => `${FILE_URL}${fileUrl}`;
