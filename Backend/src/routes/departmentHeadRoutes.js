@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  getDashboard,
   getInternships,
   getSupervisors,
 } from "../controllers/departmentHeadController.js";
@@ -8,6 +9,12 @@ import { roleMiddleware } from "../middlewares/roleMiddleware.js";
 
 const router = Router();
 
+router.get(
+  "/dashboard",
+  authMiddleware,
+  roleMiddleware("DEPARTMENT_HEAD"),
+  getDashboard,
+);
 router.get(
   "/internships",
   authMiddleware,

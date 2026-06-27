@@ -1,7 +1,20 @@
 import {
+  getDashboardStats,
   getValidatedInternships,
   getDepartmentHeadSupervisors,
 } from "../services/departmentHeadService.js";
+
+export const getDashboard = async (req, res) => {
+  try {
+    const data = await getDashboardStats(req.user.id);
+
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(400).json({
+      message: error.message,
+    });
+  }
+};
 
 export const getInternships = async (req, res) => {
   try {
