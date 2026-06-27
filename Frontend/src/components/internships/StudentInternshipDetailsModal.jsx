@@ -1,4 +1,5 @@
 import InternshipDocumentsPanel from "../internshipDocuments/InternshipDocumentsPanel";
+import FinalDecisionPanel from "../finalDecisions/FinalDecisionPanel";
 import { getStatusLabel } from "../../utils/internshipUtils.jsx";
 
 function StudentInternshipDetailsModal({ internship, onClose }) {
@@ -101,6 +102,8 @@ function StudentInternshipDetailsModal({ internship, onClose }) {
             title="Documents de stage"
             description="Convention, attestation et autres documents administratifs."
           />
+
+          <FinalDecisionPanel internship={internship} />
 
           <p className="text-sm text-slate-500">
             Le rapport PFE se gère dans la section « Rapport PFE ».

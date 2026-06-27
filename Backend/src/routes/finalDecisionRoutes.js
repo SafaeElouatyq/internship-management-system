@@ -11,13 +11,18 @@ const router = Router();
 router.get(
   "/",
   authMiddleware,
-  roleMiddleware("DEPARTMENT_HEAD"),
+  roleMiddleware(
+    "SUPERVISOR",
+    "DEPARTMENT_HEAD",
+    "INTERNSHIP_MANAGER",
+    "STUDENT",
+  ),
   getDecisions,
 );
 router.post(
   "/",
   authMiddleware,
-  roleMiddleware("DEPARTMENT_HEAD"),
+  roleMiddleware("SUPERVISOR"),
   addDecision,
 );
 

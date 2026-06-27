@@ -17,3 +17,8 @@ export const createFinalDecision = async (decisionData) => {
   const response = await axios.post(API_URL, decisionData, getToken());
   return response.data;
 };
+
+export const getMyFinalDecision = async () => {
+  const response = await axios.get(API_URL, getToken());
+  return response.data;
+};

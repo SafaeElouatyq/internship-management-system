@@ -17,3 +17,25 @@ export const createComplaint = async (complaintData) => {
   const response = await axios.post(API_URL, complaintData, getToken());
   return response.data;
 };
+
+export const getManagerComplaints = async (filters = {}) => {
+  const response = await axios.get(API_URL, {
+    ...getToken(),
+    params: filters,
+  });
+  return response.data;
+};
+
+export const getManagerComplaint = async (complaintId) => {
+  const response = await axios.get(`${API_URL}/${complaintId}`, getToken());
+  return response.data;
+};
+
+export const updateManagerComplaint = async (complaintId, complaintData) => {
+  const response = await axios.patch(
+    `${API_URL}/${complaintId}`,
+    complaintData,
+    getToken(),
+  );
+  return response.data;
+};

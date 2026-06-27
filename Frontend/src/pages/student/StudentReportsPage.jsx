@@ -9,6 +9,7 @@ import {
   getMyReports,
   updateReport,
 } from "../../services/reportService.jsx";
+import { formatSubmissionWindowMessage } from "../../utils/reportUtils.jsx";
 
 const initialForm = {
   completedWork: "",
@@ -205,7 +206,9 @@ function StudentReportsPage() {
           <p className="font-medium">
             Semaine en cours : {submissionContext.weekLabel}
           </p>
-          <p className="text-sm mt-1">{submissionContext.message}</p>
+          <p className="text-sm mt-1">
+            {formatSubmissionWindowMessage(submissionContext.message)}
+          </p>
         </div>
       )}
 

@@ -9,6 +9,7 @@ import {
   Settings,
   CircleHelp,
   LogOut,
+  Gavel,
 } from "lucide-react";
 
 function SupervisorSideBar() {
@@ -40,6 +41,11 @@ function SupervisorSideBar() {
       path: "/supervisor/pfe-documents",
       icon: BookOpen,
     },
+    {
+      title: "Décisions finales",
+      path: "/supervisor/final-decisions",
+      icon: Gavel,
+    },
   ];
 
   const others = [
@@ -48,11 +54,11 @@ function SupervisorSideBar() {
       path: "/supervisor/settings",
       icon: Settings,
     },
-    // {
-    //   title : "Aide",
-    //   path : "/supervisor/help",
-    //   icon : circleHelp,
-    // },
+    {
+      title: "Aide",
+      path: "/supervisor/help",
+      icon: CircleHelp,
+    },
   ];
       
   

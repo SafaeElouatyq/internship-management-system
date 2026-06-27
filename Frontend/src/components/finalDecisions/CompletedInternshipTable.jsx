@@ -2,8 +2,9 @@ import CompletedInternshipRow from "./CompletedInternshipRow";
 
 function CompletedInternshipTable({
   internships,
-  onAuthorize,
-  onReject,
+  readOnly = false,
+  onDecide,
+  onView,
 }) {
   if (!internships.length) {
     return (
@@ -37,8 +38,9 @@ function CompletedInternshipTable({
               <CompletedInternshipRow
                 key={internship.id}
                 internship={internship}
-                onAuthorize={onAuthorize}
-                onReject={onReject}
+                readOnly={readOnly}
+                onDecide={onDecide}
+                onView={onView}
               />
             ))}
           </tbody>

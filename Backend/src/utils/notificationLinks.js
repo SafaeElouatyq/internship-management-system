@@ -3,6 +3,11 @@ export const notificationLinks = {
     internships: () => "/manager/internships",
     internshipDetail: (internshipId) => `/manager/internships/${internshipId}`,
     documents: () => "/manager/documents",
+    finalDecisions: () => "/manager/final-decisions",
+    complaints: (complaintId) =>
+      complaintId
+        ? `/manager/complaints?complaintId=${complaintId}`
+        : "/manager/complaints",
   },
   student: {
     internship: (options = {}) => {
@@ -20,6 +25,10 @@ export const notificationLinks = {
       documentId
         ? `/student/documents?documentId=${documentId}`
         : "/student/documents",
+    complaints: (complaintId) =>
+      complaintId
+        ? `/student/complaints?complaintId=${complaintId}`
+        : "/student/complaints",
   },
   supervisor: {
     students: () => "/supervisor/students",
@@ -33,6 +42,7 @@ export const notificationLinks = {
       documentId
         ? `/supervisor/pfe-documents?documentId=${documentId}`
         : "/supervisor/pfe-documents",
+    finalDecisions: () => "/supervisor/final-decisions",
   },
   departmentHead: {
     dashboard: () => "/department-head/dashboard",

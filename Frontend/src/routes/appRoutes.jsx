@@ -15,11 +15,15 @@ import SupervisorInternshipDetailPage from "../pages/supervisor/SupervisorIntern
 import SupervisorReportsPage from "../pages/supervisor/SupervisorReportsPage.jsx";
 import SupervisorMeetingsPage from "../pages/supervisor/SupervisorMeetingsPage.jsx";
 import SupervisorPfeDocumentsPage from "../pages/supervisor/SupervisorPfeDocumentsPage.jsx";
+import SupervisorFinalDecisionsPage from "../pages/supervisor/SupervisorFinalDecisionsPage.jsx";
 import SupervisorSettingsPage from "../pages/supervisor/SupervisorSettingsPage.jsx";
 import SupervisorNotificationsPage from "../pages/supervisor/SupervisorNotificationsPage.jsx";
+import SupervisorHelpPage from "../pages/supervisor/SupervisorHelpPage.jsx";
 import InternshipManagementPage from "../pages/internshipManager/InternshipManagementPage.jsx";
 import InternshipDetailPage from "../pages/internshipManager/InternshipDetailPage.jsx";
 import InternshipManagerDocumentsPage from "../pages/internshipManager/InternshipManagerDocumentsPage.jsx";
+import InternshipManagerFinalDecisionsPage from "../pages/internshipManager/InternshipManagerFinalDecisionsPage.jsx";
+import InternshipManagerComplaintsPage from "../pages/internshipManager/InternshipManagerComplaintsPage.jsx";
 import InternshipManagerNotificationsPage from "../pages/internshipManager/InternshipManagerNotificationsPage.jsx";
 import InternshipManagerSettingsPage from "../pages/internshipManager/InternshipManagerSettingsPage.jsx";
 import InternshipManagerHelpPage from "../pages/internshipManager/InternshipManagerHelpPage.jsx";
@@ -29,6 +33,7 @@ import DepartmentHeadSupervisorsPage from "../pages/departmentHead/DepartmentHea
 import DepartmentHeadNotificationsPage from "../pages/departmentHead/DepartmentHeadNotificationsPage.jsx";
 import DepartmentHeadSettingsPage from "../pages/departmentHead/DepartmentHeadSettingsPage.jsx";
 import DepartmentHeadFinalDecisionsPage from "../pages/departmentHead/DepartmentHeadFinalDecisionsPage.jsx";
+import DepartmentHeadHelpPage from "../pages/departmentHead/DepartmentHeadHelpPage.jsx";
 import AdminHelpPage from "../pages/admin/AdminHelpPage.jsx";
 import AdminSettingsPage from "../pages/admin/AdminSettingsPage.jsx";
 import AdminNotificationsPage from "../pages/admin/AdminNotificationsPage.jsx";
@@ -108,7 +113,9 @@ function AppRoutes() {
         <Route path="reports" element={<SupervisorReportsPage />} />
         <Route path="meetings" element={<SupervisorMeetingsPage />} />
         <Route path="pfe-documents" element={<SupervisorPfeDocumentsPage />} />
+        <Route path="final-decisions" element={<SupervisorFinalDecisionsPage />} />
         <Route path="settings" element={<SupervisorSettingsPage />} />
+        <Route path="help" element={<SupervisorHelpPage />} />
         <Route path="notifications" element={<SupervisorNotificationsPage />} />
       </Route>
 
@@ -124,6 +131,8 @@ function AppRoutes() {
         <Route path="internships" element={<InternshipManagementPage />} />
         <Route path="internships/:id" element={<InternshipDetailPage />} />
         <Route path="documents" element={<InternshipManagerDocumentsPage />} />
+        <Route path="final-decisions" element={<InternshipManagerFinalDecisionsPage />} />
+        <Route path="complaints" element={<InternshipManagerComplaintsPage />} />
         <Route path="notifications" element={<InternshipManagerNotificationsPage />} />
         <Route path="settings" element={<InternshipManagerSettingsPage />} />
         <Route path="help" element={<InternshipManagerHelpPage />} />
@@ -144,6 +153,7 @@ function AppRoutes() {
         <Route path="final-decisions" element={<DepartmentHeadFinalDecisionsPage />} />
         <Route path="notifications" element={<DepartmentHeadNotificationsPage />} />
         <Route path="settings" element={<DepartmentHeadSettingsPage />} />
+        <Route path="help" element={<DepartmentHeadHelpPage />} />
       </Route>
     </Routes>
   );

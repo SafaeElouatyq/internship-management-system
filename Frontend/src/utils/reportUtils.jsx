@@ -21,3 +21,25 @@ export const getReportAttachmentUrl = (attachmentPath) => {
 
   return `http://localhost:5000${attachmentPath}`;
 };
+
+export const formatReportDateTime = (value) => {
+  if (!value) {
+    return "-";
+  }
+
+  return new Date(value).toLocaleString("fr-FR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+};
+
+export const formatSubmissionWindowMessage = (message) => {
+  if (!message) {
+    return "";
+  }
+
+  return message
+    .replace(/\s*\(heure du Maroc\)\.?/gi, "")
+    .replace(/\s*\(Heure du Maroc\)\.?/g, "")
+    .trim();
+};

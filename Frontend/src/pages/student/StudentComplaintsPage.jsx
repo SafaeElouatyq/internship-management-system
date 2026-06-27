@@ -1,4 +1,9 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Eye } from "lucide-react";
+import ComplaintDetailModal from "../../components/complaints/ComplaintDetailModal";
+import ComplaintStatusBadge from "../../components/complaints/ComplaintStatusBadge";
+import { formatComplaintDate } from "../../utils/complaintUtils.jsx";
 import {
   createComplaint,
   getMyComplaints,
@@ -10,8 +15,10 @@ const initialForm = {
 };
 
 function StudentComplaintsPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [complaints, setComplaints] = useState([]);
   const [formData, setFormData] = useState(initialForm);
+  const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [openForm, setOpenForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -22,13 +29,39 @@ function StudentComplaintsPage() {
     loadComplaints();
   }, []);
 
+  useEffect(() => {
+    if (loading || !complaints.length) {
+      return;
+    }
+
+    const complaintId = searchParams.get("complaintId");
+
+    if (!complaintId) {
+      return;
+    }
+
+    const complaint = complaints.find(
+      (entry) => String(entry.id) === complaintId,
+    );
+
+    if (complaint) {
+      setSelectedComplaint(complaint);
+    }
+
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("complaintId");
+    setSearchParams(nextParams, { replace: true });
+  }, [loading, complaints, searchParams, setSearchParams]);
+
   const loadComplaints = async () => {
     try {
       const data = await getMyComplaints();
       setComplaints(data.complaints);
       setError("");
-    } catch (error) {
-      setError(error.response?.data?.message || "Erreur lors du chargement");
+    } catch (loadError) {
+      setError(
+        loadError.response?.data?.message || "Erreur lors du chargement",
+      );
     } finally {
       setLoading(false);
     }
@@ -53,9 +86,9 @@ function StudentComplaintsPage() {
       setFormData(initialForm);
       setOpenForm(false);
       loadComplaints();
-    } catch (error) {
+    } catch (submitError) {
       setError(
-        error.response?.data?.message ||
+        submitError.response?.data?.message ||
           "Erreur lors de l'envoi de la réclamation",
       );
     } finally {
@@ -63,19 +96,14 @@ function StudentComplaintsPage() {
     }
   };
 
-  const formatDate = (value) =>
-    new Date(value).toLocaleString("fr-FR", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    });
-
   return (
     <>
       <div className="mb-8 flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-800">Réclamations</h1>
           <p className="text-slate-500 mt-2">
-            Déposez une réclamation concernant votre stage.
+            Déposez une réclamation concernant votre stage et suivez les réponses
+            du responsable des stages.
           </p>
         </div>
 
@@ -185,7 +213,13 @@ function StudentComplaintsPage() {
                   Statut
                 </th>
                 <th className="text-left px-5 py-4 text-sm font-semibold text-slate-600">
+                  Réponse
+                </th>
+                <th className="text-left px-5 py-4 text-sm font-semibold text-slate-600">
                   Date
+                </th>
+                <th className="text-center px-5 py-4 text-sm font-semibold text-slate-600">
+                  Actions
                 </th>
               </tr>
             </thead>
@@ -196,23 +230,49 @@ function StudentComplaintsPage() {
                     <p className="font-medium text-slate-800">
                       {complaint.subject}
                     </p>
-                    <p className="text-sm text-slate-500 mt-1">
+                    <p className="text-sm text-slate-500 mt-1 line-clamp-2">
                       {complaint.description}
                     </p>
                   </td>
                   <td className="px-5 py-4">
-                    <span className="inline-flex px-3 py-1 rounded-full text-sm bg-slate-100 text-slate-700">
-                      {complaint.statusLabel}
-                    </span>
+                    <ComplaintStatusBadge
+                      status={complaint.status}
+                      label={complaint.statusLabel}
+                    />
                   </td>
                   <td className="px-5 py-4 text-slate-600">
-                    {formatDate(complaint.createdAt)}
+                    {complaint.response ? (
+                      <span className="line-clamp-2">{complaint.response}</span>
+                    ) : (
+                      <span className="text-slate-400">En attente</span>
+                    )}
+                  </td>
+                  <td className="px-5 py-4 text-slate-600">
+                    {formatComplaintDate(complaint.createdAt)}
+                  </td>
+                  <td className="px-5 py-4 text-center">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedComplaint(complaint)}
+                      className="inline-flex items-center gap-1 px-3 py-2 rounded-xl text-sm font-medium text-blue-600 hover:bg-blue-50 transition"
+                      title="Voir le détail"
+                    >
+                      <Eye size={16} />
+                      Voir
+                    </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+      )}
+
+      {selectedComplaint && (
+        <ComplaintDetailModal
+          complaint={selectedComplaint}
+          onClose={() => setSelectedComplaint(null)}
+        />
       )}
     </>
   );

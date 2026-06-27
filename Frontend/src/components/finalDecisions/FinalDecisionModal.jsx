@@ -7,6 +7,7 @@ function FinalDecisionModal({
   onSubmit,
   onCancel,
   saving,
+  error = "",
 }) {
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
@@ -23,6 +24,12 @@ function FinalDecisionModal({
         </div>
 
         <form onSubmit={onSubmit} className="space-y-6">
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
+              {error}
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-medium mb-2">
               Décision
@@ -36,14 +43,19 @@ function FinalDecisionModal({
               required
             >
               <option value="">Sélectionner une décision</option>
-              <option value="DEFENSE_AUTHORIZED">Autoriser soutenance</option>
-              <option value="DEFENSE_NOT_AUTHORIZED">Refuser soutenance</option>
+              <option value="DEFENSE_AUTHORIZED">Autorisé à soutenir</option>
+              <option value="DEFENSE_AUTHORIZED_WITH_CORRECTIONS">
+                Autorisé sous réserve de corrections
+              </option>
+              <option value="DEFENSE_NOT_AUTHORIZED">
+                Non autorisé à soutenir
+              </option>
             </select>
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-2">
-              Commentaire
+              Commentaire <span className="text-red-500">*</span>
             </label>
 
             <textarea
@@ -51,7 +63,9 @@ function FinalDecisionModal({
               value={comment}
               onChange={onCommentChange}
               rows={4}
+              required
               className="w-full border border-slate-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Justifiez votre décision..."
             />
           </div>
 
@@ -66,10 +80,10 @@ function FinalDecisionModal({
 
             <button
               type="submit"
-              disabled={saving}
+              disabled={saving || !decision || !comment.trim()}
               className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium disabled:opacity-50"
             >
-              {saving ? "Enregistrement..." : "Enregistrer"}
+              {saving ? "Enregistrement..." : "Enregistrer la décision"}
             </button>
           </div>
         </form>

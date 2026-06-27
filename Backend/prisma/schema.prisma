@@ -120,6 +120,7 @@ model User {
 
   notifications Notification[]
   internshipDocumentsUploaded InternshipDocument[]
+  complaintsHandled Complaint[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -331,13 +332,18 @@ model Complaint {
 
   subject     String
   description String
+  response    String?
 
   status ComplaintStatus @default(PENDING)
 
   internshipId Int
   internship   Internship @relation(fields: [internshipId], references: [id])
 
+  handledById Int?
+  handledBy   User? @relation(fields: [handledById], references: [id])
+
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model FinalDecision {
