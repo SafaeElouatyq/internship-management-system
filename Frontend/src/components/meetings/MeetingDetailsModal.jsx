@@ -12,11 +12,11 @@ function MeetingDetailsModal({ meeting, onClose }) {
         <div className="flex items-start justify-between mb-8">
           <div>
             <h2 className="text-2xl font-bold text-slate-800">
-              Détails de la réunion
+              {meeting.sequenceLabel || "Détails de la réunion"}
             </h2>
 
             <p className="text-slate-500 mt-1">
-              {student?.firstName} {student?.lastName} —{" "}
+              {student ? `${student.firstName} ${student.lastName} — ` : ""}
               {meeting.date?.slice(0, 16).replace("T", " ")}
             </p>
           </div>

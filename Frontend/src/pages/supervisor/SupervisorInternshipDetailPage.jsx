@@ -90,7 +90,7 @@ function SupervisorInternshipDetailPage() {
         ...meetingForm,
       });
       setMeetingForm(initialMeetingForm);
-      setSuccess("Première réunion planifiée avec succès");
+      setSuccess("Rencontre 1 planifiée avec succès");
       await loadInternship();
     } catch (error) {
       setError(
@@ -143,6 +143,7 @@ function SupervisorInternshipDetailPage() {
   const company = internship.company;
   const meetings = internship.meetings || [];
   const validations = internship.subjectValidations || [];
+  const meetingContext = internship.meetingContext;
   const showFirstMeetingForm = canScheduleFirstMeeting(internship);
   const showValidationForm = canValidateSubject(internship);
 
@@ -291,6 +292,18 @@ function SupervisorInternshipDetailPage() {
         </div>
       </div>
 
+      {meetingContext?.nextSequenceLabel && !showFirstMeetingForm && (
+        <div className="mb-6 bg-blue-50 border border-blue-200 text-blue-800 px-5 py-4 rounded-2xl">
+          <p className="font-medium">
+            Prochaine étape : {meetingContext.nextSequenceLabel}
+          </p>
+          <p className="text-sm mt-1">
+            Planifiez-la depuis la page Réunions une fois la rencontre
+            précédente enregistrée.
+          </p>
+        </div>
+      )}
+
       {showFirstMeetingForm && (
         <div className="mb-6">
           <FirstMeetingForm
@@ -316,7 +329,7 @@ function SupervisorInternshipDetailPage() {
               >
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <p className="font-medium text-slate-800">
-                    {index === 0 ? "Première réunion" : `Réunion ${index + 1}`}
+                    {meeting.sequenceLabel || `Rencontre ${index + 1}`}
                   </p>
 
                   <p className="text-sm text-slate-500">

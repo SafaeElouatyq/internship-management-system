@@ -1,20 +1,64 @@
+import { getInternshipMeetingContext } from "../../utils/meetingUtils.jsx";
+
 function MeetingForm({
   formData,
   internships,
+  meetingContexts = {},
   onChange,
   onSubmit,
   onCancel,
   saving,
   isEdit = false,
 }) {
+  const selectedContext = !isEdit && formData.internshipId
+    ? getInternshipMeetingContext(formData.internshipId, meetingContexts)
+    : null;
+
+  const creatableInternships = isEdit
+    ? internships
+    : internships.filter((internship) => {
+        const context = getInternshipMeetingContext(
+          internship.id,
+          meetingContexts,
+        );
+
+        return context?.canCreateNext !== false;
+      });
+
   return (
     <form
       onSubmit={onSubmit}
       className="bg-white rounded-2xl shadow-sm p-6 border border-slate-200 mb-8"
     >
-      <h2 className="text-xl font-bold text-slate-800 mb-5">
-        {isEdit ? "Modifier la réunion" : "Planifier une réunion"}
+      <h2 className="text-xl font-bold text-slate-800 mb-2">
+        {isEdit
+          ? "Modifier la réunion"
+          : selectedContext?.nextSequenceLabel
+            ? `Planifier ${selectedContext.nextSequenceLabel}`
+            : "Planifier une réunion"}
       </h2>
+
+      {!isEdit && selectedContext?.nextSequenceLabel && (
+        <p className="text-sm text-slate-500 mb-5">
+          Prochaine étape obligatoire pour cet étudiant :{" "}
+          <span className="font-medium text-slate-700">
+            {selectedContext.nextSequenceLabel}
+          </span>
+          {selectedContext.minimumRequired && (
+            <>
+              {" "}
+              ({selectedContext.meetingCount}/{selectedContext.minimumRequired}{" "}
+              planifiée{selectedContext.meetingCount > 1 ? "s" : ""})
+            </>
+          )}
+        </p>
+      )}
+
+      {!isEdit && !selectedContext && formData.internshipId && (
+        <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-5">
+          Le quota de rencontres obligatoires est déjà atteint pour cet étudiant.
+        </p>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {!isEdit && (
@@ -32,12 +76,19 @@ function MeetingForm({
             >
               <option value="">Sélectionner un étudiant</option>
 
-              {internships.map((internship) => {
+              {creatableInternships.map((internship) => {
                 const student = internship.student?.user;
+                const context = getInternshipMeetingContext(
+                  internship.id,
+                  meetingContexts,
+                );
 
                 return (
                   <option key={internship.id} value={internship.id}>
                     {student?.firstName} {student?.lastName} — {internship.title}
+                    {context?.nextSequenceLabel
+                      ? ` (${context.nextSequenceLabel})`
+                      : ""}
                   </option>
                 );
               })}
@@ -160,7 +211,7 @@ function MeetingForm({
 
         <button
           type="submit"
-          disabled={saving}
+          disabled={saving || (!isEdit && Boolean(formData.internshipId) && !selectedContext?.canCreateNext)}
           className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium disabled:opacity-50"
         >
           {saving ? "Enregistrement..." : isEdit ? "Enregistrer" : "Planifier"}

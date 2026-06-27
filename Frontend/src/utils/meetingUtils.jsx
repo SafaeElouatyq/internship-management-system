@@ -5,6 +5,9 @@ export const typeLabels = {
 
 export const MIN_MEETINGS_LICENCE = 3;
 
+export const getMeetingSequenceLabel = (sequenceNumber) =>
+  `Rencontre ${sequenceNumber}`;
+
 export const getMeetingStatus = (date) => {
   const meetingDate = new Date(date);
   const now = new Date();
@@ -31,4 +34,26 @@ export const toDateTimeLocalValue = (isoDate) => {
   const local = new Date(date.getTime() - offset * 60000);
 
   return local.toISOString().slice(0, 16);
+};
+
+export const getInternshipMeetingContext = (internshipId, meetingContexts = {}) =>
+  meetingContexts[internshipId] || meetingContexts[String(internshipId)] || null;
+
+export const buildSequenceProgress = (context) => {
+  if (!context?.minimumRequired) {
+    return [];
+  }
+
+  return Array.from({ length: context.minimumRequired }, (_, index) => {
+    const sequenceNumber = index + 1;
+    const isCompleted = context.completedSequences?.includes(sequenceNumber);
+    const isCurrent = context.nextSequenceNumber === sequenceNumber;
+
+    return {
+      sequenceNumber,
+      label: getMeetingSequenceLabel(sequenceNumber),
+      isCompleted,
+      isCurrent,
+    };
+  });
 };

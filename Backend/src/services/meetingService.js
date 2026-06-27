@@ -1,5 +1,9 @@
 import prisma from "../config/prisma.js";
-import { MIN_MEETINGS_BY_LEVEL } from "../utils/meetingRules.js";
+import {
+  assertCanCreateMeeting,
+  buildMeetingContext,
+  enrichMeetingsWithSequence,
+} from "../utils/meetingRules.js";
 import { notifyDepartmentHeads } from "../utils/notificationHelpers.js";
 import { createNotification } from "./notificationService.js";
 import { getInternshipUserIds } from "./internshipWorkflowService.js";
@@ -81,10 +85,10 @@ const buildLicenceCompliance = (internships, meetings) => {
   return internships
     .filter((internship) => internship.student?.level === "LICENCE")
     .map((internship) => {
-      const meetingCount = meetings.filter(
+      const internshipMeetings = meetings.filter(
         (meeting) => meeting.internshipId === internship.id,
-      ).length;
-      const minimumRequired = MIN_MEETINGS_BY_LEVEL.LICENCE;
+      );
+      const context = buildMeetingContext(internship, internshipMeetings);
       const student = internship.student?.user;
 
       return {
@@ -92,13 +96,30 @@ const buildLicenceCompliance = (internships, meetings) => {
         studentName: student
           ? `${student.firstName} ${student.lastName}`
           : "Étudiant",
-        meetingCount,
-        minimumRequired,
-        isCompliant: meetingCount >= minimumRequired,
-        remaining: Math.max(0, minimumRequired - meetingCount),
+        meetingCount: context.meetingCount,
+        minimumRequired: context.minimumRequired,
+        isCompliant: context.isCompliant,
+        remaining: context.remaining,
+        nextSequenceNumber: context.nextSequenceNumber,
+        nextSequenceLabel: context.nextSequenceLabel,
+        completedSequences: context.completedSequences,
       };
     });
 };
+
+const buildMeetingContexts = (internships, meetings) =>
+  Object.fromEntries(
+    internships.map((internship) => {
+      const internshipMeetings = meetings.filter(
+        (meeting) => meeting.internshipId === internship.id,
+      );
+
+      return [
+        internship.id,
+        buildMeetingContext(internship, internshipMeetings),
+      ];
+    }),
+  );
 
 const getStudentByUserId = async (userId) => {
   const student = await prisma.student.findUnique({
@@ -150,6 +171,22 @@ const getSupervisorInternships = async (supervisorId) => {
   });
 };
 
+const getStudentActiveInternship = async (studentId) =>
+  prisma.internship.findFirst({
+    where: {
+      studentId,
+      NOT: {
+        administrativeStatus: "REJECTED",
+      },
+    },
+    include: {
+      student: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
 export const createMeeting = async (userId, meetingData) => {
   const {
     internshipId,
@@ -186,6 +223,11 @@ export const createMeeting = async (userId, meetingData) => {
     },
   });
 
+  const { nextSequenceNumber, nextSequenceLabel } = assertCanCreateMeeting(
+    internship,
+    existingMeetingsCount,
+  );
+
   const meeting = await prisma.meeting.create({
     data: {
       ...buildMeetingData({
@@ -205,6 +247,8 @@ export const createMeeting = async (userId, meetingData) => {
     },
     include: meetingInclude,
   });
+
+  const enrichedMeeting = enrichMeetingsWithSequence([meeting])[0];
 
   if (existingMeetingsCount === 0 && internship.status === "SUPERVISOR_ASSIGNED") {
     await prisma.internship.update({
@@ -229,8 +273,8 @@ export const createMeeting = async (userId, meetingData) => {
   if (userIds?.studentUserId) {
     await createNotification(
       userIds.studentUserId,
-      "Réunion planifiée",
-      "Votre encadrant a planifié une réunion de suivi.",
+      `${nextSequenceLabel} planifiée`,
+      `Votre encadrant a planifié ${nextSequenceLabel.toLowerCase()}.`,
       {
         type: "INFO",
         link: notificationLinks.student.meetings(),
@@ -238,7 +282,7 @@ export const createMeeting = async (userId, meetingData) => {
     );
   }
 
-  return meeting;
+  return enrichedMeeting;
 };
 
 export const updateMeeting = async (userId, meetingId, meetingData) => {
@@ -254,7 +298,7 @@ export const updateMeeting = async (userId, meetingId, meetingData) => {
   const supervisor = await getSupervisorByUserId(userId);
   await getSupervisorMeeting(supervisor.id, meetingId);
 
-  return await prisma.meeting.update({
+  const meeting = await prisma.meeting.update({
     where: {
       id: Number(meetingId),
     },
@@ -269,11 +313,28 @@ export const updateMeeting = async (userId, meetingId, meetingData) => {
     }),
     include: meetingInclude,
   });
+
+  return enrichMeetingsWithSequence([meeting])[0];
 };
 
 export const deleteMeeting = async (userId, meetingId) => {
   const supervisor = await getSupervisorByUserId(userId);
   const meeting = await getSupervisorMeeting(supervisor.id, meetingId);
+
+  const laterMeeting = await prisma.meeting.findFirst({
+    where: {
+      internshipId: meeting.internshipId,
+      id: {
+        gt: meeting.id,
+      },
+    },
+  });
+
+  if (laterMeeting) {
+    throw new Error(
+      "Impossible de supprimer cette rencontre : supprimez d'abord les rencontres suivantes",
+    );
+  }
 
   const internship = await prisma.internship.findUnique({
     where: {
@@ -323,23 +384,37 @@ export const deleteMeeting = async (userId, meetingId) => {
 
 export const getMeetingByIdForSupervisor = async (userId, meetingId) => {
   const supervisor = await getSupervisorByUserId(userId);
-  return await getSupervisorMeeting(supervisor.id, meetingId);
+  const meeting = await getSupervisorMeeting(supervisor.id, meetingId);
+
+  return enrichMeetingsWithSequence([meeting])[0];
 };
 
 export const getStudentMeetings = async (userId) => {
   const student = await getStudentByUserId(userId);
 
-  return await prisma.meeting.findMany({
-    where: {
-      internship: {
-        studentId: student.id,
+  const [meetings, internship] = await Promise.all([
+    prisma.meeting.findMany({
+      where: {
+        internship: {
+          studentId: student.id,
+        },
       },
-    },
-    include: meetingInclude,
-    orderBy: {
-      date: "desc",
-    },
-  });
+      include: meetingInclude,
+      orderBy: {
+        date: "desc",
+      },
+    }),
+    getStudentActiveInternship(student.id),
+  ]);
+
+  const enrichedMeetings = enrichMeetingsWithSequence(meetings);
+
+  return {
+    meetings: enrichedMeetings,
+    meetingContext: internship
+      ? buildMeetingContext(internship, meetings)
+      : null,
+  };
 };
 
 export const getSupervisorMeetings = async (userId) => {
@@ -360,9 +435,12 @@ export const getSupervisorMeetings = async (userId) => {
     getSupervisorInternships(supervisor.id),
   ]);
 
+  const enrichedMeetings = enrichMeetingsWithSequence(meetings);
+
   return {
-    meetings,
+    meetings: enrichedMeetings,
     internships,
     licenceCompliance: buildLicenceCompliance(internships, meetings),
+    meetingContexts: buildMeetingContexts(internships, meetings),
   };
 };

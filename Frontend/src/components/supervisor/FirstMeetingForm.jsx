@@ -9,12 +9,13 @@ function FirstMeetingForm({
       onSubmit={onSubmit}
       className="bg-white rounded-2xl shadow-sm p-6 border border-slate-200"
     >
-      <h2 className="text-xl font-bold text-slate-800 mb-5">
-        Planifier la première réunion
+      <h2 className="text-xl font-bold text-slate-800 mb-2">
+        Planifier la Rencontre 1
       </h2>
 
       <p className="text-slate-500 mb-5">
-        La première réunion est requise avant la validation du sujet de stage.
+        La Rencontre 1 est requise avant la validation du sujet de stage. Les
+        Rencontres 2 et 3 devront être planifiées ensuite, dans l&apos;ordre.
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -72,7 +73,7 @@ function FirstMeetingForm({
           disabled={saving}
           className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium disabled:opacity-50"
         >
-          {saving ? "Planification..." : "Planifier la première réunion"}
+          {saving ? "Planification..." : "Planifier la Rencontre 1"}
         </button>
       </div>
     </form>
