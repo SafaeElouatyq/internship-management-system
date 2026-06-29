@@ -438,6 +438,20 @@ export const deleteUser = async (userId) => {
     where: { id },
     include: {
       role: true,
+      student: {
+        include: {
+          internships: {
+            select: { id: true },
+          },
+        },
+      },
+      supervisor: {
+        include: {
+          internships: {
+            select: { id: true },
+          },
+        },
+      },
     },
   });
 
@@ -446,36 +460,72 @@ export const deleteUser = async (userId) => {
   }
 
   await prisma.$transaction(async (tx) => {
+    await tx.notification.deleteMany({
+      where: { userId: id },
+    });
+
+    await tx.complaint.updateMany({
+      where: { handledById: id },
+      data: { handledById: null },
+    });
+
+    await tx.internshipDocument.updateMany({
+      where: { uploadedById: id },
+      data: { uploadedById: null },
+    });
+
     switch (user.role.name) {
       case "ADMIN":
-        await tx.admin.delete({
+        await tx.admin.deleteMany({
           where: { userId: id },
         });
         break;
 
-      case "STUDENT":
-        await tx.student.delete({
-          where: { userId: id },
-        });
-        break;
+      case "STUDENT": {
+        const internshipCount = user.student?.internships?.length ?? 0;
 
-      case "SUPERVISOR":
-        await tx.supervisor.delete({
-          where: { userId: id },
-        });
+        if (internshipCount > 0) {
+          throw new Error(
+            `Impossible de supprimer cet étudiant : ${internshipCount} déclaration(s) de stage associée(s). Supprimez d'abord les stages liés.`,
+          );
+        }
+
+        if (user.student) {
+          await tx.student.delete({
+            where: { userId: id },
+          });
+        }
         break;
+      }
+
+      case "SUPERVISOR": {
+        if (user.supervisor) {
+          await tx.internship.updateMany({
+            where: { supervisorId: user.supervisor.id },
+            data: { supervisorId: null },
+          });
+
+          await tx.supervisor.delete({
+            where: { userId: id },
+          });
+        }
+        break;
+      }
 
       case "INTERNSHIP_MANAGER":
-        await tx.internshipManager.delete({
+        await tx.internshipManager.deleteMany({
           where: { userId: id },
         });
         break;
 
       case "DEPARTMENT_HEAD":
-        await tx.departmentHead.delete({
+        await tx.departmentHead.deleteMany({
           where: { userId: id },
         });
         break;
+
+      default:
+        throw new Error("Rôle utilisateur non pris en charge pour la suppression");
     }
 
     await tx.user.delete({
