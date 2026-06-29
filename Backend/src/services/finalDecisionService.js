@@ -1,6 +1,10 @@
 import prisma from "../config/prisma.js";
+import { getMinimumMeetings } from "../utils/meetingRules.js";
 import { createNotification } from "./notificationService.js";
-import { getInternshipUserIds } from "./internshipWorkflowService.js";
+import {
+  getInternshipUserIds,
+  syncInternshipWorkflowStatus,
+} from "./internshipWorkflowService.js";
 import { getSupervisorByUserId } from "./supervisorInternshipService.js";
 import { notificationLinks } from "../utils/notificationLinks.js";
 
@@ -54,23 +58,73 @@ const getStudentByUserId = async (userId) => {
   return student;
 };
 
-const mapDecisionToInternshipStatus = (decision) =>
-  decision === "DEFENSE_NOT_AUTHORIZED"
-    ? "DEFENSE_NOT_AUTHORIZED"
-    : "DEFENSE_AUTHORIZED";
+const mapDecisionToInternshipStatus = (decision) => {
+  switch (decision) {
+    case "DEFENSE_AUTHORIZED":
+      return "CLOSED";
+    case "DEFENSE_AUTHORIZED_WITH_CORRECTIONS":
+      return "DEFENSE_AUTHORIZED";
+    case "DEFENSE_NOT_AUTHORIZED":
+      return "DEFENSE_NOT_AUTHORIZED";
+    default:
+      throw new Error("Décision invalide");
+  }
+};
 
 const computeStats = (internships) => {
-  const authorizedCount = internships.filter(
-    (internship) => internship.status === "DEFENSE_AUTHORIZED",
+  const decided = internships.filter((internship) => internship.finalDecision);
+
+  const authorizedCount = decided.filter((internship) =>
+    ["DEFENSE_AUTHORIZED", "DEFENSE_AUTHORIZED_WITH_CORRECTIONS"].includes(
+      internship.finalDecision.decision,
+    ),
   ).length;
-  const refusedCount = internships.filter(
-    (internship) => internship.status === "DEFENSE_NOT_AUTHORIZED",
+  const refusedCount = decided.filter(
+    (internship) =>
+      internship.finalDecision.decision === "DEFENSE_NOT_AUTHORIZED",
   ).length;
 
   return {
     authorizedCount,
     refusedCount,
   };
+};
+
+const mapInternshipWithMeetingCompliance = (internship) => {
+  const meetingCount = internship._count?.meetings ?? 0;
+  const minimumMeetingsRequired = getMinimumMeetings(internship.student?.level);
+  const meetingsCompliant =
+    !minimumMeetingsRequired || meetingCount >= minimumMeetingsRequired;
+
+  const { _count, ...rest } = internship;
+
+  return {
+    ...rest,
+    meetingCount,
+    minimumMeetingsRequired,
+    meetingsCompliant,
+  };
+};
+
+const assertMinimumMeetingsForFinalDecision = async (internshipId, studentLevel) => {
+  const minimumRequired = getMinimumMeetings(studentLevel);
+
+  if (!minimumRequired) {
+    return;
+  }
+
+  const meetingCount = await prisma.meeting.count({
+    where: {
+      internshipId: Number(internshipId),
+    },
+  });
+
+  if (meetingCount < minimumRequired) {
+    const remaining = minimumRequired - meetingCount;
+    throw new Error(
+      `Décision finale impossible : ${minimumRequired} rencontre(s) obligatoire(s) requise(s) (${meetingCount}/${minimumRequired} planifiée(s)). Il manque encore ${remaining} rencontre(s).`,
+    );
+  }
 };
 
 const getNotificationContent = (decision) => {
@@ -120,6 +174,30 @@ export const getFinalDecisionsForViewer = async () => {
 export const getFinalDecisionsForSupervisor = async (userId) => {
   const supervisor = await getSupervisorByUserId(userId);
 
+  const activeInternships = await prisma.internship.findMany({
+    where: {
+      supervisorId: supervisor.id,
+      status: {
+        in: [
+          "SUBJECT_VALIDATED",
+          "IN_PROGRESS",
+          "REPORT_LATE",
+          "REPORT_WRITING",
+        ],
+      },
+      NOT: {
+        administrativeStatus: "REJECTED",
+      },
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  for (const internship of activeInternships) {
+    await syncInternshipWorkflowStatus(internship.id);
+  }
+
   const internships = await prisma.internship.findMany({
     where: {
       supervisorId: supervisor.id,
@@ -130,14 +208,21 @@ export const getFinalDecisionsForSupervisor = async (userId) => {
         administrativeStatus: "REJECTED",
       },
     },
-    include: internshipInclude,
+    include: {
+      ...internshipInclude,
+      _count: {
+        select: {
+          meetings: true,
+        },
+      },
+    },
     orderBy: {
       updatedAt: "desc",
     },
   });
 
   return {
-    internships,
+    internships: internships.map(mapInternshipWithMeetingCompliance),
     stats: computeStats(internships),
   };
 };
@@ -199,6 +284,7 @@ export const createFinalDecision = async (
     },
     include: {
       finalDecision: true,
+      student: true,
     },
   });
 
@@ -218,10 +304,15 @@ export const createFinalDecision = async (
     throw new Error("Une décision finale existe déjà pour ce stage");
   }
 
+  await assertMinimumMeetingsForFinalDecision(
+    internship.id,
+    internship.student?.level,
+  );
+
   const internshipStatus = mapDecisionToInternshipStatus(decision);
 
   return await prisma.$transaction(async (tx) => {
-    await tx.finalDecision.create({
+    const finalDecision = await tx.finalDecision.create({
       data: {
         decision,
         comment: comment.trim(),
@@ -233,7 +324,7 @@ export const createFinalDecision = async (
       },
     });
 
-    return await tx.internship.update({
+    const updatedInternship = await tx.internship.update({
       where: {
         id: internship.id,
       },
@@ -242,6 +333,11 @@ export const createFinalDecision = async (
       },
       include: internshipInclude,
     });
+
+    return {
+      ...updatedInternship,
+      finalDecision,
+    };
   }).then(async (updatedInternship) => {
     const userIds = await getInternshipUserIds(updatedInternship.id);
     const notificationContent = getNotificationContent(decision);

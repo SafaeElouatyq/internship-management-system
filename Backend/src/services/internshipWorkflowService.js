@@ -1,20 +1,59 @@
 import prisma from "../config/prisma.js";
 import { PFE_CATEGORIES } from "../utils/pfeDocumentRules.js";
+import {
+  getMissingWeeks,
+  normalizeWeekStartDate,
+} from "../utils/reportWeekUtils.js";
 
-const terminalStatuses = [
-  "READY_FOR_DEFENSE",
+const frozenStatuses = [
   "DEFENSE_AUTHORIZED",
   "DEFENSE_NOT_AUTHORIZED",
   "CLOSED",
 ];
 
-const reportLateStatuses = ["IN_PROGRESS", "SUBJECT_VALIDATED"];
-
-const reportWritingFromStatuses = [
+const followUpStatuses = [
   "SUBJECT_VALIDATED",
   "IN_PROGRESS",
   "REPORT_LATE",
+  "REPORT_WRITING",
+  "READY_FOR_DEFENSE",
 ];
+
+const reportLateFromStatuses = [
+  "SUBJECT_VALIDATED",
+  "IN_PROGRESS",
+  "REPORT_WRITING",
+];
+
+const resolveFollowUpStatus = ({
+  currentStatus,
+  hasReports,
+  hasMissingWeeks,
+  hasPfeDocs,
+  allPfeValidated,
+}) => {
+  if (allPfeValidated) {
+    return "READY_FOR_DEFENSE";
+  }
+
+  if (hasMissingWeeks && reportLateFromStatuses.includes(currentStatus)) {
+    return "REPORT_LATE";
+  }
+
+  if (hasPfeDocs) {
+    return "REPORT_WRITING";
+  }
+
+  if (hasReports || currentStatus === "SUBJECT_VALIDATED") {
+    return hasReports ? "IN_PROGRESS" : "SUBJECT_VALIDATED";
+  }
+
+  if (currentStatus === "REPORT_LATE" && !hasMissingWeeks) {
+    return "IN_PROGRESS";
+  }
+
+  return currentStatus;
+};
 
 export const getInternshipUserIds = async (internshipId) => {
   const internship = await prisma.internship.findUnique({
@@ -37,14 +76,72 @@ export const getInternshipUserIds = async (internshipId) => {
   };
 };
 
-export const transitionAfterWeeklyReport = async (internshipId) => {
+export const syncInternshipWorkflowStatus = async (
+  internshipId,
+  { hasMissingWeeks } = {},
+) => {
   const internship = await prisma.internship.findUnique({
     where: {
       id: Number(internshipId),
     },
+    include: {
+      weeklyReports: {
+        select: {
+          weekStartDate: true,
+        },
+      },
+      documents: {
+        where: {
+          category: {
+            in: PFE_CATEGORIES,
+          },
+        },
+        select: {
+          category: true,
+          validationStatus: true,
+        },
+      },
+    },
   });
 
-  if (!internship || internship.status !== "SUBJECT_VALIDATED") {
+  if (!internship || frozenStatuses.includes(internship.status)) {
+    return internship;
+  }
+
+  if (!followUpStatuses.includes(internship.status)) {
+    return internship;
+  }
+
+  let missingWeeks = hasMissingWeeks;
+
+  if (missingWeeks === undefined && internship.supervisorId) {
+    const existingWeeks = internship.weeklyReports.map((report) =>
+      normalizeWeekStartDate(report.weekStartDate),
+    );
+    missingWeeks =
+      getMissingWeeks(internship.startDate, existingWeeks).length > 0;
+  }
+
+  const hasReports = internship.weeklyReports.length > 0;
+  const hasPfeDocs = internship.documents.length > 0;
+  const validatedCategories = new Set(
+    internship.documents
+      .filter((document) => document.validationStatus === "VALIDATED")
+      .map((document) => document.category),
+  );
+  const allPfeValidated = PFE_CATEGORIES.every((category) =>
+    validatedCategories.has(category),
+  );
+
+  const newStatus = resolveFollowUpStatus({
+    currentStatus: internship.status,
+    hasReports,
+    hasMissingWeeks: Boolean(missingWeeks),
+    hasPfeDocs,
+    allPfeValidated,
+  });
+
+  if (newStatus === internship.status) {
     return internship;
   }
 
@@ -53,107 +150,16 @@ export const transitionAfterWeeklyReport = async (internshipId) => {
       id: internship.id,
     },
     data: {
-      status: "IN_PROGRESS",
+      status: newStatus,
     },
   });
 };
 
-export const syncReportLateStatus = async (internshipId, hasMissingWeeks) => {
-  const internship = await prisma.internship.findUnique({
-    where: {
-      id: Number(internshipId),
-    },
-  });
+export const transitionAfterWeeklyReport = async (internshipId) =>
+  syncInternshipWorkflowStatus(internshipId);
 
-  if (!internship || terminalStatuses.includes(internship.status)) {
-    return internship;
-  }
+export const syncReportLateStatus = async (internshipId, hasMissingWeeks) =>
+  syncInternshipWorkflowStatus(internshipId, { hasMissingWeeks });
 
-  if (hasMissingWeeks && reportLateStatuses.includes(internship.status)) {
-    return await prisma.internship.update({
-      where: {
-        id: internship.id,
-      },
-      data: {
-        status: "REPORT_LATE",
-      },
-    });
-  }
-
-  if (!hasMissingWeeks && internship.status === "REPORT_LATE") {
-    return await prisma.internship.update({
-      where: {
-        id: internship.id,
-      },
-      data: {
-        status: "IN_PROGRESS",
-      },
-    });
-  }
-
-  return internship;
-};
-
-export const syncPfeWorkflowStatus = async (internshipId) => {
-  const internship = await prisma.internship.findUnique({
-    where: {
-      id: Number(internshipId),
-    },
-  });
-
-  if (!internship || terminalStatuses.includes(internship.status)) {
-    return internship;
-  }
-
-  const documents = await prisma.document.findMany({
-    where: {
-      internshipId: Number(internshipId),
-      category: {
-        in: PFE_CATEGORIES,
-      },
-    },
-  });
-
-  const validatedCategories = new Set(
-    documents
-      .filter((document) => document.validationStatus === "VALIDATED")
-      .map((document) => document.category),
-  );
-
-  const allValidated = PFE_CATEGORIES.every((category) =>
-    validatedCategories.has(category),
-  );
-
-  if (allValidated) {
-    if (internship.status === "READY_FOR_DEFENSE") {
-      return internship;
-    }
-
-    return await prisma.internship.update({
-      where: {
-        id: internship.id,
-      },
-      data: {
-        status: "READY_FOR_DEFENSE",
-      },
-    });
-  }
-
-  const finalValidated = validatedCategories.has("FINAL");
-
-  if (
-    finalValidated &&
-    reportWritingFromStatuses.includes(internship.status)
-  ) {
-    return await prisma.internship.update({
-      where: {
-        id: internship.id,
-      },
-      data: {
-        status: "REPORT_WRITING",
-      },
-    });
-  }
-
-  return internship;
-};
+export const syncPfeWorkflowStatus = async (internshipId) =>
+  syncInternshipWorkflowStatus(internshipId);

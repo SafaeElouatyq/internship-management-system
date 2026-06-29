@@ -114,6 +114,7 @@ export const createSubjectValidation = async (
         },
       },
     });
+    
 
     const updatedInternship = await tx.internship.update({
       where: {

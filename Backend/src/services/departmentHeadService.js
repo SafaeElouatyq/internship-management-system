@@ -185,8 +185,8 @@ export const getDashboardStats = async (userId) => {
     subjectValidatedStatuses.includes(internship.status),
   ).length;
 
-  const authorizedCount = internships.filter(
-    (internship) => internship.status === "DEFENSE_AUTHORIZED",
+  const authorizedCount = internships.filter((internship) =>
+    ["DEFENSE_AUTHORIZED", "CLOSED"].includes(internship.status),
   ).length;
 
   const meetingCountByInternship = meetings.reduce((counts, meeting) => {

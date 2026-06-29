@@ -1,3 +1,8 @@
+import {
+  canDecide,
+  getMeetingsComplianceMessage,
+} from "../../utils/finalDecisionUtils.jsx";
+
 function FinalDecisionModal({
   internship,
   decision,
@@ -9,6 +14,9 @@ function FinalDecisionModal({
   saving,
   error = "",
 }) {
+  const meetingsMessage = getMeetingsComplianceMessage(internship);
+  const canSubmit = canDecide(internship);
+
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-3xl shadow-xl w-full max-w-xl p-8">
@@ -24,6 +32,12 @@ function FinalDecisionModal({
         </div>
 
         <form onSubmit={onSubmit} className="space-y-6">
+          {meetingsMessage && (
+            <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl text-sm leading-relaxed">
+              {meetingsMessage}
+            </div>
+          )}
+
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
               {error}
@@ -39,7 +53,8 @@ function FinalDecisionModal({
               name="decision"
               value={decision}
               onChange={onDecisionChange}
-              className="w-full border border-slate-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={!canSubmit}
+              className="w-full border border-slate-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
               required
             >
               <option value="">Sélectionner une décision</option>
@@ -64,7 +79,8 @@ function FinalDecisionModal({
               onChange={onCommentChange}
               rows={4}
               required
-              className="w-full border border-slate-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={!canSubmit}
+              className="w-full border border-slate-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
               placeholder="Justifiez votre décision..."
             />
           </div>
@@ -80,7 +96,7 @@ function FinalDecisionModal({
 
             <button
               type="submit"
-              disabled={saving || !decision || !comment.trim()}
+              disabled={saving || !canSubmit || !decision || !comment.trim()}
               className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium disabled:opacity-50"
             >
               {saving ? "Enregistrement..." : "Enregistrer la décision"}

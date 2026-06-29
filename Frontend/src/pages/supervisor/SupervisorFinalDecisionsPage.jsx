@@ -62,14 +62,28 @@ function SupervisorFinalDecisionsPage() {
     setSuccess("");
 
     try {
-      await createFinalDecision({
+      const { internship: updatedInternship } = await createFinalDecision({
         internshipId: selectedInternship.id,
         decision,
         comment,
       });
+
+      setInternships((current) =>
+        current.map((item) =>
+          item.id === updatedInternship.id
+            ? {
+                ...item,
+                ...updatedInternship,
+                meetingCount: item.meetingCount,
+                minimumMeetingsRequired: item.minimumMeetingsRequired,
+                meetingsCompliant: item.meetingsCompliant,
+              }
+            : item,
+        ),
+      );
       setSuccess("Décision enregistrée avec succès");
       CloseModal();
-      loadData();
+      await loadData();
     } catch (submitError) {
       setError(
         submitError.response?.data?.message ||

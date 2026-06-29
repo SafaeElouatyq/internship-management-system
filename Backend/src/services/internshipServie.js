@@ -2,6 +2,7 @@ import prisma from "../config/prisma.js";
 import { createNotification } from "./notificationService.js";
 import { notifyInternshipManagers } from "../utils/notificationHelpers.js";
 import { notificationLinks } from "../utils/notificationLinks.js";
+import { syncInternshipWorkflowStatus } from "./internshipWorkflowService.js";
 
 const includeRelations = {
   student: {
@@ -117,6 +118,30 @@ const assertCanModifyDeclaration = (internship) => {
 
 export const getMyInternships = async (userId) => {
   const student = await getStudentByUserId(userId);
+
+  const internships = await prisma.internship.findMany({
+    where: {
+      studentId: student.id,
+    },
+    include: includeRelations,
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  for (const internship of internships) {
+    if (
+      [
+        "SUBJECT_VALIDATED",
+        "IN_PROGRESS",
+        "REPORT_LATE",
+        "REPORT_WRITING",
+        "READY_FOR_DEFENSE",
+      ].includes(internship.status)
+    ) {
+      await syncInternshipWorkflowStatus(internship.id);
+    }
+  }
 
   return await prisma.internship.findMany({
     where: {

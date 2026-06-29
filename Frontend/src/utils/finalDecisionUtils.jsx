@@ -39,7 +39,7 @@ export const getDecisionLabel = (internship) => {
     return DECISION_LABELS[decision] || decision;
   }
 
-  if (internship.status === "DEFENSE_AUTHORIZED") {
+  if (internship.status === "DEFENSE_AUTHORIZED" || internship.status === "CLOSED") {
     return "Autorisé à soutenir";
   }
 
@@ -59,7 +59,8 @@ export const getDecisionBadgeClass = (internship) => {
 
   if (
     decision === "DEFENSE_AUTHORIZED" ||
-    internship.status === "DEFENSE_AUTHORIZED"
+    internship.status === "DEFENSE_AUTHORIZED" ||
+    internship.status === "CLOSED"
   ) {
     return "bg-green-50 text-green-700";
   }
@@ -79,7 +80,40 @@ export const getDecisionBadgeClass = (internship) => {
 };
 
 export const canDecide = (internship) =>
-  internship.status === "READY_FOR_DEFENSE" && !internship.finalDecision;
+  internship.status === "READY_FOR_DEFENSE" &&
+  !internship.finalDecision &&
+  isMeetingsCompliant(internship);
+
+export const isMeetingsCompliant = (internship) => {
+  const minimum = internship.minimumMeetingsRequired;
+
+  if (!minimum) {
+    return true;
+  }
+
+  return (internship.meetingCount ?? 0) >= minimum;
+};
+
+export const getMeetingsComplianceMessage = (internship) => {
+  const minimum = internship.minimumMeetingsRequired;
+  const count = internship.meetingCount ?? 0;
+
+  if (!minimum || count >= minimum) {
+    return null;
+  }
+
+  const remaining = minimum - count;
+  const levelLabel =
+    internship.student?.level === "LICENCE"
+      ? "Licence"
+      : internship.student?.level === "MASTER"
+        ? "Master"
+        : internship.student?.level === "ENGINEER"
+          ? "Ingénieur"
+          : "ce niveau";
+
+  return `Décision impossible : ${minimum} rencontre(s) obligatoire(s) requise(s) pour le niveau ${levelLabel} (${count}/${minimum} planifiée(s)). Il manque encore ${remaining} rencontre(s).`;
+};
 
 export const formatDecisionDate = (value) => {
   if (!value) {
