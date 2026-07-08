@@ -1,0 +1,28 @@
+export const settingsCopy = {
+  pageTitle: "Paramètres",
+  pageDescription:
+    "Gérez votre mot de passe et l'apparence de l'application.",
+  passwordTitle: "Changer le mot de passe",
+  passwordDescription:
+    "Mettez à jour votre mot de passe pour sécuriser votre compte.",
+  currentPassword: "Mot de passe actuel",
+  newPassword: "Nouveau mot de passe",
+  confirmPassword: "Confirmer le nouveau mot de passe",
+  updatePassword: "Mettre à jour le mot de passe",
+  appearanceTitle: "Apparence",
+  appearanceDescription: "Personnalisez le thème de l'application.",
+  saveAppearance: "Enregistrer l'apparence",
+  themeLight: "Clair",
+  themeDark: "Sombre",
+  themeSystem: "Système",
+  saving: "Enregistrement...",
+  passwordSuccess: "Mot de passe mis à jour avec succès.",
+  appearanceSuccess: "Apparence enregistrée avec succès.",
+  currentPasswordRequired: "Le mot de passe actuel est obligatoire.",
+  newPasswordRequired: "Le nouveau mot de passe est obligatoire.",
+  confirmPasswordRequired: "La confirmation du mot de passe est obligatoire.",
+  passwordMinLength: "Le mot de passe doit contenir au moins 6 caractères.",
+  passwordMismatch: "Les mots de passe ne correspondent pas.",
+  currentPasswordInvalid: "Le mot de passe actuel est incorrect.",
+  passwordError: "Erreur lors de la mise à jour du mot de passe.",
+};
