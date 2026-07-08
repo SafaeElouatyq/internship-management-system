@@ -64,35 +64,23 @@ export const formatWeekLabel = (dateKey) => {
   return `${formatter.format(start)} - ${formatter.format(end)}`;
 };
 
+const getMondayOfReportingWeek = (dateKey, dayOfWeek) => {
+  const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  return addDaysToDateKey(dateKey, -daysFromMonday);
+};
+
+const getMinutesSinceMidnight = (casablanca) =>
+  casablanca.hour * 60 + casablanca.minute + casablanca.second / 60;
+
 export const getSubmissionContext = (date = new Date()) => {
   const casablanca = getCasablancaDateTime(date);
   const dateKey = toDateKey(casablanca);
-  const minutesSinceMidnight =
-    casablanca.hour * 60 + casablanca.minute + casablanca.second / 60;
-  const saturdayOpenMinutes = 19 * 60;
   const mondayCloseMinutes = 10 * 60;
 
-  if (casablanca.dayOfWeek === 6) {
-    if (minutesSinceMidnight >= saturdayOpenMinutes) {
-      return {
-        weekStartDate: addDaysToDateKey(dateKey, -5),
-        windowType: "ON_TIME",
-        canCreate: true,
-        canEdit: true,
-      };
-    }
-
+  // Fenêtre à temps : vendredi 00h00 → lundi 10h00 (heure du Maroc)
+  if (casablanca.dayOfWeek === 5 || casablanca.dayOfWeek === 6 || casablanca.dayOfWeek === 0) {
     return {
-      weekStartDate: addDaysToDateKey(dateKey, -12),
-      windowType: "LATE",
-      canCreate: true,
-      canEdit: false,
-    };
-  }
-
-  if (casablanca.dayOfWeek === 0) {
-    return {
-      weekStartDate: addDaysToDateKey(dateKey, -6),
+      weekStartDate: getMondayOfReportingWeek(dateKey, casablanca.dayOfWeek),
       windowType: "ON_TIME",
       canCreate: true,
       canEdit: true,
@@ -102,7 +90,7 @@ export const getSubmissionContext = (date = new Date()) => {
   if (casablanca.dayOfWeek === 1) {
     const weekStartDate = addDaysToDateKey(dateKey, -7);
 
-    if (minutesSinceMidnight < mondayCloseMinutes) {
+    if (getMinutesSinceMidnight(casablanca) < mondayCloseMinutes) {
       return {
         weekStartDate,
         windowType: "ON_TIME",
@@ -195,21 +183,10 @@ const getFirstReportingWeekStart = (internshipStartDate) => {
 
 const getLastClosedWeekStart = (currentWeekStartDate, context, date = new Date()) => {
   if (context.windowType === "LATE") {
-    return addDaysToDateKey(currentWeekStartDate, -7);
+    return currentWeekStartDate;
   }
 
   if (context.windowType === "ON_TIME") {
-    const casablanca = getCasablancaDateTime(date);
-
-    if (casablanca.dayOfWeek === 6) {
-      const minutesSinceMidnight =
-        casablanca.hour * 60 + casablanca.minute + casablanca.second / 60;
-
-      if (minutesSinceMidnight >= 19 * 60) {
-        return addDaysToDateKey(currentWeekStartDate, -7);
-      }
-    }
-
     return addDaysToDateKey(currentWeekStartDate, -7);
   }
 
@@ -218,10 +195,10 @@ const getLastClosedWeekStart = (currentWeekStartDate, context, date = new Date()
 
 export const getSubmissionWindowMessage = (context) => {
   if (context.windowType === "ON_TIME") {
-    return "Fenêtre ouverte : du samedi 19h00 au lundi 10h00 (heure du Maroc).";
+    return "Fenêtre ouverte : du vendredi 00h00 au lundi 10h00 (heure du Maroc).";
   }
 
-  return "Soumission en retard autorisée jusqu'au samedi 19h00 (heure du Maroc).";
+  return "Soumission en retard autorisée jusqu'au vendredi 00h00 (heure du Maroc).";
 };
 
 export const normalizeWeekStartDate = (value) => {

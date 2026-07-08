@@ -1,8 +1,8 @@
 import ReportStatusBadge from "./ReportStatusBadge";
 import {
   formatReportDateTime,
-  getReportAttachmentUrl,
 } from "../../utils/reportUtils.jsx";
+import SecureFileLink from "../common/SecureFileLink.jsx";
 
 function ReportDetailsModal({
   report,
@@ -81,15 +81,14 @@ function ReportDetailsModal({
             {attachments.length ? (
               <div className="mt-2 space-y-2">
                 {attachments.map((attachment) => (
-                  <a
+                  <SecureFileLink
                     key={attachment.id}
-                    href={getReportAttachmentUrl(attachment.path)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="block text-blue-600 hover:text-blue-700 font-medium"
+                    filePath={attachment.path}
+                    displayName={attachment.name}
+                    className="block text-blue-600 hover:text-blue-700 font-medium text-left"
                   >
                     {attachment.name}
-                  </a>
+                  </SecureFileLink>
                 ))}
               </div>
             ) : (

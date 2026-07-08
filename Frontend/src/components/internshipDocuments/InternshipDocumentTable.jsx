@@ -1,8 +1,7 @@
 import { Download, Trash2 } from "lucide-react";
 import InternshipDocumentTypeBadge from "./InternshipDocumentTypeBadge";
-import { getDocumentUrl } from "../../services/internshipDocumentService.jsx";
 import { getFileNameFromUrl } from "../../utils/internshipDocumentUtils.jsx";
-
+import SecureFileLink from "../common/SecureFileLink.jsx";
 function InternshipDocumentTable({
   documents,
   onDelete,
@@ -39,16 +38,14 @@ function InternshipDocumentTable({
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <a
-              href={getDocumentUrl(document.fileUrl)}
-              target="_blank"
-              rel="noreferrer"
+            <SecureFileLink
+              filePath={document.fileUrl}
+              displayName={getFileNameFromUrl(document.fileUrl)}
               className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-blue-600 hover:bg-blue-50"
             >
               <Download size={16} />
               Ouvrir
-            </a>
-
+            </SecureFileLink>
             {canDelete && onDelete && (
               <button
                 type="button"

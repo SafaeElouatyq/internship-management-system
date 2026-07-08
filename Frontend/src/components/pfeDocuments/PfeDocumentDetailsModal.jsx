@@ -1,4 +1,4 @@
-import { getDocumentUrl } from "../../services/documentService.jsx";
+import SecureFileLink from "../common/SecureFileLink.jsx";
 import {
   PFE_CATEGORY_LABELS,
   SUPERVISOR_VALIDATION_OPTIONS,
@@ -61,14 +61,13 @@ function PfeDocumentDetailsModal({
           </div>
 
           <div>
-            <a
-              href={getDocumentUrl(document.path)}
-              target="_blank"
-              rel="noreferrer"
+            <SecureFileLink
+              filePath={document.path}
+              displayName={document.name}
               className="text-blue-600 hover:text-blue-700 font-medium"
             >
               Ouvrir le document
-            </a>
+            </SecureFileLink>
           </div>
 
           {!showValidation && document.supervisorComment && (

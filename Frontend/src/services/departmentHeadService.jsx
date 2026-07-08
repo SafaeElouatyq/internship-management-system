@@ -14,6 +14,11 @@ export const getInternships = async () => {
   return response.data;
 };
 
+export const getDashboardStats = async () => {
+  const response = await axios.get(`${API_URL}/dashboard`, getToken());
+  return response.data;
+};
+
 export const getSupervisors = async () => {
   const response = await axios.get(`${API_URL}/supervisors`, getToken());
   return response.data;

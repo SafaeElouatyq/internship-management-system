@@ -9,7 +9,7 @@ import {
 import { createNotification } from "./notificationService.js";
 import {
   getInternshipUserIds,
-  syncPfeWorkflowStatus,
+  syncInternshipWorkflowStatus,
 } from "./internshipWorkflowService.js";
 import { notificationLinks } from "../utils/notificationLinks.js";
 
@@ -223,6 +223,8 @@ export const uploadPfeDocument = async (userId, { category }, file) => {
 
     await notifySupervisorPfeUpload(internship, category, updated.id);
 
+    await syncInternshipWorkflowStatus(internship.id);
+
     return updated;
   }
 
@@ -239,6 +241,8 @@ export const uploadPfeDocument = async (userId, { category }, file) => {
   });
 
   await notifySupervisorPfeUpload(internship, category, created.id);
+
+  await syncInternshipWorkflowStatus(internship.id);
 
   return created;
 };
@@ -390,7 +394,7 @@ export const validatePfeDocument = async (
     include: documentInclude,
   });
 
-  await syncPfeWorkflowStatus(document.internshipId);
+  await syncInternshipWorkflowStatus(document.internshipId);
 
   const userIds = await getInternshipUserIds(document.internshipId);
 

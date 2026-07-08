@@ -1,10 +1,7 @@
 import { Download } from "lucide-react";
 import InternshipDocumentTypeBadge from "../internshipDocuments/InternshipDocumentTypeBadge";
-import { getDocumentUrl } from "../../services/internshipDocumentService.jsx";
-import {
-  getFileNameFromUrl,
-} from "../../utils/internshipDocumentUtils.jsx";
-
+import { getFileNameFromUrl } from "../../utils/internshipDocumentUtils.jsx";
+import SecureFileLink from "../common/SecureFileLink.jsx";
 function ManagerDocumentRow({ document }) {
   const student = document.internship?.student?.user;
 
@@ -34,18 +31,15 @@ function ManagerDocumentRow({ document }) {
 
       <td className="px-2 py-4">
         <div className="flex items-center justify-center">
-          <a
-            href={getDocumentUrl(document.fileUrl)}
-            download
-            target="_blank"
-            rel="noreferrer"
+          <SecureFileLink
+            filePath={document.fileUrl}
+            displayName={getFileNameFromUrl(document.fileUrl)}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-blue-600 hover:bg-blue-50 transition"
             title="Télécharger"
           >
             <Download size={18} />
             Télécharger
-          </a>
-        </div>
+          </SecureFileLink>        </div>
       </td>
     </tr>
   );

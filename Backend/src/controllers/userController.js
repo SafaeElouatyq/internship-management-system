@@ -66,6 +66,13 @@ export const removeUser = async (req, res) => {
   } catch (error) {
     console.error(error);
 
+    if (error.code === "P2003") {
+      return res.status(400).json({
+        message:
+          "Impossible de supprimer cet utilisateur : des données liées existent encore dans le système.",
+      });
+    }
+
     res.status(400).json({
       message: error.message,
     });

@@ -1,6 +1,33 @@
 import prisma from "../config/prisma.js";
 import bcrypt from "bcryptjs";
 
+const deleteInternshipWithDependencies = async (tx, internshipId) => {
+  const reports = await tx.weeklyReport.findMany({
+    where: { internshipId },
+    select: { id: true },
+  });
+
+  if (reports.length) {
+    await tx.reportAttachment.deleteMany({
+      where: {
+        weeklyReportId: {
+          in: reports.map((report) => report.id),
+        },
+      },
+    });
+    await tx.weeklyReport.deleteMany({
+      where: { internshipId },
+    });
+  }
+
+  await tx.meeting.deleteMany({ where: { internshipId } });
+  await tx.document.deleteMany({ where: { internshipId } });
+  await tx.complaint.deleteMany({ where: { internshipId } });
+  await tx.finalDecision.deleteMany({ where: { internshipId } });
+  await tx.subjectValidation.deleteMany({ where: { internshipId } });
+  await tx.internship.delete({ where: { id: internshipId } });
+};
+
 export const getAllUsers = async (search = "", role = "") => {
   const where = {};
 
@@ -438,6 +465,20 @@ export const deleteUser = async (userId) => {
     where: { id },
     include: {
       role: true,
+      student: {
+        include: {
+          internships: {
+            select: { id: true },
+          },
+        },
+      },
+      supervisor: {
+        include: {
+          internships: {
+            select: { id: true },
+          },
+        },
+      },
     },
   });
 
@@ -446,36 +487,68 @@ export const deleteUser = async (userId) => {
   }
 
   await prisma.$transaction(async (tx) => {
+    await tx.notification.deleteMany({
+      where: { userId: id },
+    });
+
+    await tx.complaint.updateMany({
+      where: { handledById: id },
+      data: { handledById: null },
+    });
+
+    await tx.internshipDocument.updateMany({
+      where: { uploadedById: id },
+      data: { uploadedById: null },
+    });
+
     switch (user.role.name) {
       case "ADMIN":
-        await tx.admin.delete({
+        await tx.admin.deleteMany({
           where: { userId: id },
         });
         break;
 
-      case "STUDENT":
-        await tx.student.delete({
-          where: { userId: id },
-        });
-        break;
+      case "STUDENT": {
+        if (user.student) {
+          for (const internship of user.student.internships) {
+            await deleteInternshipWithDependencies(tx, internship.id);
+          }
 
-      case "SUPERVISOR":
-        await tx.supervisor.delete({
-          where: { userId: id },
-        });
+          await tx.student.delete({
+            where: { userId: id },
+          });
+        }
         break;
+      }
+
+      case "SUPERVISOR": {
+        if (user.supervisor) {
+          await tx.internship.updateMany({
+            where: { supervisorId: user.supervisor.id },
+            data: { supervisorId: null },
+          });
+
+          await tx.supervisor.delete({
+            where: { userId: id },
+          });
+        }
+        break;
+      }
 
       case "INTERNSHIP_MANAGER":
-        await tx.internshipManager.delete({
+        await tx.internshipManager.deleteMany({
           where: { userId: id },
         });
         break;
 
       case "DEPARTMENT_HEAD":
-        await tx.departmentHead.delete({
+        await tx.departmentHead.deleteMany({
           where: { userId: id },
         });
         break;
+
+      default:
+        throw new Error("Rôle utilisateur non pris en charge pour la suppression");
     }
 
     await tx.user.delete({

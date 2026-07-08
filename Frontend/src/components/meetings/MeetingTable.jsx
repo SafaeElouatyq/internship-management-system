@@ -7,6 +7,7 @@ function MeetingTable({
   onDelete,
   showStudent = false,
   title,
+  appearance = "default",
 }) {
   if (!meetings.length) {
     return (
@@ -38,6 +39,7 @@ function MeetingTable({
               {showStudent && (
                 <th className="text-left px-4 py-4">Étudiant</th>
               )}
+              <th className="text-left px-4 py-4">Rencontre</th>
               <th className="text-left px-4 py-4">Date</th>
               <th className="text-left px-4 py-4">Type</th>
               <th className="text-left px-4 py-4">Statut</th>
@@ -56,6 +58,7 @@ function MeetingTable({
                 onEdit={onEdit}
                 onDelete={onDelete}
                 showStudent={showStudent}
+                appearance={appearance}
               />
             ))}
           </tbody>

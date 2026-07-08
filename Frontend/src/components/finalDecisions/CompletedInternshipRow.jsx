@@ -4,6 +4,8 @@ import {
   getDecisionBadgeClass,
   getDecisionLabel,
   getFinalReportLabel,
+  getMeetingsComplianceMessage,
+  isPendingFinalDecision,
 } from "../../utils/finalDecisionUtils.jsx";
 
 function CompletedInternshipRow({
@@ -13,7 +15,9 @@ function CompletedInternshipRow({
   onView,
 }) {
   const student = internship.student?.user;
-  const pending = canDecide(internship);
+  const pending = isPendingFinalDecision(internship);
+  const canTakeDecision = canDecide(internship);
+  const meetingsMessage = getMeetingsComplianceMessage(internship);
   const hasDecision = Boolean(internship.finalDecision);
 
   return (
@@ -41,11 +45,16 @@ function CompletedInternshipRow({
         >
           {getDecisionLabel(internship)}
         </span>
+        {pending && !canTakeDecision && meetingsMessage && (
+          <p className="text-xs text-amber-700 mt-2 max-w-xs leading-relaxed">
+            {meetingsMessage}
+          </p>
+        )}
       </td>
 
       <td className="px-2 py-4">
         <div className="flex items-center justify-center gap-1">
-          {!readOnly && pending && (
+          {!readOnly && canTakeDecision && (
             <button
               type="button"
               onClick={() => onDecide?.(internship)}
@@ -65,12 +74,18 @@ function CompletedInternshipRow({
               title="Voir la décision"
             >
               <Eye size={16} />
-              Voir
+              
             </button>
           )}
 
-          {readOnly && !hasDecision && pending && (
+          {readOnly && pending && !hasDecision && (
             <span className="text-sm text-slate-400">En attente</span>
+          )}
+
+          {!readOnly && pending && !canTakeDecision && !hasDecision && (
+            <span className="text-sm text-amber-700 text-center max-w-[160px] leading-snug">
+              {meetingsMessage || "Conditions non remplies"}
+            </span>
           )}
         </div>
       </td>

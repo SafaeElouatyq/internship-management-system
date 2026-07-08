@@ -26,6 +26,7 @@ function SupervisorMeetingsPage() {
   const [meetings, setMeetings] = useState([]);
   const [internships, setInternships] = useState([]);
   const [licenceCompliance, setLicenceCompliance] = useState([]);
+  const [meetingContexts, setMeetingContexts] = useState({});
   const [formData, setFormData] = useState(initialForm);
   const [editingMeeting, setEditingMeeting] = useState(null);
   const [selectedMeeting, setSelectedMeeting] = useState(null);
@@ -45,6 +46,7 @@ function SupervisorMeetingsPage() {
       setMeetings(data.meetings);
       setInternships(data.internships);
       setLicenceCompliance(data.licenceCompliance || []);
+      setMeetingContexts(data.meetingContexts || {});
     } catch (error) {
       setError(error.response?.data?.message || "Erreur lors du chargement");
     } finally {
@@ -136,6 +138,12 @@ function SupervisorMeetingsPage() {
     }
   };
 
+  const canScheduleAnyMeeting = internships.some((internship) => {
+    const context = meetingContexts[internship.id];
+
+    return !context || context.canCreateNext;
+  });
+
   return (
     <>
       <div className="flex items-center justify-between mb-8 gap-4">
@@ -152,7 +160,7 @@ function SupervisorMeetingsPage() {
         {!openForm && (
           <button
             onClick={OpenCreateForm}
-            disabled={!internships.length || saving}
+            disabled={!internships.length || !canScheduleAnyMeeting || saving}
             className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-medium disabled:opacity-50"
           >
             Planifier une réunion
@@ -178,6 +186,7 @@ function SupervisorMeetingsPage() {
         <MeetingForm
           formData={formData}
           internships={internships}
+          meetingContexts={meetingContexts}
           onChange={Change}
           onSubmit={Submit}
           onCancel={ResetForm}

@@ -1,12 +1,7 @@
-import PlaceholderPage from "../../components/common/PlaceholderPage.jsx";
+import SettingsPage from "../../components/settings/SettingsPage.jsx";
 
 function AdminSettingsPage() {
-  return (
-    <PlaceholderPage
-      title="Paramètres"
-      description="Gérez vos préférences de compte."
-    />
-  );
+  return <SettingsPage />;
 }
 
 export default AdminSettingsPage;

@@ -1,4 +1,8 @@
 import prisma from "../config/prisma.js";
+import {
+  buildMeetingContext,
+  enrichMeetingsWithSequence,
+} from "../utils/meetingRules.js";
 
 const internshipInclude = {
   student: {
@@ -136,7 +140,13 @@ export const getAssignedInternshipById = async (userId, internshipId) => {
     throw new Error("Stage introuvable ou non assigné à cet encadrant");
   }
 
-  return internship;
+  const enrichedMeetings = enrichMeetingsWithSequence(internship.meetings || []);
+
+  return {
+    ...internship,
+    meetings: enrichedMeetings,
+    meetingContext: buildMeetingContext(internship, internship.meetings || []),
+  };
 };
 
 export { getSupervisorByUserId };
