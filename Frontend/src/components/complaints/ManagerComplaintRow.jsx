@@ -48,7 +48,7 @@ function ManagerComplaintRow({ complaint, onView, onManage }) {
             title="Voir le détail"
           >
             <Eye size={16} />
-            Voir
+           
           </button>
 
           <button
@@ -58,7 +58,7 @@ function ManagerComplaintRow({ complaint, onView, onManage }) {
             title="Traiter la réclamation"
           >
             <Pencil size={16} />
-            Traiter
+            
           </button>
         </div>
       </td>

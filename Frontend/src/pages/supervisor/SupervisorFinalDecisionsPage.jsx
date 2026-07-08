@@ -74,9 +74,13 @@ function SupervisorFinalDecisionsPage() {
             ? {
                 ...item,
                 ...updatedInternship,
-                meetingCount: item.meetingCount,
-                minimumMeetingsRequired: item.minimumMeetingsRequired,
-                meetingsCompliant: item.meetingsCompliant,
+                meetingCount: updatedInternship.meetingCount,
+                minimumMeetingsRequired: updatedInternship.minimumMeetingsRequired,
+                meetingsCompliant: updatedInternship.meetingsCompliant,
+                meetingsCompleted: updatedInternship.meetingsCompleted,
+                adminValidated: updatedInternship.adminValidated,
+                subjectValidated: updatedInternship.subjectValidated,
+                canDecide: updatedInternship.canDecide,
               }
             : item,
         ),
@@ -102,8 +106,8 @@ function SupervisorFinalDecisionsPage() {
         </h1>
 
         <p className="text-slate-500 mt-2">
-          Prenez la décision finale de soutenance pour vos étudiants dont le
-          stage est prêt pour défense.
+          Prenez la décision finale dès que le dossier est validé, le sujet
+          accepté et les 3 rencontres obligatoires terminées.
         </p>
       </div>
 

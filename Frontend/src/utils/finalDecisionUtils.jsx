@@ -39,7 +39,14 @@ export const getDecisionLabel = (internship) => {
     return DECISION_LABELS[decision] || decision;
   }
 
-  if (internship.status === "DEFENSE_AUTHORIZED" || internship.status === "CLOSED") {
+  if (canDecide(internship)) {
+    return "Décision à prendre";
+  }
+
+  if (
+    internship.status === "DEFENSE_AUTHORIZED" ||
+    internship.status === "CLOSED"
+  ) {
     return "Autorisé à soutenir";
   }
 
@@ -79,12 +86,36 @@ export const getDecisionBadgeClass = (internship) => {
   return "bg-slate-100 text-slate-700";
 };
 
-export const canDecide = (internship) =>
-  internship.status === "READY_FOR_DEFENSE" &&
+export const canDecide = (internship) => {
+  if (internship.canDecide !== undefined) {
+    return internship.canDecide;
+  }
+
+  return (
+    !internship.finalDecision &&
+    internship.adminValidated &&
+    internship.subjectValidated &&
+    isMeetingsCompliant(internship)
+  );
+};
+
+export const isPendingFinalDecision = (internship) =>
   !internship.finalDecision &&
-  isMeetingsCompliant(internship);
+  (internship.adminValidated ?? internship.administrativeStatus === "COMPLETE") &&
+  (internship.subjectValidated ??
+    [
+      "SUBJECT_VALIDATED",
+      "IN_PROGRESS",
+      "REPORT_LATE",
+      "REPORT_WRITING",
+      "READY_FOR_DEFENSE",
+    ].includes(internship.status));
 
 export const isMeetingsCompliant = (internship) => {
+  if (internship.meetingsCompliant !== undefined) {
+    return internship.meetingsCompliant;
+  }
+
   const minimum = internship.minimumMeetingsRequired;
 
   if (!minimum) {
@@ -95,24 +126,40 @@ export const isMeetingsCompliant = (internship) => {
 };
 
 export const getMeetingsComplianceMessage = (internship) => {
-  const minimum = internship.minimumMeetingsRequired;
-  const count = internship.meetingCount ?? 0;
-
-  if (!minimum || count >= minimum) {
+  if (internship.finalDecision) {
     return null;
   }
 
-  const remaining = minimum - count;
-  const levelLabel =
-    internship.student?.level === "LICENCE"
-      ? "Licence"
-      : internship.student?.level === "MASTER"
-        ? "Master"
-        : internship.student?.level === "ENGINEER"
-          ? "Ingénieur"
-          : "ce niveau";
+  if (internship.adminValidated === false) {
+    return "Décision impossible : le dossier administratif n'est pas encore validé.";
+  }
 
-  return `Décision impossible : ${minimum} rencontre(s) obligatoire(s) requise(s) pour le niveau ${levelLabel} (${count}/${minimum} planifiée(s)). Il manque encore ${remaining} rencontre(s).`;
+  if (internship.subjectValidated === false) {
+    return "Décision impossible : le sujet du stage n'est pas encore validé.";
+  }
+
+  const minimum = internship.minimumMeetingsRequired;
+  const count = internship.meetingCount ?? 0;
+
+  if (minimum && count < minimum) {
+    const remaining = minimum - count;
+    const levelLabel =
+      internship.student?.level === "LICENCE"
+        ? "Licence"
+        : internship.student?.level === "MASTER"
+          ? "Master"
+          : internship.student?.level === "ENGINEER"
+            ? "Ingénieur"
+            : "ce niveau";
+
+    return `Décision impossible : ${minimum} rencontre(s) obligatoire(s) requise(s) pour le niveau ${levelLabel} (${count}/${minimum} planifiée(s)). Il manque encore ${remaining} rencontre(s).`;
+  }
+
+  if (internship.meetingsCompleted === false) {
+    return "Décision impossible : toutes les rencontres obligatoires doivent être terminées.";
+  }
+
+  return null;
 };
 
 export const formatDecisionDate = (value) => {

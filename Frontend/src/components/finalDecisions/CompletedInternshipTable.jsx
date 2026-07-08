@@ -10,10 +10,10 @@ function CompletedInternshipTable({
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-12 text-center">
         <h3 className="text-lg font-semibold text-slate-800">
-          Aucun stage terminé
+          Aucun stage éligible
         </h3>
         <p className="text-slate-500 mt-2">
-          Les stages prêts pour décision apparaîtront ici.
+          Les stages avec sujet validé apparaîtront ici pour la décision finale.
         </p>
       </div>
     );

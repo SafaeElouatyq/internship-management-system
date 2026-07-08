@@ -1,6 +1,33 @@
 import prisma from "../config/prisma.js";
 import bcrypt from "bcryptjs";
 
+const deleteInternshipWithDependencies = async (tx, internshipId) => {
+  const reports = await tx.weeklyReport.findMany({
+    where: { internshipId },
+    select: { id: true },
+  });
+
+  if (reports.length) {
+    await tx.reportAttachment.deleteMany({
+      where: {
+        weeklyReportId: {
+          in: reports.map((report) => report.id),
+        },
+      },
+    });
+    await tx.weeklyReport.deleteMany({
+      where: { internshipId },
+    });
+  }
+
+  await tx.meeting.deleteMany({ where: { internshipId } });
+  await tx.document.deleteMany({ where: { internshipId } });
+  await tx.complaint.deleteMany({ where: { internshipId } });
+  await tx.finalDecision.deleteMany({ where: { internshipId } });
+  await tx.subjectValidation.deleteMany({ where: { internshipId } });
+  await tx.internship.delete({ where: { id: internshipId } });
+};
+
 export const getAllUsers = async (search = "", role = "") => {
   const where = {};
 
@@ -482,15 +509,11 @@ export const deleteUser = async (userId) => {
         break;
 
       case "STUDENT": {
-        const internshipCount = user.student?.internships?.length ?? 0;
-
-        if (internshipCount > 0) {
-          throw new Error(
-            `Impossible de supprimer cet étudiant : ${internshipCount} déclaration(s) de stage associée(s). Supprimez d'abord les stages liés.`,
-          );
-        }
-
         if (user.student) {
+          for (const internship of user.student.internships) {
+            await deleteInternshipWithDependencies(tx, internship.id);
+          }
+
           await tx.student.delete({
             where: { userId: id },
           });

@@ -5,7 +5,7 @@ import {
   getDecisionLabel,
   getFinalReportLabel,
   getMeetingsComplianceMessage,
-  isMeetingsCompliant,
+  isPendingFinalDecision,
 } from "../../utils/finalDecisionUtils.jsx";
 
 function CompletedInternshipRow({
@@ -15,8 +15,7 @@ function CompletedInternshipRow({
   onView,
 }) {
   const student = internship.student?.user;
-  const pending =
-    internship.status === "READY_FOR_DEFENSE" && !internship.finalDecision;
+  const pending = isPendingFinalDecision(internship);
   const canTakeDecision = canDecide(internship);
   const meetingsMessage = getMeetingsComplianceMessage(internship);
   const hasDecision = Boolean(internship.finalDecision);
@@ -46,7 +45,7 @@ function CompletedInternshipRow({
         >
           {getDecisionLabel(internship)}
         </span>
-        {pending && !isMeetingsCompliant(internship) && meetingsMessage && (
+        {pending && !canTakeDecision && meetingsMessage && (
           <p className="text-xs text-amber-700 mt-2 max-w-xs leading-relaxed">
             {meetingsMessage}
           </p>
@@ -75,7 +74,7 @@ function CompletedInternshipRow({
               title="Voir la décision"
             >
               <Eye size={16} />
-              Voir
+              
             </button>
           )}
 
@@ -84,8 +83,8 @@ function CompletedInternshipRow({
           )}
 
           {!readOnly && pending && !canTakeDecision && !hasDecision && (
-            <span className="text-sm text-amber-700 text-center max-w-[140px] leading-snug">
-              Rencontres insuffisantes
+            <span className="text-sm text-amber-700 text-center max-w-[160px] leading-snug">
+              {meetingsMessage || "Conditions non remplies"}
             </span>
           )}
         </div>

@@ -8,10 +8,8 @@ import {
 } from "../../services/internshipManagerService.jsx";
 import InternshipDocumentsPanel from "../../components/internshipDocuments/InternshipDocumentsPanel";
 import {
-  administrativeStatusLabels,
   canManageInternship,
   canVerifyAdministrativeFile,
-  getStatusLabel,
 } from "../../utils/internshipUtils.jsx";
 
 const levelLabels = {
@@ -292,44 +290,6 @@ function InternshipDetailPage() {
             description="Convention, attestation et autres documents administratifs soumis par l'étudiant."
           />
         </div>
-
-        <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-          <h2 className="text-xl font-bold text-slate-800 mb-5">
-            Historique
-          </h2>
-
-          <div className="grid grid-cols-1 gap-5 text-slate-700">
-            <div>
-              <p className="text-sm text-slate-500">Date création</p>
-              <p className="font-medium">
-                {internship.createdAt?.slice(0, 10) || "-"}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-sm text-slate-500">Dernière mise à jour</p>
-              <p className="font-medium">
-                {internship.updatedAt?.slice(0, 10) || "-"}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-sm text-slate-500">Statut actuel</p>
-              <p className="font-medium">
-                {getStatusLabel(internship.status)}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-sm text-slate-500">Dossier administratif</p>
-              <p className="font-medium">
-                {administrativeStatusLabels[internship.administrativeStatus] ||
-                  internship.administrativeStatus ||
-                  "-"}
-              </p>
-            </div>
-          </div>
-        </section>
 
         <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 xl:col-span-2">
           <h2 className="text-xl font-bold text-slate-800 mb-5">

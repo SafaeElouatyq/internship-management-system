@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { logout } from "../../services/authService.jsx";
 import SidebarNotificationLink from "../notifications/SidebarNotificationLink.jsx";
+import AppSidebar from "../layout/AppSidebar.jsx";
 import {
   FileText,
   Settings,
@@ -55,69 +56,67 @@ function InternshipManagerSideBar() {
   ];
 
   return (
-    <aside className="w-72 bg-white border-r border-slate-200 flex flex-col justify-between">
-      <div className="pt-10">
-        <nav className="px-5 space-y-2">
-          {menu.map((item) => {
-            const Icon = item.icon;
-
-            return (
-              <NavLink
-                key={item.title}
-                to={item.path}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                    isActive
-                      ? "bg-blue-500 text-white shadow-md"
-                      : "text-slate-600 hover:bg-slate-100"
-                  }`
-                }
-              >
-                <Icon size={20} />
-                <span className="font-medium">{item.title}</span>
-              </NavLink>
-            );
-          })}
-
-          <SidebarNotificationLink path="/manager/notifications" />
-        </nav>
-
-        <div className="mx-5 my-7 border-t border-slate-200"></div>
-
-        <nav className="px-5 space-y-2">
-          {others.map((item) => {
-            const Icon = item.icon;
-
-            return (
-              <NavLink
-                key={item.title}
-                to={item.path}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                    isActive
-                      ? "bg-blue-500 text-white shadow-md"
-                      : "text-slate-600 hover:bg-slate-100"
-                  }`
-                }
-              >
-                <Icon size={20} />
-                <span className="font-medium">{item.title}</span>
-              </NavLink>
-            );
-          })}
-        </nav>
-      </div>
-
-      <div className="p-5">
+    <AppSidebar
+      footer={
         <button
           onClick={Logout}
-          className="w-full flex items-center justify-center gap-3 border border-red-200 text-red-500 hover:bg-red-50 py-3 rounded-xl transition font-medium"
+          className="flex w-full items-center justify-center gap-3 rounded-xl border border-red-200 py-3 font-medium text-red-500 transition hover:bg-red-50"
         >
           <LogOut size={18} />
           Déconnexion
         </button>
-      </div>
-    </aside>
+      }
+    >
+      <nav className="space-y-2 px-5">
+        {menu.map((item) => {
+          const Icon = item.icon;
+
+          return (
+            <NavLink
+              key={item.title}
+              to={item.path}
+              className={({ isActive }) =>
+                `flex items-center gap-3 rounded-xl px-4 py-3 transition-all duration-200 ${
+                  isActive
+                    ? "bg-blue-500 text-white shadow-md"
+                    : "text-slate-600 hover:bg-slate-100"
+                }`
+              }
+            >
+              <Icon size={20} />
+              <span className="font-medium">{item.title}</span>
+            </NavLink>
+          );
+        })}
+
+        <SidebarNotificationLink path="/manager/notifications" />
+      </nav>
+
+      <div className="mx-5 my-7 border-t border-slate-200"></div>
+
+      <nav className="space-y-2 px-5">
+        {others.map((item) => {
+          const Icon = item.icon;
+
+          return (
+            <NavLink
+              key={item.title}
+              to={item.path}
+              className={({ isActive }) =>
+                `flex items-center gap-3 rounded-xl px-4 py-3 transition-all duration-200 ${
+                  isActive
+                    ? "bg-blue-500 text-white shadow-md"
+                    : "text-slate-600 hover:bg-slate-100"
+                }`
+              }
+            >
+              <Icon size={20} />
+              <span className="font-medium">{item.title}</span>
+            </NavLink>
+          );
+        })}
+      </nav>
+    </AppSidebar>
   );
 }
 
